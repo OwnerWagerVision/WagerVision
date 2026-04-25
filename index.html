@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WagerWise</title>
+  <title>WagerVision</title>
 <style>
   * { box-sizing: border-box; }
 
@@ -205,8 +205,8 @@
 <body>
   <div class="app">
     <div class="header">
-      <h1>WagerWise</h1>
-      <div class="tagline">Know the odds before the moment changes.</div>
+      <h1>WagerVision</h1>
+	<div class="tagline">See the edge before the market does.</div>
     </div>
 
     <div class="card">
@@ -275,13 +275,16 @@
         </div>
       </div>
 
-	<label>Sportsbook Odds (Home)</label>
+<label>Sportsbook Odds (Home)</label>
 <input id="odds" type="number" placeholder="e.g. -120 or +150">
 
-      <button onclick="calculateOdds()">Calculate Edge</button>
-    </div>
+<button onclick="calculateOdds()">Calculate Edge</button>
+<button onclick="saveScenario()" style="background:#1e293b; color:white; margin-top:10px;">
+  Save Scenario
+</button>
+</div>
 
-    <div class="card">
+<div class="card">
       <div class="section-title">Estimated Win Probability</div>
 
       <div class="results-grid">
@@ -298,7 +301,12 @@
 
       <div class="edge-card">
         <div id="edgeTitle" class="edge-title">Enter game state</div>
-        <div id="edgeSubtitle" class="edge-subtitle">
+       <div id="decisionBox" style="
+  font-size: 20px;
+  font-weight: 900;
+  margin-bottom: 8px;
+"></div>
+	 <div id="edgeSubtitle" class="edge-subtitle">
           WagerWise will estimate which side has the edge based on inning, score, outs, runners, and batting team.
         </div>
         <div id="confidence" class="confidence">Waiting</div>
@@ -310,7 +318,12 @@
   <div id="valueDetails" class="small"></div>
 </div>
 
-      <div class="disclaimer">
+<div class="card">
+  <div class="section-title">Saved Scenarios</div>
+  <div id="scenarioList" class="small"></div>
+</div>
+     
+ <div class="disclaimer">
         Model estimate only. Not sportsbook data. Built for quick game-state analysis.
       </div>
     </div>
@@ -392,7 +405,16 @@ function calculateOdds() {
   else if (edgeGap >= 20) strength = "Clear Edge";
   else if (edgeGap >= 8) strength = "Slight Edge";
 
+let decision = "PASS";
+
+if (edgeGap >= 25) {
+  decision = homeChance > 50 ? "TAKE HOME" : "TAKE AWAY";
+} else if (edgeGap >= 10) {
+  decision = homeChance > 50 ? "LEAN HOME" : "LEAN AWAY";
+}
+
   edgeTitle.textContent = strength + ": " + leadingTeam;
+document.getElementById("decisionBox").textContent = decision;
 
   let message = "This read is based on score pressure, inning leverage, runners, outs, and home advantage.";
 
@@ -444,6 +466,55 @@ document.getElementById("valueDetails").textContent = valueDetails;
   edgeSubtitle.textContent = message;
   confidence.textContent = strength;
 }
+function saveScenario() {
+  const scenario = {
+    inning: document.getElementById("inning").value,
+    half: document.getElementById("half").value,
+    away: document.getElementById("awayScore").value,
+    home: document.getElementById("homeScore").value,
+    outs: document.getElementById("outs").value,
+    runners: document.getElementById("runners").value,
+    odds: document.getElementById("odds").value
+  };
+
+  let list = JSON.parse(localStorage.getItem("scenarios") || "[]");
+  list.unshift(scenario);
+  localStorage.setItem("scenarios", JSON.stringify(list));
+
+  loadScenarios();
+}
+
+function loadScenarios() {
+  const list = JSON.parse(localStorage.getItem("scenarios") || "[]");
+  const container = document.getElementById("scenarioList");
+
+  container.innerHTML = "";
+
+  list.forEach((s, i) => {
+    container.innerHTML += `
+      <div style="margin-bottom:10px; cursor:pointer;" onclick="loadScenario(${i})">
+        Inning ${s.inning} (${s.half}) | ${s.away}-${s.home} | Outs: ${s.outs}
+      </div>
+    `;
+  });
+}
+
+function loadScenario(i) {
+  const list = JSON.parse(localStorage.getItem("scenarios") || "[]");
+  const s = list[i];
+
+  document.getElementById("inning").value = s.inning;
+  document.getElementById("half").value = s.half;
+  document.getElementById("awayScore").value = s.away;
+  document.getElementById("homeScore").value = s.home;
+  document.getElementById("outs").value = s.outs;
+  document.getElementById("runners").value = s.runners;
+  document.getElementById("odds").value = s.odds;
+
+  calculateOdds();
+}
+
+window.onload = loadScenarios;
 
   </script>
 </body>
