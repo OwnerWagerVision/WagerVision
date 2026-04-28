@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WagerVision</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+  color: #f8fafc;
+  background: url("bg.jpg") center/cover no-repeat fixed;
+  display: flex;
+  justify-content: center;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(1,8,16,0.70), rgba(1,8,16,0.88)),
+    rgba(0,0,0,0.35);
+  backdrop-filter: blur(7px);
+  z-index: -1;
+}
+
+.app {
+  width: 100%;
+  max-width: 480px;
+  padding: 22px 16px 36px;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.brand h1 {
+  margin: 0;
+  font-size: 34px;
+  letter-spacing: -1px;
+  font-weight: 900;
+}
+
+.brand p {
+  margin: 4px 0 0;
+  color: #b6c2d1;
+  font-size: 13px;
+}
+
+.live-pill {
+  padding: 8px 11px;
+  border-radius: 999px;
+  background: rgba(34,197,94,0.16);
+  color: #86efac;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.8px;
+  border: 1px solid rgba(34,197,94,0.22);
+}
+
+.hero-card, .panel {
+  background: rgba(8, 18, 32, 0.72);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 26px;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.48);
+  backdrop-filter: blur(18px);
+}
+
+.hero-card {
+  padding: 18px;
+  margin-bottom: 16px;
+}
+
+.panel {
+  padding: 18px;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  color: #93c5fd;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 1.6px;
+  font-weight: 900;
+  margin-bottom: 12px;
+}
+
+.score-strip {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.team {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 18px;
+  padding: 13px;
+  text-align: center;
+}
+
+.team-label {
+  color: #94a3b8;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.score {
+  font-size: 34px;
+  font-weight: 900;
+}
+
+.vs {
+  color: #94a3b8;
+  font-weight: 900;
+}
+
+.decision {
+  margin-top: 14px;
+  padding: 18px;
+  border-radius: 22px;
+  background: rgba(2, 8, 18, 0.72);
+  border: 1px solid rgba(255,255,255,0.10);
+}
+
+#decisionBox {
+  font-size: 28px;
+  font-weight: 950;
+  letter-spacing: 0.5px;
+  margin-bottom: 5px;
+}
+
+.edge-title {
+  color: #dbeafe;
+  font-weight: 800;
+  font-size: 15px;
+}
+
+.edge-subtitle {
+  color: #b6c2d1;
+  font-size: 13px;
+  line-height: 1.45;
+  margin-top: 8px;
+}
+
+.decision-strong { color: #22c55e; }
+.decision-lean { color: #facc15; }
+.decision-pass { color: #94a3b8; }
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+label {
+  display: block;
+  margin: 12px 0 5px;
+  color: #cbd5e1;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 900;
+}
+
+select, input {
+  width: 100%;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.13);
+  background: rgba(255,255,255,0.075);
+  color: #f8fafc;
+  font-size: 15px;
+  outline: none;
+}
+
+select:focus, input:focus {
+  border-color: rgba(34,197,94,0.7);
+  box-shadow: 0 0 0 3px rgba(34,197,94,0.13);
+}
+
+button {
+  width: 100%;
+  margin-top: 16px;
+  padding: 16px;
+  border: none;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #35e37f, #16a34a);
+  color: #03130a;
+  font-size: 16px;
+  font-weight: 950;
+  cursor: pointer;
+  box-shadow: 0 16px 40px rgba(34,197,94,0.28);
+}
+
+.secondary {
+  background: rgba(255,255,255,0.08);
+  color: #e5e7eb;
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: none;
+  margin-top: 10px;
+}
+
+.results-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.metric {
+  background: rgba(255,255,255,0.065);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  padding: 15px;
+}
+
+.metric-label {
+  color: #94a3b8;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 900;
+}
+
+.metric-value {
+  margin-top: 5px;
+  font-size: 30px;
+  font-weight: 950;
+}
+
+.home-win { color: #22c55e; }
+.away-win { color: #fb923c; }
+
+.value-green { color: #22c55e; }
+.value-red { color: #ef4444; }
+.value-neutral { color: #94a3b8; }
+
+#valueDetails {
+  color: #b6c2d1;
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+.scenario-item {
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 10px;
+  cursor: pointer;
+  color: #dbeafe;
+  font-size: 13px;
+}
+
+.disclaimer {
+  color: #94a3b8;
+  font-size: 11px;
+  line-height: 1.45;
+  text-align: center;
+  margin-top: 12px;
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <div class="brand">
+      <h1>WagerVision</h1>
+      <p>See the edge before the market does.</p>
+    </div>
+    <div class="live-pill">LIVE</div>
+  </div>
+
+  <div class="hero-card">
+    <div class="section-title">Current Read</div>
+
+    <div class="score-strip">
+      <div class="team">
+        <div class="team-label">Away</div>
+        <div id="awayScoreBig" class="score">0</div>
+      </div>
+      <div class="vs">VS</div>
+      <div class="team">
+        <div class="team-label">Home</div>
+        <div id="homeScoreBig" class="score">0</div>
+      </div>
+    </div>
+
+    <div class="decision">
+      <div id="decisionBox" class="decision-pass">WAITING</div>
+      <div id="edgeTitle" class="edge-title">Enter game state</div>
+      <div id="edgeSubtitle" class="edge-subtitle">
+        WagerVision will estimate the edge using score, inning, outs, runners, and live price.
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="section-title">Game State</div>
+
+    <div class="row">
+      <div>
+        <label>Inning</label>
+        <select id="inning">
+          <option value="1">1st</option><option value="2">2nd</option>
+          <option value="3">3rd</option><option value="4">4th</option>
+          <option value="5">5th</option><option value="6">6th</option>
+          <option value="7">7th</option><option value="8">8th</option>
+          <option value="9">9th</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Half</label>
+        <select id="half">
+          <option value="top">Top</option>
+          <option value="bottom">Bottom</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>Away Score</label>
+        <input id="awayScore" type="number" value="0">
+      </div>
+      <div>
+        <label>Home Score</label>
+        <input id="homeScore" type="number" value="0">
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>Outs</label>
+        <select id="outs">
+          <option value="0">0 Outs</option>
+          <option value="1">1 Out</option>
+          <option value="2">2 Outs</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Runners</label>
+        <select id="runners">
+          <option value="0">Empty</option>
+          <option value="1">1st</option>
+          <option value="2">2nd</option>
+          <option value="3">3rd</option>
+          <option value="12">1st & 2nd</option>
+          <option value="13">1st & 3rd</option>
+          <option value="23">2nd & 3rd</option>
+          <option value="123">Loaded</option>
+        </select>
+      </div>
+    </div>
+
+    <label>Sportsbook Odds — Home</label>
+    <input id="odds" type="number" placeholder="e.g. -120 or +150">
+
+    <button onclick="calculateOdds()">Calculate Edge</button>
+    <button class="secondary" onclick="saveScenario()">Save Scenario</button>
+  </div>
+
+  <div class="panel">
+    <div class="section-title">Win Probability</div>
+
+    <div class="results-grid">
+      <div class="metric">
+        <div class="metric-label">Home</div>
+        <div id="homeProb" class="metric-value home-win">--%</div>
+      </div>
+
+      <div class="metric">
+        <div class="metric-label">Away</div>
+        <div id="awayProb" class="metric-value away-win">--%</div>
+      </div>
+    </div>
+
+    <div class="metric" style="margin-top:12px;">
+      <div class="metric-label">Sportsbook vs Model</div>
+      <div id="valueBox" class="metric-value value-neutral">--</div>
+      <div id="valueDetails"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="section-title">Saved Scenarios</div>
+    <div id="scenarioList"></div>
+  </div>
+
+  <div class="disclaimer">
+    Model estimate only. Not sportsbook data. Built for quick live game-state analysis.
+  </div>
+
+</div>
+
+<script>
+function clamp(num, min, max) {
+  return Math.max(min, Math.min(max, num));
+}
+
+function runnerValue(runners) {
+  const values = {
+    "0": 0, "1": 3, "2": 5, "3": 6,
+    "12": 8, "13": 9, "23": 10, "123": 13
+  };
+  return values[runners] || 0;
+}
+
+function calculateOdds() {
+  const inning = Number(document.getElementById("inning").value);
+  const half = document.getElementById("half").value;
+  const awayScore = Number(document.getElementById("awayScore").value);
+  const homeScore = Number(document.getElementById("homeScore").value);
+  const battingTeam = half === "bottom" ? "home" : "away";
+  const outs = Number(document.getElementById("outs").value);
+  const runners = document.getElementById("runners").value;
+  const oddsInput = Number(document.getElementById("odds").value);
+
+  document.getElementById("awayScoreBig").textContent = awayScore;
+  document.getElementById("homeScoreBig").textContent = homeScore;
+
+  let homeChance = 50;
+  const scoreDiff = homeScore - awayScore;
+  const lateFactor = 1 + (inning / 10);
+
+  homeChance += scoreDiff * 9 * lateFactor;
+  if (inning >= 8) homeChance += scoreDiff * 4;
+  if (half === "bottom") homeChance += 3;
+  homeChance += 2;
+
+  const basePressure = runnerValue(runners);
+  const outPenalty = outs * 4;
+
+  if (battingTeam === "home") {
+    homeChance += basePressure;
+    homeChance -= outPenalty;
+  } else {
+    homeChance -= basePressure;
+    homeChance += outPenalty;
+  }
+
+  if (inning === 9 && half === "bottom" && homeScore > awayScore) {
+    homeChance = 99;
+  }
+
+  homeChance = clamp(homeChance, 1, 99);
+
+  const awayChance = 100 - homeChance;
+  const edgeGap = Math.abs(homeChance - awayChance);
+
+  document.getElementById("homeProb").textContent = homeChance.toFixed(1) + "%";
+  document.getElementById("awayProb").textContent = awayChance.toFixed(1) + "%";
+
+  const leadingTeam = homeChance >= 50 ? "Home team" : "Away team";
+
+  let strength = "Toss-Up";
+  if (edgeGap >= 40) strength = "Strong Edge";
+  else if (edgeGap >= 20) strength = "Clear Edge";
+  else if (edgeGap >= 8) strength = "Slight Edge";
+
+  let decision = "PASS";
+  if (edgeGap >= 25) {
+    decision = homeChance > 50 ? "TAKE HOME" : "TAKE AWAY";
+  } else if (edgeGap >= 10) {
+    decision = homeChance > 50 ? "LEAN HOME" : "LEAN AWAY";
+  }
+
+  const decisionBox = document.getElementById("decisionBox");
+  decisionBox.textContent = decision;
+  decisionBox.className = "";
+
+  if (decision.includes("TAKE")) decisionBox.classList.add("decision-strong");
+  else if (decision.includes("LEAN")) decisionBox.classList.add("decision-lean");
+  else decisionBox.classList.add("decision-pass");
+
+  document.getElementById("edgeTitle").textContent = strength + ": " + leadingTeam;
+
+  let message = "This read is based on live score pressure, inning leverage, runners, outs, and home advantage.";
+
+  let valueText = "--";
+  let valueClass = "value-neutral";
+  let valueDetails = "";
+
+  if (oddsInput) {
+    const implied = oddsInput > 0
+      ? (100 / (oddsInput + 100)) * 100
+      : (Math.abs(oddsInput) / (Math.abs(oddsInput) + 100)) * 100;
+
+    const modelEdge = homeChance - implied;
+    valueDetails = "Book: " + implied.toFixed(1) + "% | Model: " + homeChance.toFixed(1) + "%";
+
+    if (modelEdge >= 5) {
+      valueText = "Value: Home +" + modelEdge.toFixed(1) + "%";
+      valueClass = "value-green";
+      message += " The model sees value on the Home side.";
+    } else if (modelEdge <= -5) {
+      valueText = "Value: Away +" + Math.abs(modelEdge).toFixed(1) + "%";
+      valueClass = "value-green";
+      message += " The model sees value on the Away side.";
+    } else {
+      valueText = "No Clear Edge";
+      valueClass = "value-red";
+      message += " The sportsbook line is close to the model.";
+    }
+  }
+
+  const valueBox = document.getElementById("valueBox");
+  valueBox.textContent = valueText;
+  valueBox.className = "metric-value " + valueClass;
+
+  document.getElementById("valueDetails").textContent = valueDetails;
+  document.getElementById("edgeSubtitle").textContent = message;
+}
+
+function saveScenario() {
+  const scenario = {
+    inning: document.getElementById("inning").value,
+    half: document.getElementById("half").value,
+    away: document.getElementById("awayScore").value,
+    home: document.getElementById("homeScore").value,
+    outs: document.getElementById("outs").value,
+    runners: document.getElementById("runners").value,
+    odds: document.getElementById("odds").value
+  };
+
+  let list = JSON.parse(localStorage.getItem("scenarios") || "[]");
+  list.unshift(scenario);
+  localStorage.setItem("scenarios", JSON.stringify(list));
+  loadScenarios();
+}
+
+function loadScenarios() {
+  const list = JSON.parse(localStorage.getItem("scenarios") || "[]");
+  const container = document.getElementById("scenarioList");
+  container.innerHTML = "";
+
+  list.forEach((s, i) => {
+    const halfText = s.half === "bottom" ? "Bottom" : "Top";
+    container.innerHTML += `
+      <div class="scenario-item" onclick="loadScenario(${i})">
+        ${halfText} ${s.inning} | Away ${s.away} - Home ${s.home} | Outs: ${s.outs}
+      </div>
+    `;
+  });
+}
+
+function loadScenario(i) {
+  const list = JSON.parse(localStorage.getItem("scenarios") || "[]");
+  const s = list[i];
+
+  document.getElementById("inning").value = s.inning;
+  document.getElementById("half").value = s.half;
+  document.getElementById("awayScore").value = s.away;
+  document.getElementById("homeScore").value = s.home;
+  document.getElementById("outs").value = s.outs;
+  document.getElementById("runners").value = s.runners;
+  document.getElementById("odds").value = s.odds;
+
+  calculateOdds();
+}
+
+window.onload = loadScenarios;
+</script>
+</body>
+</html>
