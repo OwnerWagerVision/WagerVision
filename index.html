@@ -58,13 +58,13 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.12);margin:18px 0}.footer{tex
 </section>
 
 <div class="tabs">
-  <button class="tab active" onclick="showTab('board',this)">Board</button>
+  <button class="tab active" onclick="showTab('game',this)">Game</button>
+  <button class="tab" onclick="showTab('board',this)">Board</button>
   <button class="tab" onclick="showTab('slip',this)">Bet Slip</button>
-  <button class="tab" onclick="showTab('game',this)">Game</button>
   <button class="tab" onclick="showTab('settings',this)">Settings</button>
 </div>
 
-<section id="board" class="section active">
+<section id="board" class="section">
   <div class="summary-strip">
     <div class="summary-card"><strong id="topEdge">—</strong><span>Top Edge</span></div>
     <div class="summary-card"><strong id="gamesLoaded">0</strong><span>Games</span></div>
@@ -96,7 +96,7 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.12);margin:18px 0}.footer{tex
   </div>
 </section>
 
-<section id="game" class="section">
+<section id="game" class="section active">
   <div class="grid">
     <div>
       <div class="card">
