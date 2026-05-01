@@ -114,7 +114,9 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.12);margin:18px 0}.footer{tex
 
       <div class="card">
         <h2>Game Inputs</h2>
-        <div class="form-grid">
+       <button class="secondary" onclick="toggleInputs()">Edit Model Inputs</button>
+	<div id="inputsSection" style="display:none;">
+	 <div class="form-grid">
           <div><label>Home Team</label><input id="homeTeam" value="Home Team"></div>
           <div><label>Away Team</label><input id="awayTeam" value="Away Team"></div>
           <div><label>Home AVG</label><input id="homeAvg" type="number" step="0.001" value="0.255"></div>
@@ -147,8 +149,8 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.12);margin:18px 0}.footer{tex
           <div><label>Market Home Win %</label><input id="bookOdds" type="number" value="50"></div>
         </div>
         <button onclick="calculateOdds()">Calculate Odds</button>
-      </div>
-    </div>
+         </div>
+	 </div>
 
     <div>
       <div class="card">
@@ -197,6 +199,11 @@ let selectedGameData=null;
 let slip=[];
 
 document.getElementById("gameDate").value=new Date().toISOString().split("T")[0];
+
+function toggleInputs(){
+  const el=document.getElementById("inputsSection");
+  el.style.display=el.style.display==="none"?"block":"none";
+}
 
 function showTab(id,el){
   document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
