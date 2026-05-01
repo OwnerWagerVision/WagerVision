@@ -1,1184 +1,440 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WagerVision</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WagerVision V5</title>
 
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-
-    body {
-      min-height: 100vh;
-      color: white;
-      background:
-        linear-gradient(rgba(2,6,23,.78), rgba(2,6,23,.93)),
-        url("bg.jpg") center/cover fixed no-repeat;
-      padding: 22px;
-    }
-
-    .app {
-      max-width: 1240px;
-      margin: auto;
-    }
-
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-      gap: 14px;
-    }
-
-    .logo {
-      font-size: 31px;
-      font-weight: 950;
-      letter-spacing: -1px;
-    }
-
-    .logo span {
-      color: #38bdf8;
-    }
-
-    .tag {
-      padding: 8px 13px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.15);
-      background: rgba(255,255,255,.07);
-      color: #cbd5e1;
-      font-size: 13px;
-      white-space: nowrap;
-    }
-
-    .hero {
-      background: rgba(15,23,42,.76);
-      border: 1px solid rgba(255,255,255,.14);
-      border-radius: 30px;
-      padding: 34px;
-      margin-bottom: 20px;
-      box-shadow: 0 24px 80px rgba(0,0,0,.35);
-      backdrop-filter: blur(18px);
-    }
-
-    .hero h1 {
-      font-size: clamp(38px, 6vw, 78px);
-      line-height: .92;
-      letter-spacing: -3px;
-      margin-bottom: 14px;
-    }
-
-    .hero p {
-      color: #cbd5e1;
-      max-width: 840px;
-      line-height: 1.6;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: 1.08fr .92fr;
-      gap: 20px;
-    }
-
-    .card {
-      background: rgba(15,23,42,.82);
-      border: 1px solid rgba(255,255,255,.14);
-      border-radius: 26px;
-      padding: 22px;
-      box-shadow: 0 20px 60px rgba(0,0,0,.28);
-      backdrop-filter: blur(18px);
-      margin-bottom: 20px;
-    }
-
-    h2 {
-      font-size: 20px;
-      margin-bottom: 16px;
-    }
-
-    h3 {
-      font-size: 15px;
-      color: #e2e8f0;
-      margin-bottom: 10px;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 14px;
-    }
-
-    .full {
-      grid-column: 1 / -1;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 6px;
-      color: #cbd5e1;
-      font-size: 12px;
-    }
-
-    input, select {
-      width: 100%;
-      padding: 13px 14px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(2,6,23,.76);
-      color: white;
-      font-size: 15px;
-      outline: none;
-    }
-
-    input:focus, select:focus {
-      border-color: #38bdf8;
-      box-shadow: 0 0 0 3px rgba(56,189,248,.17);
-    }
-
-    button {
-      width: 100%;
-      margin-top: 12px;
-      padding: 15px 18px;
-      border: 0;
-      border-radius: 16px;
-      background: linear-gradient(135deg, #38bdf8, #2563eb);
-      color: white;
-      font-weight: 900;
-      font-size: 16px;
-      cursor: pointer;
-      box-shadow: 0 16px 42px rgba(37,99,235,.38);
-    }
-
-    button.secondary {
-      background: rgba(255,255,255,.1);
-      box-shadow: none;
-      border: 1px solid rgba(255,255,255,.14);
-    }
-
-    button.danger {
-      background: rgba(239,68,68,.18);
-      box-shadow: none;
-      border: 1px solid rgba(239,68,68,.32);
-    }
-
-    button:hover {
-      transform: translateY(-1px);
-    }
-
-    .status {
-      margin-top: 10px;
-      color: #bae6fd;
-      font-size: 13px;
-      line-height: 1.4;
-    }
-
-    .result {
-      text-align: center;
-      padding: 20px 8px 8px;
-    }
-
-    .team-name {
-      color: #38bdf8;
-      font-weight: 950;
-      font-size: 24px;
-      margin-top: 8px;
-    }
-
-    .prob {
-      font-size: clamp(54px, 8vw, 90px);
-      font-weight: 950;
-      letter-spacing: -4px;
-      margin: 4px 0 8px;
-    }
-
-    .meter {
-      height: 16px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.13);
-      overflow: hidden;
-      margin: 18px 0;
-    }
-
-    .bar {
-      height: 100%;
-      width: 50%;
-      border-radius: 999px;
-      background: linear-gradient(90deg, #22c55e, #38bdf8);
-      transition: width .35s ease;
-    }
-
-    .mini-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-top: 15px;
-    }
-
-    .mini {
-      padding: 14px;
-      border-radius: 18px;
-      background: rgba(255,255,255,.07);
-      border: 1px solid rgba(255,255,255,.1);
-    }
-
-    .mini strong {
-      display: block;
-      font-size: 20px;
-      margin-bottom: 4px;
-    }
-
-    .mini span {
-      color: #cbd5e1;
-      font-size: 12px;
-    }
-
-    .edge {
-      margin-top: 18px;
-      padding: 16px;
-      border-radius: 18px;
-      background: rgba(34,197,94,.12);
-      border: 1px solid rgba(34,197,94,.28);
-      color: #dcfce7;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-
-    .edge.yellow {
-      background: rgba(234,179,8,.13);
-      border-color: rgba(234,179,8,.34);
-      color: #fef9c3;
-    }
-
-    .edge.red {
-      background: rgba(239,68,68,.13);
-      border-color: rgba(239,68,68,.34);
-      color: #fee2e2;
-    }
-
-    .edge.neutral {
-      background: rgba(148,163,184,.12);
-      border-color: rgba(148,163,184,.25);
-      color: #e2e8f0;
-    }
-
-    .data-box {
-      margin-top: 16px;
-      text-align: left;
-      padding: 16px;
-      border-radius: 18px;
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.1);
-      color: #cbd5e1;
-      font-size: 13px;
-      line-height: 1.6;
-    }
-
-    .pill-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .pill {
-      padding: 7px 10px;
-      border-radius: 999px;
-      background: rgba(56,189,248,.12);
-      border: 1px solid rgba(56,189,248,.28);
-      color: #e0f2fe;
-      font-size: 12px;
-    }
-
-    .odds-list {
-      display: grid;
-      gap: 10px;
-      margin-top: 12px;
-    }
-
-    .book-row {
-      display: grid;
-      grid-template-columns: 1.1fr .8fr .8fr;
-      gap: 10px;
-      align-items: center;
-      padding: 12px;
-      border-radius: 16px;
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.09);
-      font-size: 13px;
-    }
-
-    .book-row strong {
-      color: white;
-    }
-
-    .positive {
-      color: #86efac;
-      font-weight: 900;
-    }
-
-    .negative {
-      color: #fca5a5;
-      font-weight: 900;
-    }
-
-    .small {
-      color: #94a3b8;
-      font-size: 12px;
-      line-height: 1.5;
-    }
-
-    .footer {
-      text-align: center;
-      color: #94a3b8;
-      font-size: 12px;
-      margin-top: 18px;
-    }
-
-    hr {
-      border: 0;
-      border-top: 1px solid rgba(255,255,255,.12);
-      margin: 22px 0;
-    }
-
-    @media (max-width: 900px) {
-      body {
-        padding: 14px;
-      }
-
-      header {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .grid, .form-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .mini-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .hero {
-        padding: 24px;
-      }
-
-      .book-row {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{min-height:100vh;color:white;background:linear-gradient(rgba(2,6,23,.82),rgba(2,6,23,.95)),url("bg.jpg") center/cover fixed no-repeat;padding:14px;padding-bottom:90px}
+.app{max-width:1200px;margin:auto}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px}
+.logo{font-size:28px;font-weight:950;letter-spacing:-1px}
+.logo span{color:#38bdf8}
+.tag{font-size:12px;color:#cbd5e1;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.07);padding:7px 10px;border-radius:999px;white-space:nowrap}
+.hero{background:rgba(15,23,42,.78);border:1px solid rgba(255,255,255,.14);border-radius:24px;padding:22px;margin-bottom:14px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.hero h1{font-size:clamp(32px,8vw,68px);line-height:.95;letter-spacing:-2px;margin-bottom:8px}
+.hero p{color:#cbd5e1;line-height:1.5;font-size:14px}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;position:sticky;top:8px;z-index:10;margin-bottom:14px}
+.tab{border:1px solid rgba(255,255,255,.14);background:rgba(15,23,42,.92);color:#cbd5e1;border-radius:14px;padding:11px 8px;font-weight:900;font-size:12px;cursor:pointer}
+.tab.active{background:linear-gradient(135deg,#38bdf8,#2563eb);color:white}
+.section{display:none}
+.section.active{display:block}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.card{background:rgba(15,23,42,.84);border:1px solid rgba(255,255,255,.14);border-radius:22px;padding:18px;margin-bottom:14px;box-shadow:0 18px 50px rgba(0,0,0,.25)}
+h2{font-size:19px;margin-bottom:13px}
+h3{font-size:14px;color:#e2e8f0;margin-bottom:8px}
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.full{grid-column:1/-1}
+label{display:block;margin-bottom:5px;color:#cbd5e1;font-size:12px}
+input,select{width:100%;padding:12px;border-radius:13px;border:1px solid rgba(255,255,255,.14);background:rgba(2,6,23,.78);color:white;font-size:15px;outline:none}
+button{width:100%;margin-top:10px;padding:14px;border:0;border-radius:15px;background:linear-gradient(135deg,#38bdf8,#2563eb);color:white;font-weight:950;font-size:15px;cursor:pointer}
+button.secondary{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.14);box-shadow:none}
+button.star{background:rgba(250,204,21,.14);border:1px solid rgba(250,204,21,.35);color:#fef3c7}
+.status{margin-top:9px;color:#bae6fd;font-size:13px;line-height:1.4}
+.big{font-size:64px;font-weight:950;letter-spacing:-4px;text-align:center}
+.team-name{text-align:center;color:#38bdf8;font-size:23px;font-weight:950;margin-top:6px}
+.meter{height:15px;border-radius:999px;background:rgba(255,255,255,.13);overflow:hidden;margin:15px 0}
+.bar{height:100%;width:50%;background:linear-gradient(90deg,#22c55e,#38bdf8);border-radius:999px;transition:.3s}
+.mini-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:12px}
+.mini{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:12px;text-align:center}
+.mini strong{display:block;font-size:19px;margin-bottom:3px}
+.mini span{font-size:11px;color:#cbd5e1}
+.edge{margin-top:14px;padding:14px;border-radius:16px;font-size:14px;line-height:1.45;background:rgba(148,163,184,.12);border:1px solid rgba(148,163,184,.25);color:#e2e8f0}
+.green{background:rgba(34,197,94,.13);border-color:rgba(34,197,94,.34);color:#dcfce7}
+.yellow{background:rgba(234,179,8,.13);border-color:rgba(234,179,8,.34);color:#fef9c3}
+.red{background:rgba(239,68,68,.13);border-color:rgba(239,68,68,.34);color:#fee2e2}
+.data-box{margin-top:12px;text-align:left;padding:14px;border-radius:16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#cbd5e1;font-size:13px;line-height:1.55}
+.pick-card{padding:14px;border-radius:18px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.11);margin-bottom:10px}
+.pick-top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.pick-title{font-weight:950;font-size:15px}
+.pick-edge{font-weight:950;color:#86efac}
+.pick-meta{margin-top:8px;color:#cbd5e1;font-size:12px;line-height:1.45}
+.pill-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+.pill{font-size:11px;padding:6px 9px;border-radius:999px;background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.28);color:#e0f2fe}
+.base-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.base-toggle{padding:12px;border-radius:14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.13);text-align:center;font-weight:900;cursor:pointer;color:#cbd5e1}
+.base-toggle.on{background:rgba(34,197,94,.18);border-color:rgba(34,197,94,.38);color:#dcfce7}
+.parlay-leg{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:12px;border-radius:15px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);margin-bottom:8px;font-size:13px}
+.remove{width:auto;margin:0;padding:8px 10px;background:rgba(239,68,68,.2);border:1px solid rgba(239,68,68,.35)}
+.odds-list{display:grid;gap:9px}
+.book-row{display:grid;grid-template-columns:1.2fr .8fr .8fr;gap:8px;align-items:center;padding:11px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);font-size:12px}
+.small{font-size:12px;color:#94a3b8;line-height:1.45}
+hr{border:0;border-top:1px solid rgba(255,255,255,.12);margin:18px 0}
+.footer{text-align:center;color:#94a3b8;font-size:11px;margin-top:12px}
+@media(max-width:850px){.grid,.form-grid{grid-template-columns:1fr}.mini-grid{grid-template-columns:repeat(3,1fr)}.hero{padding:18px}.book-row{grid-template-columns:1fr}.tabs{position:fixed;bottom:10px;top:auto;left:10px;right:10px;background:rgba(2,6,23,.88);padding:8px;border-radius:18px;backdrop-filter:blur(15px)}}
+</style>
 </head>
 
 <body>
-  <div class="app">
-    <header>
-      <div class="logo">Wager<span>Vision</span></div>
-      <div class="tag">V4 · Market Edge Engine</div>
-    </header>
+<div class="app">
+<header>
+  <div class="logo">Wager<span>Vision</span></div>
+  <div class="tag">V5 · Mobile Pro</div>
+</header>
 
-    <section class="hero">
-      <h1>Odds Vegas Wont Give You.</h1>
-      <p>
-        Wagervision is a real time odds calculator that gives you a real time edge on your MLB betting!
-      </p>
-    </section>
+<section class="hero">
+  <h1>Find the board’s weak spot.</h1>
+  <p>Live MLB data, sportsbook odds, edge detection, best-pick ranking, specific base runners, and a parlay builder — without making your thumb run a marathon.</p>
+</section>
 
-    <main class="grid">
-      <section>
-        <div class="card">
-          <h2>API Setup</h2>
+<div class="tabs">
+  <button class="tab active" onclick="showTab('board',this)">Board</button>
+  <button class="tab" onclick="showTab('analyze',this)">Analyze</button>
+  <button class="tab" onclick="showTab('parlay',this)">Parlay</button>
+  <button class="tab" onclick="showTab('settings',this)">Settings</button>
+</div>
 
-          <div class="form-grid">
-            <div class="full">
-              <label>The Odds API Key</label>
-              <input id="oddsApiKey" placeholder="Paste your Odds API key here" />
-            </div>
+<section id="board" class="section active">
+  <div class="card">
+    <h2>Best Picks Today</h2>
+    <button onclick="scanBoard()">Scan Board by Edge</button>
+    <button class="secondary" onclick="loadGames()">Load MLB Games</button>
+    <div class="status" id="boardStatus">Load games, then scan the board.</div>
+    <div id="pickBoard" class="data-box">No picks scanned yet.</div>
+  </div>
+</section>
 
-            <div class="full">
-              <button onclick="saveApiKey()">Save API Key</button>
-              <button class="secondary" onclick="clearApiKey()">Clear Saved Key</button>
-              <div class="status" id="apiStatus">No odds key saved yet. MLB data works without it.</div>
-            </div>
+<section id="analyze" class="section">
+  <div class="grid">
+    <div>
+      <div class="card">
+        <h2>Live Game Loader</h2>
+        <div class="form-grid">
+          <div>
+            <label>Game Date</label>
+            <input id="gameDate" type="date" />
+          </div>
+          <div>
+            <label>MLB Game</label>
+            <select id="gameSelect"><option value="">Load games first</option></select>
+          </div>
+          <div class="full">
+            <button onclick="loadGames()">Load MLB Games</button>
+            <button class="secondary" onclick="loadSelectedGame()">Use Selected Game</button>
+            <button class="secondary" onclick="refreshLiveState()">Refresh Live State</button>
+            <button class="secondary" onclick="loadOdds()">Load Sportsbook Odds</button>
+            <div class="status" id="loadStatus">Waiting for first pitch.</div>
           </div>
         </div>
+      </div>
 
-        <div class="card">
-          <h2>Live Game Loader</h2>
+      <div class="card">
+        <h2>Game Inputs</h2>
+        <div class="form-grid">
+          <div><label>Home Team</label><input id="homeTeam" value="Home Team"></div>
+          <div><label>Away Team</label><input id="awayTeam" value="Away Team"></div>
+          <div><label>Home AVG</label><input id="homeAvg" type="number" step="0.001" value="0.255"></div>
+          <div><label>Away AVG</label><input id="awayAvg" type="number" step="0.001" value="0.245"></div>
+          <div><label>Home OPS</label><input id="homeOps" type="number" step="0.001" value="0.710"></div>
+          <div><label>Away OPS</label><input id="awayOps" type="number" step="0.001" value="0.700"></div>
 
-          <div class="form-grid">
-            <div>
-              <label>Game Date</label>
-              <input id="gameDate" type="date" />
-            </div>
-
-            <div>
-              <label>MLB Game</label>
-              <select id="gameSelect">
-                <option value="">Load games first</option>
-              </select>
-            </div>
-
-            <div class="full">
-              <button onclick="loadGames()">Load MLB Games</button>
-              <button class="secondary" onclick="loadSelectedGame()">Use Selected Game</button>
-              <button class="secondary" onclick="refreshLiveState()">Refresh Live State</button>
-              <button class="secondary" onclick="loadOdds()">Load Sportsbook Odds</button>
-              <div class="status" id="loadStatus">Waiting for first pitch.</div>
-            </div>
+          <div>
+            <label>Home Pitcher</label>
+            <select id="homePitcher"><option value="9">Elite</option><option value="8">Ace</option><option value="6">Good</option><option value="5" selected>Average</option><option value="3">Shaky</option><option value="2">Weak</option></select>
           </div>
-        </div>
+          <div>
+            <label>Away Pitcher</label>
+            <select id="awayPitcher"><option value="9">Elite</option><option value="8">Ace</option><option value="6">Good</option><option value="5" selected>Average</option><option value="3">Shaky</option><option value="2">Weak</option></select>
+          </div>
 
-        <div class="card">
-          <h2>Game Inputs</h2>
+          <div><label>Home ERA</label><input id="homeEra" type="number" step="0.01" value="4.10"></div>
+          <div><label>Away ERA</label><input id="awayEra" type="number" step="0.01" value="4.20"></div>
 
-          <div class="form-grid">
-            <div>
-              <label>Home Team</label>
-              <input id="homeTeam" value="Home Team" />
-            </div>
+          <div>
+            <label>Home Injury Impact</label>
+            <select id="homeInjuries"><option value="0">None</option><option value="-2">Minor lineup hit</option><option value="-4">Star hitter out</option><option value="-6">Multiple starters out</option><option value="-8">Pitcher scratched</option></select>
+          </div>
+          <div>
+            <label>Away Injury Impact</label>
+            <select id="awayInjuries"><option value="0">None</option><option value="-2">Minor lineup hit</option><option value="-4">Star hitter out</option><option value="-6">Multiple starters out</option><option value="-8">Pitcher scratched</option></select>
+          </div>
 
-            <div>
-              <label>Away Team</label>
-              <input id="awayTeam" value="Away Team" />
-            </div>
+          <div><label>Current Inning</label><select id="inning"><option value="1">1st</option><option value="2">2nd</option><option value="3">3rd</option><option value="4">4th</option><option value="5" selected>5th</option><option value="6">6th</option><option value="7">7th</option><option value="8">8th</option><option value="9">9th+</option></select></div>
+          <div><label>Home Score Lead</label><input id="scoreLead" type="number" value="0"></div>
 
-            <div>
-              <label>Home Batting Average</label>
-              <input id="homeAvg" type="number" step="0.001" value="0.255" />
-            </div>
-
-            <div>
-              <label>Away Batting Average</label>
-              <input id="awayAvg" type="number" step="0.001" value="0.245" />
-            </div>
-
-            <div>
-              <label>Home OPS</label>
-              <input id="homeOps" type="number" step="0.001" value="0.710" />
-            </div>
-
-            <div>
-              <label>Away OPS</label>
-              <input id="awayOps" type="number" step="0.001" value="0.700" />
-            </div>
-
-            <div>
-              <label>Home Pitcher Rating</label>
-              <select id="homePitcher">
-                <option value="9">Elite</option>
-                <option value="8">Ace</option>
-                <option value="6">Good</option>
-                <option value="5" selected>Average</option>
-                <option value="3">Shaky</option>
-                <option value="2">Weak</option>
-              </select>
-            </div>
-
-            <div>
-              <label>Away Pitcher Rating</label>
-              <select id="awayPitcher">
-                <option value="9">Elite</option>
-                <option value="8">Ace</option>
-                <option value="6">Good</option>
-                <option value="5" selected>Average</option>
-                <option value="3">Shaky</option>
-                <option value="2">Weak</option>
-              </select>
-            </div>
-
-            <div>
-              <label>Home Team ERA</label>
-              <input id="homeEra" type="number" step="0.01" value="4.10" />
-            </div>
-
-            <div>
-              <label>Away Team ERA</label>
-              <input id="awayEra" type="number" step="0.01" value="4.20" />
-            </div>
-
-            <div>
-              <label>Home Injury Impact</label>
-              <select id="homeInjuries">
-                <option value="0" selected>No major injuries</option>
-                <option value="-3">One key player out</option>
-                <option value="-6">Multiple key players out</option>
-              </select>
-            </div>
-
-            <div>
-              <label>Away Injury Impact</label>
-              <select id="awayInjuries">
-                <option value="0" selected>No major injuries</option>
-                <option value="-3">One key player out</option>
-                <option value="-6">Multiple key players out</option>
-              </select>
-            </div>
-
-            <div>
-              <label>Current Inning</label>
-              <select id="inning">
-                <option value="1">1st</option>
-                <option value="2">2nd</option>
-                <option value="3">3rd</option>
-                <option value="4">4th</option>
-                <option value="5" selected>5th</option>
-                <option value="6">6th</option>
-                <option value="7">7th</option>
-                <option value="8">8th</option>
-                <option value="9">9th+</option>
-              </select>
-            </div>
-
-            <div>
-              <label>Home Score Lead</label>
-              <input id="scoreLead" type="number" value="0" />
-            </div>
-
-            <div>
-              <label>Runners On Base</label>
-              <select id="bases">
-                <option value="0">None</option>
-                <option value="1">One runner</option>
-                <option value="2">Two runners</option>
-                <option value="3">Bases loaded</option>
-              </select>
-            </div>
-
-            <div>
-              <label>Outs</label>
-              <select id="outs">
-                <option value="0">0 outs</option>
-                <option value="1">1 out</option>
-                <option value="2">2 outs</option>
-              </select>
-            </div>
-
-            <div>
-              <label>Market Home Win Probability</label>
-              <input id="bookOdds" type="number" value="50" />
-            </div>
-
-            <div>
-              <label>Best Home Moneyline</label>
-              <input id="bestHomeLine" value="Manual / not loaded" />
+          <div class="full">
+            <label>Runners On Base</label>
+            <div class="base-row">
+              <div id="base1" class="base-toggle" onclick="toggleBase('base1')">1st</div>
+              <div id="base2" class="base-toggle" onclick="toggleBase('base2')">2nd</div>
+              <div id="base3" class="base-toggle" onclick="toggleBase('base3')">3rd</div>
             </div>
           </div>
 
-          <button onclick="calculateOdds()">Calculate Odds</button>
+          <div><label>Outs</label><select id="outs"><option value="0">0 outs</option><option value="1">1 out</option><option value="2">2 outs</option></select></div>
+          <div><label>Market Home Win %</label><input id="bookOdds" type="number" value="50"></div>
+          <div class="full"><label>Best Home Moneyline</label><input id="bestHomeLine" value="Manual / not loaded"></div>
         </div>
-      </section>
+        <button onclick="calculateOdds()">Calculate Odds</button>
+      </div>
+    </div>
 
-      <section>
-        <div class="card">
-          <h2>WagerVision Readout</h2>
-
-          <div class="result">
-            <div>Projected winner</div>
-            <div class="team-name" id="winner">Home Team</div>
-            <div class="prob" id="probability">50%</div>
-
-            <div class="meter">
-              <div class="bar" id="bar"></div>
-            </div>
-
-            <div class="mini-grid">
-              <div class="mini">
-                <strong id="homeProb">50%</strong>
-                <span>Model Home Win</span>
-              </div>
-
-              <div class="mini">
-                <strong id="marketProb">50%</strong>
-                <span>Market Home Win</span>
-              </div>
-
-              <div class="mini">
-                <strong id="edgeValue">0%</strong>
-                <span>Model Edge</span>
-              </div>
-            </div>
-
-            <div class="edge neutral" id="edgeText">
-              Load a game, pull odds, then let the machine talk.
-            </div>
-
-            <div class="data-box" id="whyBox">
-              <strong>Why Panel</strong><br>
-              No calculation yet.
-            </div>
-          </div>
+    <div>
+      <div class="card">
+        <h2>Readout</h2>
+        <div class="team-name" id="winner">Home Team</div>
+        <div class="big" id="probability">50%</div>
+        <div class="meter"><div class="bar" id="bar"></div></div>
+        <div class="mini-grid">
+          <div class="mini"><strong id="homeProb">50%</strong><span>Model</span></div>
+          <div class="mini"><strong id="marketProb">50%</strong><span>Market</span></div>
+          <div class="mini"><strong id="edgeValue">0%</strong><span>Edge</span></div>
         </div>
+        <div class="edge" id="edgeText">Load a game, pull odds, calculate.</div>
+        <button class="star" onclick="addCurrentToParlay()">⭐ Add Current Pick</button>
+        <div class="data-box" id="whyBox"><strong>Why Panel</strong><br>No calculation yet.</div>
+      </div>
 
-        <div class="card">
-          <h2>Live MLB Data</h2>
-          <div class="data-box" id="dataBox">No live game loaded yet.</div>
-        </div>
+      <div class="card">
+        <h2>Live MLB Data</h2>
+        <div class="data-box" id="dataBox">No live game loaded yet.</div>
+      </div>
 
-        <div class="card">
-          <h2>Sportsbook Market</h2>
-          <div class="small">
-            This pulls moneyline odds when your API key is saved. Best line gets used for edge detection.
-          </div>
-          <div class="odds-list" id="oddsBox">
-            <div class="data-box">No odds loaded yet.</div>
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <div class="footer">
-      MVP model only. It finds possible edges, not guaranteed money. The house has chandeliers for a reason.
+      <div class="card">
+        <h2>Sportsbook Market</h2>
+        <div id="oddsBox" class="odds-list"><div class="data-box">No odds loaded yet.</div></div>
+      </div>
     </div>
   </div>
-
-  <script>
-    let loadedGames = [];
-    let selectedGamePk = null;
-    let selectedGameData = null;
-    let selectedOddsGame = null;
-
-    function todayISO() {
-      const d = new Date();
-      return d.toISOString().split("T")[0];
-    }
-
-    document.getElementById("gameDate").value = todayISO();
-
-    function num(id) {
-      return Number(document.getElementById(id).value);
-    }
-
-    function text(id) {
-      return document.getElementById(id).value.trim();
-    }
-
-    function setVal(id, value) {
-      document.getElementById(id).value = value;
-    }
-
-    function clamp(value, min, max) {
-      return Math.max(min, Math.min(max, value));
-    }
-
-    function saveApiKey() {
-      const key = text("oddsApiKey");
-      if (!key) {
-        document.getElementById("apiStatus").textContent = "Paste an API key first.";
-        return;
-      }
-
-      localStorage.setItem("wagervision_odds_key", key);
-      document.getElementById("apiStatus").textContent = "Odds API key saved.";
-    }
-
-    function clearApiKey() {
-      localStorage.removeItem("wagervision_odds_key");
-      setVal("oddsApiKey", "");
-      document.getElementById("apiStatus").textContent = "Odds API key cleared.";
-    }
-
-    function loadSavedKey() {
-      const saved = localStorage.getItem("wagervision_odds_key");
-      if (saved) {
-        setVal("oddsApiKey", saved);
-        document.getElementById("apiStatus").textContent = "Odds API key loaded from this browser.";
-      }
-    }
-
-    loadSavedKey();
-
-    async function fetchJSON(url) {
-      const res = await fetch(url);
-      if (!res.ok) {
-        throw new Error("Network error");
-      }
-      return await res.json();
-    }
-
-    function statValue(stats, name) {
-      try {
-        const splits = stats?.stats?.[0]?.splits?.[0]?.stat;
-        return splits?.[name] ?? null;
-      } catch {
-        return null;
-      }
-    }
-
-    async function loadGames() {
-      const date = document.getElementById("gameDate").value;
-      const select = document.getElementById("gameSelect");
-      const status = document.getElementById("loadStatus");
-
-      status.textContent = "Loading MLB games...";
-      select.innerHTML = `<option value="">Loading...</option>`;
-
-      try {
-        const url = `https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${date}&hydrate=probablePitcher`;
-        const data = await fetchJSON(url);
-
-        loadedGames = data.dates?.[0]?.games || [];
-
-        if (loadedGames.length === 0) {
-          select.innerHTML = `<option value="">No MLB games found for this date</option>`;
-          status.textContent = "No games found. Try another date.";
-          return;
-        }
-
-        select.innerHTML = loadedGames.map((game, index) => {
-          const away = game.teams.away.team.name;
-          const home = game.teams.home.team.name;
-          const awayP = game.teams.away.probablePitcher?.fullName || "TBD";
-          const homeP = game.teams.home.probablePitcher?.fullName || "TBD";
-          const state = game.status?.abstractGameState || "Scheduled";
-          return `<option value="${index}">${away} @ ${home} · ${awayP} vs ${homeP} · ${state}</option>`;
-        }).join("");
-
-        status.textContent = `${loadedGames.length} games loaded. Pick one and hit “Use Selected Game.”`;
-      } catch (err) {
-        select.innerHTML = `<option value="">Could not load games</option>`;
-        status.textContent = "Could not load MLB data. Check internet/CORS or try again.";
-      }
-    }
-
-    async function getTeamStats(teamId, season) {
-      const hittingURL = `https://statsapi.mlb.com/api/v1/teams/${teamId}/stats?stats=season&group=hitting&season=${season}`;
-      const pitchingURL = `https://statsapi.mlb.com/api/v1/teams/${teamId}/stats?stats=season&group=pitching&season=${season}`;
-
-      const [hitting, pitching] = await Promise.all([
-        fetchJSON(hittingURL),
-        fetchJSON(pitchingURL)
-      ]);
-
-      return {
-        avg: Number(statValue(hitting, "avg")) || 0.250,
-        ops: Number(statValue(hitting, "ops")) || 0.700,
-        runs: Number(statValue(hitting, "runs")) || 0,
-        era: Number(statValue(pitching, "era")) || 4.20,
-        whip: Number(statValue(pitching, "whip")) || 1.30
-      };
-    }
-
-    async function getPitcherStats(playerId, season) {
-      if (!playerId) return null;
-
-      try {
-        const url = `https://statsapi.mlb.com/api/v1/people/${playerId}/stats?stats=season&group=pitching&season=${season}`;
-        const data = await fetchJSON(url);
-        const stat = data?.stats?.[0]?.splits?.[0]?.stat;
-
-        if (!stat) return null;
-
-        return {
-          era: Number(stat.era) || null,
-          whip: Number(stat.whip) || null,
-          innings: Number(stat.inningsPitched) || null,
-          strikeOuts: Number(stat.strikeOuts) || 0,
-          walks: Number(stat.baseOnBalls) || 0
-        };
-      } catch {
-        return null;
-      }
-    }
-
-    function ratePitcher(stats) {
-      if (!stats || !stats.era) return 5;
-
-      const era = stats.era;
-      const whip = stats.whip || 1.30;
-
-      if (era <= 2.75 && whip <= 1.05) return 9;
-      if (era <= 3.35 && whip <= 1.15) return 8;
-      if (era <= 3.90 && whip <= 1.25) return 6;
-      if (era <= 4.60 && whip <= 1.38) return 5;
-      if (era <= 5.20) return 3;
-      return 2;
-    }
-
-    async function loadSelectedGame() {
-      const index = document.getElementById("gameSelect").value;
-      const status = document.getElementById("loadStatus");
-
-      if (index === "") {
-        status.textContent = "Pick a game first.";
-        return;
-      }
-
-      const game = loadedGames[Number(index)];
-      selectedGamePk = game.gamePk;
-      selectedGameData = game;
-
-      const season = new Date(document.getElementById("gameDate").value).getFullYear();
-
-      const homeTeam = game.teams.home.team.name;
-      const awayTeam = game.teams.away.team.name;
-      const homeId = game.teams.home.team.id;
-      const awayId = game.teams.away.team.id;
-
-      const homePitcher = game.teams.home.probablePitcher?.fullName || "TBD";
-      const awayPitcher = game.teams.away.probablePitcher?.fullName || "TBD";
-
-      const homePitcherId = game.teams.home.probablePitcher?.id || null;
-      const awayPitcherId = game.teams.away.probablePitcher?.id || null;
-
-      status.textContent = "Pulling team stats, pitcher stats, and live game state...";
-
-      try {
-        const [homeStats, awayStats, homePStats, awayPStats] = await Promise.all([
-          getTeamStats(homeId, season),
-          getTeamStats(awayId, season),
-          getPitcherStats(homePitcherId, season),
-          getPitcherStats(awayPitcherId, season)
-        ]);
-
-        setVal("homeTeam", homeTeam);
-        setVal("awayTeam", awayTeam);
-        setVal("homeAvg", homeStats.avg.toFixed(3));
-        setVal("awayAvg", awayStats.avg.toFixed(3));
-        setVal("homeEra", homeStats.era.toFixed(2));
-        setVal("awayEra", awayStats.era.toFixed(2));
-        setVal("homeOps", homeStats.ops.toFixed(3));
-        setVal("awayOps", awayStats.ops.toFixed(3));
-        setVal("homePitcher", ratePitcher(homePStats));
-        setVal("awayPitcher", ratePitcher(awayPStats));
-
-        await refreshLiveState(false);
-
-        document.getElementById("dataBox").innerHTML = `
-          <strong>Live MLB Data Loaded</strong><br>
-          ${awayTeam} @ ${homeTeam}<br>
-          Away probable pitcher: ${awayPitcher} ${awayPStats ? `(ERA ${awayPStats.era || "N/A"}, WHIP ${awayPStats.whip || "N/A"})` : "(stats unavailable)"}<br>
-          Home probable pitcher: ${homePitcher} ${homePStats ? `(ERA ${homePStats.era || "N/A"}, WHIP ${homePStats.whip || "N/A"})` : "(stats unavailable)"}<br><br>
-
-          ${homeTeam}: AVG ${homeStats.avg.toFixed(3)}, OPS ${homeStats.ops.toFixed(3)}, ERA ${homeStats.era.toFixed(2)}, WHIP ${homeStats.whip.toFixed(2)}<br>
-          ${awayTeam}: AVG ${awayStats.avg.toFixed(3)}, OPS ${awayStats.ops.toFixed(3)}, ERA ${awayStats.era.toFixed(2)}, WHIP ${awayStats.whip.toFixed(2)}
-
-          <div class="pill-row">
-            <div class="pill">Pitchers auto-rated</div>
-            <div class="pill">Live state ready</div>
-            <div class="pill">Market layer ready</div>
-          </div>
-        `;
-
-        status.textContent = "Game loaded. Now pull odds or calculate manually.";
-        calculateOdds();
-      } catch (err) {
-        status.textContent = "Game loaded, but some stats failed. Using available data.";
-        setVal("homeTeam", homeTeam);
-        setVal("awayTeam", awayTeam);
-        calculateOdds();
-      }
-    }
-
-    async function refreshLiveState(showMessage = true) {
-      const status = document.getElementById("loadStatus");
-
-      if (!selectedGamePk) {
-        if (showMessage) status.textContent = "Load a game first.";
-        return;
-      }
-
-      try {
-        if (showMessage) status.textContent = "Refreshing live game state...";
-
-        const url = `https://statsapi.mlb.com/api/v1.1/game/${selectedGamePk}/feed/live`;
-        const data = await fetchJSON(url);
-
-        const linescore = data.liveData?.linescore;
-        const gameData = data.gameData;
-
-        const homeRuns = Number(linescore?.teams?.home?.runs || 0);
-        const awayRuns = Number(linescore?.teams?.away?.runs || 0);
-        const homeLead = homeRuns - awayRuns;
-
-        const inning = Number(linescore?.currentInning || 1);
-        const outs = Number(linescore?.outs || 0);
-
-        const offense = linescore?.offense || {};
-        let bases = 0;
-        if (offense.first) bases++;
-        if (offense.second) bases++;
-        if (offense.third) bases++;
-
-        setVal("scoreLead", homeLead);
-        setVal("inning", clamp(inning, 1, 9));
-        setVal("outs", clamp(outs, 0, 2));
-        setVal("bases", clamp(bases, 0, 3));
-
-        const inningText = linescore?.inningState && linescore?.currentInningOrdinal
-          ? `${linescore.inningState} ${linescore.currentInningOrdinal}`
-          : "Pregame / unavailable";
-
-        if (showMessage) {
-          status.textContent = `Live state updated: ${awayRuns}-${homeRuns}, ${inningText}, ${outs} outs, ${bases} runners on.`;
-        }
-
-        calculateOdds();
-      } catch {
-        if (showMessage) status.textContent = "Could not refresh live state.";
-      }
-    }
-
-    function normalizeTeamName(name) {
-      return String(name || "")
-        .toLowerCase()
-        .replace(/[^a-z0-9 ]/g, "")
-        .replace(/\s+/g, " ")
-        .trim();
-    }
-
-    function americanToImplied(price) {
-      const p = Number(price);
-
-      if (!p) return null;
-
-      if (p > 0) {
-        return (100 / (p + 100)) * 100;
-      }
-
-      return ((-p) / ((-p) + 100)) * 100;
-    }
-
-    function displayAmerican(price) {
-      const p = Number(price);
-      if (p > 0) return `+${p}`;
-      return `${p}`;
-    }
-
-    function noVigTwoWay(probA, probB) {
-      const total = probA + probB;
-      if (!total) return { a: probA, b: probB };
-      return {
-        a: (probA / total) * 100,
-        b: (probB / total) * 100
-      };
-    }
-
-    async function loadOdds() {
-      const status = document.getElementById("loadStatus");
-      const oddsBox = document.getElementById("oddsBox");
-
-      const key = text("oddsApiKey") || localStorage.getItem("wagervision_odds_key");
-
-      if (!key) {
-        status.textContent = "Paste and save your Odds API key first.";
-        return;
-      }
-
-      const homeTeam = normalizeTeamName(text("homeTeam"));
-      const awayTeam = normalizeTeamName(text("awayTeam"));
-
-      if (!homeTeam || !awayTeam || homeTeam === "home team") {
-        status.textContent = "Load or enter a real game first.";
-        return;
-      }
-
-      status.textContent = "Loading sportsbook odds...";
-      oddsBox.innerHTML = `<div class="data-box">Fetching market prices...</div>`;
-
-      try {
-        const url = `https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?regions=us&markets=h2h&oddsFormat=american&apiKey=${key}`;
-        const data = await fetchJSON(url);
-
-        const game = data.find(g => {
-          const apiHome = normalizeTeamName(g.home_team);
-          const apiAway = normalizeTeamName(g.away_team);
-
-          return (
-            apiHome.includes(homeTeam) ||
-            homeTeam.includes(apiHome) ||
-            apiAway.includes(awayTeam) ||
-            awayTeam.includes(apiAway)
-          );
-        });
-
-        if (!game) {
-          oddsBox.innerHTML = `<div class="data-box">No matching odds found for this game.</div>`;
-          status.textContent = "No matching sportsbook game found.";
-          return;
-        }
-
-        selectedOddsGame = game;
-
-        let rows = [];
-        let bestHome = null;
-        let bestHomeBook = "";
-        let bestMarketProb = null;
-
-        game.bookmakers.forEach(book => {
-          const market = book.markets?.find(m => m.key === "h2h");
-          if (!market) return;
-
-          const homeOutcome = market.outcomes.find(o => normalizeTeamName(o.name) === normalizeTeamName(game.home_team));
-          const awayOutcome = market.outcomes.find(o => normalizeTeamName(o.name) === normalizeTeamName(game.away_team));
-
-          if (!homeOutcome || !awayOutcome) return;
-
-          const homeImpliedRaw = americanToImplied(homeOutcome.price);
-          const awayImpliedRaw = americanToImplied(awayOutcome.price);
-
-          const noVig = noVigTwoWay(homeImpliedRaw, awayImpliedRaw);
-          const homeNoVig = noVig.a;
-
-          if (bestHome === null || Number(homeOutcome.price) > Number(bestHome)) {
-            bestHome = homeOutcome.price;
-            bestHomeBook = book.title;
-            bestMarketProb = homeNoVig;
-          }
-
-          rows.push({
-            book: book.title,
-            homeLine: homeOutcome.price,
-            awayLine: awayOutcome.price,
-            homeProb: homeNoVig
-          });
-        });
-
-        if (rows.length === 0) {
-          oddsBox.innerHTML = `<div class="data-box">Odds were found, but could not parse moneyline prices.</div>`;
-          status.textContent = "Could not parse odds.";
-          return;
-        }
-
-        setVal("bookOdds", bestMarketProb.toFixed(1));
-        setVal("bestHomeLine", `${displayAmerican(bestHome)} at ${bestHomeBook}`);
-
-        oddsBox.innerHTML = rows.map(row => `
-          <div class="book-row">
-            <div><strong>${row.book}</strong></div>
-            <div>Home: <span class="${row.homeLine > 0 ? "positive" : "negative"}">${displayAmerican(row.homeLine)}</span></div>
-            <div>No-vig home: ${row.homeProb.toFixed(1)}%</div>
-          </div>
-        `).join("");
-
-        status.textContent = `Odds loaded. Best home price: ${displayAmerican(bestHome)} at ${bestHomeBook}.`;
-        calculateOdds();
-      } catch (err) {
-        oddsBox.innerHTML = `<div class="data-box">Could not load odds. Check your API key or request limit.</div>`;
-        status.textContent = "Odds fetch failed.";
-      }
-    }
-
-    function calculateOdds() {
-      const homeTeam = text("homeTeam") || "Home Team";
-      const awayTeam = text("awayTeam") || "Away Team";
-
-      const homeAvg = num("homeAvg");
-      const awayAvg = num("awayAvg");
-
-      const homeOps = num("homeOps");
-      const awayOps = num("awayOps");
-
-      const homePitcher = num("homePitcher");
-      const awayPitcher = num("awayPitcher");
-
-      const homeEra = num("homeEra");
-      const awayEra = num("awayEra");
-
-      const homeInjuries = num("homeInjuries");
-      const awayInjuries = num("awayInjuries");
-
-      const inning = num("inning");
-      const scoreLead = num("scoreLead");
-      const bases = num("bases");
-      const outs = num("outs");
-      const bookOdds = num("bookOdds");
-
-      let homeScore = 50;
-      let reasons = [];
-
-      homeScore += 4;
-      reasons.push("Home field advantage added +4.");
-
-      const avgImpact = (homeAvg - awayAvg) * 170;
-      homeScore += avgImpact;
-      reasons.push(`Batting average impact: ${avgImpact >= 0 ? "+" : ""}${avgImpact.toFixed(1)}.`);
-
-      const opsImpact = (homeOps - awayOps) * 55;
-      homeScore += opsImpact;
-      reasons.push(`OPS impact: ${opsImpact >= 0 ? "+" : ""}${opsImpact.toFixed(1)}.`);
-
-      const pitcherImpact = (homePitcher - awayPitcher) * 3.15;
-      homeScore += pitcherImpact;
-      reasons.push(`Starting pitcher impact: ${pitcherImpact >= 0 ? "+" : ""}${pitcherImpact.toFixed(1)}.`);
-
-      const eraImpact = (awayEra - homeEra) * 2.65;
-      homeScore += eraImpact;
-      reasons.push(`Team ERA impact: ${eraImpact >= 0 ? "+" : ""}${eraImpact.toFixed(1)}.`);
-
-      homeScore += homeInjuries;
-      homeScore -= awayInjuries;
-
-      if (homeInjuries !== 0) reasons.push(`Home injury penalty: ${homeInjuries}.`);
-      if (awayInjuries !== 0) reasons.push(`Away injury penalty benefits home by ${-awayInjuries}.`);
-
-      const lateGameMultiplier = inning >= 8 ? 6.2 : inning >= 7 ? 5.2 : inning >= 5 ? 3.4 : 2.1;
-      const scoreImpact = scoreLead * lateGameMultiplier;
-      homeScore += scoreImpact;
-      reasons.push(`Score/inning leverage impact: ${scoreImpact >= 0 ? "+" : ""}${scoreImpact.toFixed(1)}.`);
-
-      const basePressure = bases * (3 - outs) * 0.85;
-      homeScore += basePressure;
-      if (bases > 0) reasons.push(`Base runner pressure added +${basePressure.toFixed(1)}.`);
-
-      if (inning >= 8 && scoreLead > 0) {
-        homeScore += 4;
-        reasons.push("Late-game lead bonus added +4.");
-      }
-
-      if (inning >= 8 && scoreLead < 0) {
-        homeScore -= 4;
-        reasons.push("Late-game trailing penalty added -4.");
-      }
-
-      homeScore = clamp(homeScore, 2, 98);
-
-      const awayScore = 100 - homeScore;
-      const winner = homeScore >= awayScore ? homeTeam : awayTeam;
-      const winProb = Math.max(homeScore, awayScore);
-      const edge = homeScore - bookOdds;
-
-      document.getElementById("winner").textContent = winner;
-      document.getElementById("probability").textContent = Math.round(winProb) + "%";
-      document.getElementById("homeProb").textContent = homeScore.toFixed(1) + "%";
-      document.getElementById("marketProb").textContent = bookOdds.toFixed(1) + "%";
-      document.getElementById("edgeValue").textContent = (edge >= 0 ? "+" : "") + edge.toFixed(1) + "%";
-      document.getElementById("bar").style.width = homeScore + "%";
-
-      const edgeBox = document.getElementById("edgeText");
-      let edgeText = "";
-
-      if (edge >= 10) {
-        edgeBox.className = "edge";
-        edgeText = `STRONG VALUE on ${homeTeam}. Model says ${homeScore.toFixed(1)}%. Market says ${bookOdds.toFixed(1)}%. That’s not a gap. That’s a door someone forgot to close.`;
-      } else if (edge >= 5) {
-        edgeBox.className = "edge yellow";
-        edgeText = `LEAN ${homeTeam}. There is value, but don't start buying cigars yet.`;
-      } else if (edge <= -10) {
-        edgeBox.className = "edge red";
-        edgeText = `FADE ${homeTeam}. Market may be overpricing them. The suit looks expensive, but the stitching is weak.`;
-      } else if (edge <= -5) {
-        edgeBox.className = "edge yellow";
-        edgeText = `LEAN AWAY SIDE. ${homeTeam} looks a little overpriced.`;
-      } else {
-        edgeBox.className = "edge neutral";
-        edgeText = `NO BET. Market and model are too close. Sometimes discipline is the wager.`;
-      }
-
-      edgeBox.textContent = edgeText;
-
-      document.getElementById("whyBox").innerHTML = `
-        <strong>Why Panel</strong><br>
-        Model Home Win: ${homeScore.toFixed(1)}%<br>
-        Market Home Win: ${bookOdds.toFixed(1)}%<br>
-        Edge: ${edge >= 0 ? "+" : ""}${edge.toFixed(1)}%<br><br>
-        ${reasons.map(r => `• ${r}`).join("<br>")}
-      `;
-    }
-
+</section>
+
+<section id="parlay" class="section">
+  <div class="card">
+    <h2>Parlay Builder</h2>
+    <div id="parlayBox" class="data-box">No legs added yet. Star picks from the Board or Analyze tab.</div>
+    <button class="secondary" onclick="clearParlay()">Clear Parlay</button>
+  </div>
+</section>
+
+<section id="settings" class="section">
+  <div class="card">
+    <h2>Settings</h2>
+    <label>The Odds API Key</label>
+    <input id="oddsApiKey" placeholder="Paste your Odds API key here">
+    <button onclick="saveApiKey()">Save API Key</button>
+    <button class="secondary" onclick="clearApiKey()">Clear Saved Key</button>
+    <div class="status" id="apiStatus">No key loaded yet.</div>
+    <hr>
+    <div class="small">For videos, clear the key first or stay off this Settings tab. Product mode later will hide this completely.</div>
+  </div>
+</section>
+
+<div class="footer">WagerVision V5. Finds bad prices, not guaranteed money.</div>
+</div>
+
+<script>
+let loadedGames=[],selectedGamePk=null,selectedGameData=null,parlay=[];
+document.getElementById("gameDate").value=new Date().toISOString().split("T")[0];
+
+function showTab(id,el){document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));document.getElementById(id).classList.add("active");el.classList.add("active")}
+function num(id){return Number(document.getElementById(id).value)}
+function text(id){return document.getElementById(id).value.trim()}
+function setVal(id,v){document.getElementById(id).value=v}
+function clamp(v,min,max){return Math.max(min,Math.min(max,v))}
+function toggleBase(id){document.getElementById(id).classList.toggle("on")}
+function baseCount(){return ["base1","base2","base3"].filter(id=>document.getElementById(id).classList.contains("on")).length}
+function baseValue(){let v=0;if(base1.classList.contains("on"))v+=1;if(base2.classList.contains("on"))v+=1.4;if(base3.classList.contains("on"))v+=1.8;return v}
+async function fetchJSON(url){const r=await fetch(url);if(!r.ok)throw new Error("network");return await r.json()}
+function saveApiKey(){const k=text("oddsApiKey");if(!k)return apiStatus.textContent="Paste a key first.";localStorage.setItem("wagervision_odds_key",k);apiStatus.textContent="API key saved."}
+function clearApiKey(){localStorage.removeItem("wagervision_odds_key");setVal("oddsApiKey","");apiStatus.textContent="API key cleared."}
+(function(){const k=localStorage.getItem("wagervision_odds_key");if(k){setVal("oddsApiKey",k);apiStatus.textContent="API key loaded from browser."}})();
+
+function statValue(stats,name){try{return stats?.stats?.[0]?.splits?.[0]?.stat?.[name]??null}catch{return null}}
+
+async function loadGames(){
+  loadStatus.textContent="Loading MLB games...";boardStatus.textContent="Loading MLB games...";
+  gameSelect.innerHTML="<option>Loading...</option>";
+  try{
+    const d=gameDate.value;
+    const data=await fetchJSON(`https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${d}&hydrate=probablePitcher`);
+    loadedGames=data.dates?.[0]?.games||[];
+    if(!loadedGames.length){gameSelect.innerHTML="<option>No games found</option>";loadStatus.textContent="No games found.";boardStatus.textContent="No games found.";return}
+    gameSelect.innerHTML=loadedGames.map((g,i)=>{
+      const a=g.teams.away.team.name,h=g.teams.home.team.name;
+      const ap=g.teams.away.probablePitcher?.fullName||"TBD",hp=g.teams.home.probablePitcher?.fullName||"TBD";
+      return `<option value="${i}">${a} @ ${h} · ${ap} vs ${hp}</option>`
+    }).join("");
+    loadStatus.textContent=`${loadedGames.length} games loaded.`;
+    boardStatus.textContent=`${loadedGames.length} games loaded. Now scan board.`;
+  }catch{loadStatus.textContent="Could not load MLB games.";boardStatus.textContent="Could not load games."}
+}
+
+async function getTeamStats(teamId,season){
+  const [hit,pitch]=await Promise.all([
+    fetchJSON(`https://statsapi.mlb.com/api/v1/teams/${teamId}/stats?stats=season&group=hitting&season=${season}`),
+    fetchJSON(`https://statsapi.mlb.com/api/v1/teams/${teamId}/stats?stats=season&group=pitching&season=${season}`)
+  ]);
+  return {avg:Number(statValue(hit,"avg"))||.250,ops:Number(statValue(hit,"ops"))||.700,era:Number(statValue(pitch,"era"))||4.2,whip:Number(statValue(pitch,"whip"))||1.3}
+}
+
+async function getPitcherStats(id,season){
+  if(!id)return null;
+  try{
+    const d=await fetchJSON(`https://statsapi.mlb.com/api/v1/people/${id}/stats?stats=season&group=pitching&season=${season}`);
+    const s=d?.stats?.[0]?.splits?.[0]?.stat;if(!s)return null;
+    return {era:Number(s.era)||null,whip:Number(s.whip)||null}
+  }catch{return null}
+}
+
+function ratePitcher(s){
+  if(!s||!s.era)return 5;
+  if(s.era<=2.75&&s.whip<=1.05)return 9;
+  if(s.era<=3.35&&s.whip<=1.15)return 8;
+  if(s.era<=3.90&&s.whip<=1.25)return 6;
+  if(s.era<=4.60&&s.whip<=1.38)return 5;
+  if(s.era<=5.20)return 3;
+  return 2;
+}
+
+async function loadSelectedGame(){
+  const i=gameSelect.value;if(i==="")return loadStatus.textContent="Pick a game first.";
+  const g=loadedGames[Number(i)],season=new Date(gameDate.value).getFullYear();
+  selectedGamePk=g.gamePk;selectedGameData=g;
+  const home=g.teams.home.team,away=g.teams.away.team;
+  loadStatus.textContent="Pulling stats...";
+  try{
+    const [hs,as,hp,ap]=await Promise.all([
+      getTeamStats(home.id,season),getTeamStats(away.id,season),
+      getPitcherStats(g.teams.home.probablePitcher?.id,season),
+      getPitcherStats(g.teams.away.probablePitcher?.id,season)
+    ]);
+    setVal("homeTeam",home.name);setVal("awayTeam",away.name);
+    setVal("homeAvg",hs.avg.toFixed(3));setVal("awayAvg",as.avg.toFixed(3));
+    setVal("homeOps",hs.ops.toFixed(3));setVal("awayOps",as.ops.toFixed(3));
+    setVal("homeEra",hs.era.toFixed(2));setVal("awayEra",as.era.toFixed(2));
+    setVal("homePitcher",ratePitcher(hp));setVal("awayPitcher",ratePitcher(ap));
+    await refreshLiveState(false);
+    dataBox.innerHTML=`<strong>Live MLB Data Loaded</strong><br>${away.name} @ ${home.name}<br>Away pitcher: ${g.teams.away.probablePitcher?.fullName||"TBD"}<br>Home pitcher: ${g.teams.home.probablePitcher?.fullName||"TBD"}<br><br>${home.name}: AVG ${hs.avg.toFixed(3)}, OPS ${hs.ops.toFixed(3)}, ERA ${hs.era.toFixed(2)}<br>${away.name}: AVG ${as.avg.toFixed(3)}, OPS ${as.ops.toFixed(3)}, ERA ${as.era.toFixed(2)}`;
+    loadStatus.textContent="Game loaded.";
     calculateOdds();
-  </script>
+  }catch{loadStatus.textContent="Stats failed. Using defaults.";calculateOdds()}
+}
+
+async function refreshLiveState(show=true){
+  if(!selectedGamePk){if(show)loadStatus.textContent="Load a game first.";return}
+  try{
+    const d=await fetchJSON(`https://statsapi.mlb.com/api/v1.1/game/${selectedGamePk}/feed/live`);
+    const l=d.liveData?.linescore;
+    const hr=Number(l?.teams?.home?.runs||0),ar=Number(l?.teams?.away?.runs||0);
+    setVal("scoreLead",hr-ar);setVal("inning",clamp(Number(l?.currentInning||1),1,9));setVal("outs",clamp(Number(l?.outs||0),0,2));
+    ["base1","base2","base3"].forEach(id=>document.getElementById(id).classList.remove("on"));
+    if(l?.offense?.first)base1.classList.add("on");if(l?.offense?.second)base2.classList.add("on");if(l?.offense?.third)base3.classList.add("on");
+    if(show)loadStatus.textContent=`Live state updated: ${ar}-${hr}.`;
+    calculateOdds();
+  }catch{if(show)loadStatus.textContent="Could not refresh live state."}
+}
+
+function normalize(n){return String(n||"").toLowerCase().replace(/[^a-z0-9 ]/g,"").replace(/\s+/g," ").trim()}
+function americanToImplied(p){p=Number(p);return p>0?(100/(p+100))*100:((-p)/((-p)+100))*100}
+function displayAmerican(p){p=Number(p);return p>0?`+${p}`:`${p}`}
+function noVig(a,b){const t=a+b;return t?{a:a/t*100,b:b/t*100}:{a,b}}
+
+async function loadOdds(){
+  const key=text("oddsApiKey")||localStorage.getItem("wagervision_odds_key");
+  if(!key)return loadStatus.textContent="Save your Odds API key first.";
+  const h=normalize(text("homeTeam")),a=normalize(text("awayTeam"));
+  oddsBox.innerHTML=`<div class="data-box">Fetching odds...</div>`;
+  try{
+    const d=await fetchJSON(`https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?regions=us&markets=h2h&oddsFormat=american&apiKey=${key}`);
+    const game=d.find(g=>normalize(g.home_team).includes(h)||h.includes(normalize(g.home_team))||normalize(g.away_team).includes(a)||a.includes(normalize(g.away_team)));
+    if(!game){oddsBox.innerHTML=`<div class="data-box">No matching odds found.</div>`;return}
+    let rows=[],best=null,bestBook="",bestProb=50;
+    game.bookmakers.forEach(book=>{
+      const m=book.markets?.find(x=>x.key==="h2h");if(!m)return;
+      const ho=m.outcomes.find(o=>normalize(o.name)===normalize(game.home_team));
+      const ao=m.outcomes.find(o=>normalize(o.name)===normalize(game.away_team));if(!ho||!ao)return;
+      const nv=noVig(americanToImplied(ho.price),americanToImplied(ao.price));
+      if(best===null||Number(ho.price)>Number(best)){best=ho.price;bestBook=book.title;bestProb=nv.a}
+      rows.push({book:book.title,homeLine:ho.price,homeProb:nv.a});
+    });
+    setVal("bookOdds",bestProb.toFixed(1));setVal("bestHomeLine",`${displayAmerican(best)} at ${bestBook}`);
+    oddsBox.innerHTML=rows.map(r=>`<div class="book-row"><strong>${r.book}</strong><div>Home ${displayAmerican(r.homeLine)}</div><div>${r.homeProb.toFixed(1)}%</div></div>`).join("");
+    loadStatus.textContent="Odds loaded.";
+    calculateOdds();
+  }catch{oddsBox.innerHTML=`<div class="data-box">Odds failed. Check key/request limit.</div>`}
+}
+
+function modelCalc(input){
+  let s=50,reasons=[];
+  s+=4;reasons.push("Home field +4.");
+  const avg=(input.homeAvg-input.awayAvg)*170;s+=avg;reasons.push(`AVG ${avg>=0?"+":""}${avg.toFixed(1)}.`);
+  const ops=(input.homeOps-input.awayOps)*55;s+=ops;reasons.push(`OPS ${ops>=0?"+":""}${ops.toFixed(1)}.`);
+  const pit=(input.homePitcher-input.awayPitcher)*3.15;s+=pit;reasons.push(`Pitcher ${pit>=0?"+":""}${pit.toFixed(1)}.`);
+  const era=(input.awayEra-input.homeEra)*2.65;s+=era;reasons.push(`ERA ${era>=0?"+":""}${era.toFixed(1)}.`);
+  s+=input.homeInjuries;s-=input.awayInjuries;
+  const mult=input.inning>=8?6.2:input.inning>=7?5.2:input.inning>=5?3.4:2.1;
+  const score=input.scoreLead*mult;s+=score;reasons.push(`Score leverage ${score>=0?"+":""}${score.toFixed(1)}.`);
+  const bp=input.baseValue*(3-input.outs)*.85;s+=bp;if(input.baseValue>0)reasons.push(`Base pressure +${bp.toFixed(1)}.`);
+  if(input.inning>=8&&input.scoreLead>0)s+=4;
+  if(input.inning>=8&&input.scoreLead<0)s-=4;
+  return {homeScore:clamp(s,2,98),reasons};
+}
+
+function currentInput(){
+  return {homeAvg:num("homeAvg"),awayAvg:num("awayAvg"),homeOps:num("homeOps"),awayOps:num("awayOps"),homePitcher:num("homePitcher"),awayPitcher:num("awayPitcher"),homeEra:num("homeEra"),awayEra:num("awayEra"),homeInjuries:num("homeInjuries"),awayInjuries:num("awayInjuries"),inning:num("inning"),scoreLead:num("scoreLead"),baseValue:baseValue(),outs:num("outs")}
+}
+
+function calculateOdds(){
+  const home=text("homeTeam")||"Home Team",away=text("awayTeam")||"Away Team";
+  const r=modelCalc(currentInput());
+  const market=num("bookOdds"),edge=r.homeScore-market,awayScore=100-r.homeScore;
+  winner.textContent=r.homeScore>=awayScore?home:away;
+  probability.textContent=Math.round(Math.max(r.homeScore,awayScore))+"%";
+  homeProb.textContent=r.homeScore.toFixed(1)+"%";marketProb.textContent=market.toFixed(1)+"%";edgeValue.textContent=(edge>=0?"+":"")+edge.toFixed(1)+"%";bar.style.width=r.homeScore+"%";
+  let cls="edge",msg="";
+  if(edge>=10){cls+=" green";msg=`STRONG VALUE on ${home}. Model ${r.homeScore.toFixed(1)}%, market ${market.toFixed(1)}%.`}
+  else if(edge>=5){cls+=" yellow";msg=`LEAN ${home}. Positive edge, but not a cannon shot.`}
+  else if(edge<=-10){cls+=" red";msg=`FADE ${home}. Market may be too high.`}
+  else if(edge<=-5){cls+=" yellow";msg=`LEAN AWAY. ${home} looks overpriced.`}
+  else{msg="NO BET. Market and model are too close."}
+  edgeText.className=cls;edgeText.textContent=msg;
+  whyBox.innerHTML=`<strong>Why Panel</strong><br>Model: ${r.homeScore.toFixed(1)}%<br>Market: ${market.toFixed(1)}%<br>Edge: ${(edge>=0?"+":"")+edge.toFixed(1)}%<br><br>${r.reasons.map(x=>"• "+x).join("<br>")}`;
+  return {home,away,model:r.homeScore,market,edge};
+}
+
+async function scanBoard(){
+  if(!loadedGames.length)await loadGames();
+  if(!loadedGames.length)return;
+  boardStatus.textContent="Scanning board...";
+  const season=new Date(gameDate.value).getFullYear();
+  let picks=[];
+  for(const g of loadedGames){
+    try{
+      const home=g.teams.home.team,away=g.teams.away.team;
+      const [hs,as,hp,ap]=await Promise.all([getTeamStats(home.id,season),getTeamStats(away.id,season),getPitcherStats(g.teams.home.probablePitcher?.id,season),getPitcherStats(g.teams.away.probablePitcher?.id,season)]);
+      const r=modelCalc({homeAvg:hs.avg,awayAvg:as.avg,homeOps:hs.ops,awayOps:as.ops,homePitcher:ratePitcher(hp),awayPitcher:ratePitcher(ap),homeEra:hs.era,awayEra:as.era,homeInjuries:0,awayInjuries:0,inning:1,scoreLead:0,baseValue:0,outs:0});
+      const fakeMarket=50;
+      picks.push({home:home.name,away:away.name,model:r.homeScore,market:fakeMarket,edge:r.homeScore-fakeMarket,label:r.homeScore>=50?home.name:away.name});
+    }catch{}
+  }
+  picks.sort((a,b)=>Math.abs(b.edge)-Math.abs(a.edge));
+  pickBoard.innerHTML=picks.map((p,i)=>`
+    <div class="pick-card">
+      <div class="pick-top">
+        <div><div class="pick-title">${i===0?"⭐ ":i===1?"🔥 ":""}${p.away} @ ${p.home}</div><div class="pick-meta">Model home: ${p.model.toFixed(1)}% · Baseline market: ${p.market.toFixed(1)}%</div></div>
+        <div class="pick-edge">${p.edge>=0?"+":""}${p.edge.toFixed(1)}%</div>
+      </div>
+      <div class="pill-row"><span class="pill">${Math.abs(p.edge)>=8?"Strong Edge":Math.abs(p.edge)>=4?"Lean":"Pass"}</span><span class="pill">Pre-odds scan</span></div>
+      <button class="star" onclick='addPickToParlay(${JSON.stringify(p)})'>⭐ Add to Parlay</button>
+    </div>`).join("");
+  boardStatus.textContent="Board scanned. For true edge, load sportsbook odds on specific games.";
+}
+
+function addPickToParlay(p){parlay.push(p);renderParlay();showTab("parlay",document.querySelectorAll(".tab")[2])}
+function addCurrentToParlay(){const p=calculateOdds();addPickToParlay({home:p.home,away:p.away,model:p.model,market:p.market,edge:p.edge,label:p.edge>=0?p.home:p.away})}
+function removeLeg(i){parlay.splice(i,1);renderParlay()}
+function clearParlay(){parlay=[];renderParlay()}
+function renderParlay(){
+  if(!parlay.length){parlayBox.innerHTML="No legs added yet. Star picks from the Board or Analyze tab.";return}
+  const avg=parlay.reduce((s,p)=>s+p.edge,0)/parlay.length;
+  const confidence=parlay.reduce((s,p)=>s*(Math.max(p.model,100-p.model)/100),1)*100;
+  parlayBox.innerHTML=parlay.map((p,i)=>`<div class="parlay-leg"><div><strong>${p.label}</strong><br><span class="small">${p.away} @ ${p.home} · edge ${(p.edge>=0?"+":"")+p.edge.toFixed(1)}%</span></div><button class="remove" onclick="removeLeg(${i})">X</button></div>`).join("")+
+  `<div class="edge ${avg>=5?"green":avg>=2?"yellow":"red"}"><strong>Parlay Readout</strong><br>Legs: ${parlay.length}<br>Average edge: ${(avg>=0?"+":"")+avg.toFixed(1)}%<br>Rough model confidence: ${confidence.toFixed(1)}%<br><br>${parlay.length>3?"Parlays get fragile after 3 legs. Pretty payout, ugly math.":"This is a reasonable leg count."}</div>`;
+}
+
+calculateOdds();
+</script>
 </body>
 </html>
