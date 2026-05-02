@@ -2,51 +2,46 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1.0" />
-<title>WagerVision V6.2</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WagerVision V6</title>
 
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-body{min-height:100vh;color:#f8fafc;background:linear-gradient(rgba(2,6,23,.86),rgba(2,6,23,.97)),url("bg.jpg") center/cover fixed no-repeat;padding:12px;padding-bottom:86px}
-.app{max-width:1180px;margin:auto}
-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px}
-.logo{font-size:27px;font-weight:950;letter-spacing:-1px}.logo span{color:#60a5fa}
-.tag{font-size:11px;color:#cbd5e1;border:1px solid rgba(255,255,255,.1);background:rgba(15,23,42,.55);padding:6px 9px;border-radius:999px;white-space:nowrap}
-.hero{background:rgba(15,23,42,.58);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:14px;margin-bottom:10px}
-.hero h1{font-size:clamp(28px,7vw,56px);line-height:.95;letter-spacing:-2px;margin-bottom:6px}.hero p{color:#cbd5e1;line-height:1.45;font-size:13px;max-width:820px}
-.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;position:fixed;bottom:10px;left:10px;right:10px;z-index:20;background:rgba(2,6,23,.92);padding:7px;border-radius:16px;backdrop-filter:blur(15px);border:1px solid rgba(255,255,255,.08)}
-.tab{border:1px solid rgba(255,255,255,.1);background:rgba(15,23,42,.96);color:#cbd5e1;border-radius:10px;padding:9px 4px;font-weight:800;font-size:11px;cursor:pointer}.tab.active{background:#2563eb;color:white;border-color:#3b82f6}
+body{min-height:100vh;color:white;background:linear-gradient(rgba(2,6,23,.84),rgba(2,6,23,.96)),url("bg.jpg") center/cover fixed no-repeat;padding:14px;padding-bottom:92px}
+.app{max-width:1220px;margin:auto}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px}
+.logo{font-size:29px;font-weight:950;letter-spacing:-1px}.logo span{color:#38bdf8}
+.tag{font-size:12px;color:#cbd5e1;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.07);padding:7px 10px;border-radius:999px;white-space:nowrap}
+.hero{background:rgba(15,23,42,.78);border:1px solid rgba(255,255,255,.14);border-radius:24px;padding:22px;margin-bottom:14px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.hero h1{font-size:clamp(32px,8vw,70px);line-height:.94;letter-spacing:-2px;margin-bottom:8px}.hero p{color:#cbd5e1;line-height:1.5;font-size:14px;max-width:850px}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;position:fixed;bottom:10px;left:10px;right:10px;z-index:20;background:rgba(2,6,23,.9);padding:8px;border-radius:18px;backdrop-filter:blur(15px)}
+.tab{border:1px solid rgba(255,255,255,.14);background:rgba(15,23,42,.95);color:#cbd5e1;border-radius:14px;padding:12px 6px;font-weight:900;font-size:12px;cursor:pointer}.tab.active{background:linear-gradient(135deg,#38bdf8,#2563eb);color:white}
 .section{display:none}.section.active{display:block}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.full{grid-column:1/-1}
-.card{background:rgba(15,23,42,.72);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:12px;margin-bottom:10px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
-.card.soft{background:rgba(30,41,59,.5)}
-h2{font-size:17px;margin-bottom:10px}h3{font-size:13px;color:#e2e8f0;margin:8px 0}
-label{display:block;margin-bottom:4px;color:#cbd5e1;font-size:11px}
-input,select{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(2,6,23,.72);color:#fff;font-size:14px;outline:none}
-button{width:100%;margin-top:7px;padding:9px 11px;border:0;border-radius:10px;background:#2563eb;color:#fff;font-weight:750;font-size:13px;letter-spacing:.1px;cursor:pointer}
-button.secondary{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:#e2e8f0}
-button.gold{background:rgba(245,158,11,.16);border:1px solid rgba(245,158,11,.28);color:#fde68a}
-button.danger,.remove{background:rgba(239,68,68,.18);border:1px solid rgba(239,68,68,.3)}
-.button-row{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.button-row button{margin-top:7px}
-.status,.small{margin-top:7px;color:#94a3b8;font-size:12px;line-height:1.4}
-.main-readout{background:rgba(15,23,42,.8);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:14px;margin-bottom:10px}
-.team-name{text-align:center;color:#93c5fd;font-size:20px;font-weight:950;margin-top:2px}
-.big{text-align:center;font-size:clamp(48px,13vw,74px);font-weight:950;letter-spacing:-4px;line-height:1}
-.meter{height:12px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden;margin:12px 0}.bar{height:100%;width:50%;background:linear-gradient(90deg,#22c55e,#60a5fa);border-radius:999px;transition:.3s}
-.mini-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.mini{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:13px;padding:9px;text-align:center}.mini strong{display:block;font-size:17px;margin-bottom:2px}.mini span{font-size:10px;color:#cbd5e1}
-.edge-box{margin-top:10px;padding:12px;border-radius:14px;font-size:13px;line-height:1.4;background:rgba(148,163,184,.1);border:1px solid rgba(148,163,184,.18);color:#e2e8f0}
-.green{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.28);color:#dcfce7}.yellow{background:rgba(234,179,8,.12);border-color:rgba(234,179,8,.28);color:#fef9c3}.red{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.28);color:#fee2e2}
-.data-box{margin-top:10px;text-align:left;padding:12px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#cbd5e1;font-size:12px;line-height:1.5}
-.pick-card{padding:12px;border-radius:15px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.09);margin-bottom:8px}.pick-top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.pick-title{font-weight:950;font-size:14px}.pick-edge{font-weight:950;color:#86efac}.pick-edge.bad{color:#fca5a5}.pick-meta{margin-top:6px;color:#cbd5e1;font-size:12px;line-height:1.4}
-.pill-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}.pill{font-size:10px;padding:5px 8px;border-radius:999px;background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.22);color:#dbeafe}
-.base-row{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.base-toggle{padding:10px;border-radius:12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);text-align:center;font-weight:850;cursor:pointer;color:#cbd5e1;font-size:13px}.base-toggle.on{background:rgba(34,197,94,.16);border-color:rgba(34,197,94,.32);color:#dcfce7}
-.leg{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px;border-radius:13px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);margin-bottom:7px;font-size:12px}.remove{width:auto;margin:0;padding:7px 9px;color:white;border-radius:9px}
-.odds-list{display:grid;gap:8px}.book-row{display:grid;grid-template-columns:1.15fr .85fr .85fr;gap:8px;align-items:center;padding:10px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);font-size:12px}
-.summary-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px}.summary-card{padding:10px;border-radius:13px;background:rgba(15,23,42,.65);border:1px solid rgba(255,255,255,.08);text-align:center}.summary-card strong{display:block;font-size:16px}.summary-card span{font-size:10px;color:#cbd5e1}
-.collapsed{display:none}
-.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
-hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}.footer{text-align:center;color:#94a3b8;font-size:11px;margin-top:10px}
-@media(max-width:850px){.grid,.form-grid{grid-template-columns:1fr}.quick-grid{grid-template-columns:1fr}.button-row{grid-template-columns:1fr 1fr}.book-row{grid-template-columns:1fr}.hero{padding:13px}}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.full{grid-column:1/-1}
+.card{background:rgba(15,23,42,.84);border:1px solid rgba(255,255,255,.14);border-radius:22px;padding:18px;margin-bottom:14px;box-shadow:0 18px 50px rgba(0,0,0,.25)}
+h2{font-size:19px;margin-bottom:13px}h3{font-size:14px;color:#e2e8f0;margin:10px 0 8px}
+label{display:block;margin-bottom:5px;color:#cbd5e1;font-size:12px}
+input,select{width:100%;padding:12px;border-radius:13px;border:1px solid rgba(255,255,255,.14);background:rgba(2,6,23,.78);color:white;font-size:15px;outline:none}
+button{width:100%;margin-top:8px;padding:10px 12px;border:0;border-radius:10px;background:#2563eb;color:#fff;font-weight:700;font-size:13px;letter-spacing:.2px};button.secondary{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14)} background:linear-gradient(135deg,#38bdf8,#2563eb);color:white;font-weight:950;font-size:15px;cursor:pointer}
+button.secondary{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.14);box-shadow:none}
+button.gold{background:rgba(250,204,21,.14);border:1px solid rgba(250,204,21,.35);color:#fef3c7}
+button.danger,.remove{background:rgba(239,68,68,.2);border:1px solid rgba(239,68,68,.35)}
+.status,.small{margin-top:9px;color:#94a3b8;font-size:12px;line-height:1.45}
+.big{text-align:center;font-size:64px;font-weight:950;letter-spacing:-4px}
+.team-name{text-align:center;color:#38bdf8;font-size:23px;font-weight:950;margin-top:6px}
+.meter{height:15px;border-radius:999px;background:rgba(255,255,255,.13);overflow:hidden;margin:15px 0}.bar{height:100%;width:50%;background:linear-gradient(90deg,#22c55e,#38bdf8);border-radius:999px;transition:.3s}
+.mini-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:12px}.mini{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:12px;text-align:center}.mini strong{display:block;font-size:19px;margin-bottom:3px}.mini span{font-size:11px;color:#cbd5e1}
+.edge-box{margin-top:14px;padding:14px;border-radius:16px;font-size:14px;line-height:1.45;background:rgba(148,163,184,.12);border:1px solid rgba(148,163,184,.25);color:#e2e8f0}
+.green{background:rgba(34,197,94,.13);border-color:rgba(34,197,94,.34);color:#dcfce7}.yellow{background:rgba(234,179,8,.13);border-color:rgba(234,179,8,.34);color:#fef9c3}.red{background:rgba(239,68,68,.13);border-color:rgba(239,68,68,.34);color:#fee2e2}
+.data-box{margin-top:12px;text-align:left;padding:14px;border-radius:16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#cbd5e1;font-size:13px;line-height:1.55}
+.pick-card{padding:14px;border-radius:18px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.11);margin-bottom:10px}.pick-top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.pick-title{font-weight:950;font-size:15px}.pick-edge{font-weight:950;color:#86efac}.pick-edge.bad{color:#fca5a5}.pick-meta{margin-top:8px;color:#cbd5e1;font-size:12px;line-height:1.45}
+.pill-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}.pill{font-size:11px;padding:6px 9px;border-radius:999px;background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.28);color:#e0f2fe}
+.base-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.base-toggle{padding:12px;border-radius:14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.13);text-align:center;font-weight:900;cursor:pointer;color:#cbd5e1}.base-toggle.on{background:rgba(34,197,94,.18);border-color:rgba(34,197,94,.38);color:#dcfce7}
+.leg{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:12px;border-radius:15px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);margin-bottom:8px;font-size:13px}.remove{width:auto;margin:0;padding:8px 10px;color:white;border-radius:10px}
+.odds-list{display:grid;gap:9px}.book-row{display:grid;grid-template-columns:1.15fr .85fr .85fr;gap:8px;align-items:center;padding:11px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);font-size:12px}
+.summary-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:12px}.summary-card{padding:12px;border-radius:16px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);text-align:center}.summary-card strong{display:block;font-size:18px}.summary-card span{font-size:11px;color:#cbd5e1}
+hr{border:0;border-top:1px solid rgba(255,255,255,.12);margin:18px 0}.footer{text-align:center;color:#94a3b8;font-size:11px;margin-top:12px}
+@media(max-width:850px){.grid,.form-grid{grid-template-columns:1fr}.hero{padding:18px}.big{font-size:56px}.book-row{grid-template-columns:1fr}.summary-strip{grid-template-columns:repeat(3,1fr)}}
 </style>
 </head>
 
@@ -54,12 +49,12 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}.footer{text
 <div class="app">
 <header>
   <div class="logo">Wager<span>Vision</span></div>
-  <div class="tag">V6.2 · Clean Mobile</div>
+  <div class="tag">V6 · Real Edge + Bet Slip</div>
 </header>
 
 <section class="hero">
-  <h1>Find the mispriced game.</h1>
-  <p>Live MLB data, sportsbook odds, real edge ranking, bet slip payouts, and advanced inputs — kept powerful, but cleaner.</p>
+  <h1>Find the edge in every bet.</h1>
+  <p>We Give You The Odds That Vegas Wont</p>
 </section>
 
 <div class="tabs">
@@ -68,84 +63,6 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}.footer{text
   <button class="tab" onclick="showTab('slip',this)">Bet Slip</button>
   <button class="tab" onclick="showTab('settings',this)">Settings</button>
 </div>
-
-<section id="game" class="section active">
-  <div class="card">
-    <h2>Game Command Center</h2>
-    <div class="quick-grid">
-      <div><label>Game Date</label><input id="gameDate" type="date"></div>
-      <div><label>MLB Game</label><select id="gameSelect"><option value="">Load games first</option></select></div>
-    </div>
-    <div class="button-row">
-      <button onclick="loadGames()">Load Games</button>
-      <button class="secondary" onclick="loadSelectedGame()">Use Game</button>
-      <button class="secondary" onclick="loadOdds()">Load Odds</button>
-    </div>
-    <button class="secondary" onclick="refreshLiveState()">Refresh Live State</button>
-    <div class="status" id="loadStatus">Start here: load games, pick a matchup, then load odds.</div>
-  </div>
-
-  <div class="main-readout">
-    <h2>Readout</h2>
-    <div class="team-name" id="winner">Home Team</div>
-    <div class="big" id="probability">50%</div>
-    <div class="meter"><div class="bar" id="bar"></div></div>
-    <div class="mini-grid">
-      <div class="mini"><strong id="homeProb">50%</strong><span>Model</span></div>
-      <div class="mini"><strong id="marketProb">50%</strong><span>Market</span></div>
-      <div class="mini"><strong id="edgeValue">0%</strong><span>Edge</span></div>
-    </div>
-    <div class="edge-box" id="edgeText">Load a game, pull odds, calculate.</div>
-    <button class="gold" onclick="addCurrentToSlip()">⭐ Add Current Pick</button>
-  </div>
-
-  <div class="card">
-    <h2>Model Controls</h2>
-    <button class="secondary" onclick="toggleInputs()">Edit Advanced Inputs</button>
-
-    <div id="inputsSection" class="collapsed">
-      <div class="form-grid" style="margin-top:10px">
-        <div><label>Home Team</label><input id="homeTeam" value="Home Team"></div>
-        <div><label>Away Team</label><input id="awayTeam" value="Away Team"></div>
-        <div><label>Home AVG</label><input id="homeAvg" type="number" step="0.001" value="0.255"></div>
-        <div><label>Away AVG</label><input id="awayAvg" type="number" step="0.001" value="0.245"></div>
-        <div><label>Home OPS</label><input id="homeOps" type="number" step="0.001" value="0.710"></div>
-        <div><label>Away OPS</label><input id="awayOps" type="number" step="0.001" value="0.700"></div>
-
-        <div><label>Home Pitcher</label><select id="homePitcher"><option value="9">Elite</option><option value="8">Ace</option><option value="6">Good</option><option value="5" selected>Average</option><option value="3">Shaky</option><option value="2">Weak</option></select></div>
-        <div><label>Away Pitcher</label><select id="awayPitcher"><option value="9">Elite</option><option value="8">Ace</option><option value="6">Good</option><option value="5" selected>Average</option><option value="3">Shaky</option><option value="2">Weak</option></select></div>
-
-        <div><label>Home ERA</label><input id="homeEra" type="number" step="0.01" value="4.10"></div>
-        <div><label>Away ERA</label><input id="awayEra" type="number" step="0.01" value="4.20"></div>
-
-        <div><label>Home Injury Impact</label><select id="homeInjuries"><option value="0">None</option><option value="-2">Minor lineup hit</option><option value="-4">Star hitter out</option><option value="-6">Multiple starters out</option><option value="-8">Pitcher scratched</option></select></div>
-        <div><label>Away Injury Impact</label><select id="awayInjuries"><option value="0">None</option><option value="-2">Minor lineup hit</option><option value="-4">Star hitter out</option><option value="-6">Multiple starters out</option><option value="-8">Pitcher scratched</option></select></div>
-
-        <div><label>Current Inning</label><select id="inning"><option value="1">1st</option><option value="2">2nd</option><option value="3">3rd</option><option value="4">4th</option><option value="5" selected>5th</option><option value="6">6th</option><option value="7">7th</option><option value="8">8th</option><option value="9">9th+</option></select></div>
-        <div><label>Home Score Lead</label><input id="scoreLead" type="number" value="0"></div>
-
-        <div class="full">
-          <label>Runners On Base</label>
-          <div class="base-row">
-            <div id="base1" class="base-toggle" onclick="toggleBase('base1')">1st</div>
-            <div id="base2" class="base-toggle" onclick="toggleBase('base2')">2nd</div>
-            <div id="base3" class="base-toggle" onclick="toggleBase('base3')">3rd</div>
-          </div>
-        </div>
-
-        <div><label>Outs</label><select id="outs"><option value="0">0 outs</option><option value="1">1 out</option><option value="2">2 outs</option></select></div>
-        <div><label>Market Home Win %</label><input id="bookOdds" type="number" value="50"></div>
-        <div class="full"><label>Best Home Moneyline</label><input id="bestHomeLine" value="Manual / not loaded"></div>
-      </div>
-      <button onclick="calculateOdds()">Calculate Odds</button>
-    </div>
-  </div>
-
-  <div class="grid">
-    <div class="card soft"><h2>Why Panel</h2><div class="data-box" id="whyBox">No calculation yet.</div></div>
-    <div class="card soft"><h2>Live + Market</h2><div id="dataBox" class="data-box">No game loaded yet.</div><div id="oddsBox" class="odds-list"><div class="data-box">No odds loaded yet.</div></div></div>
-  </div>
-</section>
 
 <section id="board" class="section">
   <div class="summary-strip">
@@ -156,6 +73,10 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}.footer{text
 
   <div class="card">
     <h2>Best Picks Board</h2>
+    <div class="form-grid">
+      <div><label>Game Date</label><input id="gameDate" type="date"></div>
+      <div><label>Default Stake</label><input id="defaultStake" type="number" value="10"></div>
+    </div>
     <button onclick="scanBoard()">Scan Real Edge Board</button>
     <button class="secondary" onclick="loadGames()">Load MLB Games Only</button>
     <div class="status" id="boardStatus">Save your Odds API key in Settings, then scan the real board.</div>
@@ -175,6 +96,135 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}.footer{text
   </div>
 </section>
 
+<section id="game" class="section active">
+  <div class="grid">
+    <div>
+      <div class="card">
+        <h2>Analyze One Game</h2>
+	<button onclick="loadGames()">Load MLB Games</button>
+        <div class="form-grid">
+	 <div><label>MLB Game</label><select id="gameSelect"><option value="">Load games first</option></select></div>
+          <div><label>Best Home Moneyline</label><input id="bestHomeLine" value="Manual / not loaded"></div>
+        </div>
+        <button onclick="loadSelectedGame()">Use Selected Game</button>
+        <button class="secondary" onclick="refreshLiveState()">Refresh Live State</button>
+        <button class="secondary" onclick="loadOdds()">Load Sportsbook Odds</button>
+        <div class="status" id="loadStatus">Waiting.</div>
+      </div>
+
+      <div class="card">
+        <h2>Game Inputs</h2>
+       <button class="secondary" onclick="toggleInputs()">Edit Model Inputs</button>
+	<div id="inputsSection" style="display:none;">
+	 <div class="form-grid">
+          <div><label>Home Team</label><input id="homeTeam" value="Home Team"></div>
+          <div><label>Away Team</label><input id="awayTeam" value="Away Team"></div>
+          <div><label>Home AVG</label><input id="homeAvg" type="number" step="0.001" value="0.255"></div>
+          <div><label>Away AVG</label><input id="awayAvg" type="number" step="0.001" value="0.245"></div>
+          <div><label>Home OPS</label><input id="homeOps" type="number" step="0.001" value="0.710"></div>
+          <div><label>Away OPS</label><input id="awayOps" type="number" step="0.001" value="0.700"></div>
+
+	<div><label>Home Pitcher</label>
+<select id="homePitcher">
+<option value="9">Elite</option>
+<option value="8">Ace</option>
+<option value="6">Good</option>
+<option value="5" selected>Average</option>
+<option value="3">Shaky</option>
+<option value="2">Weak</option>
+</select>
+</div>
+
+<div><label>Away Pitcher</label>
+<select id="awayPitcher">
+<option value="9">Elite</option>
+<option value="8">Ace</option>
+<option value="6">Good</option>
+<option value="5" selected>Average</option>
+<option value="3">Shaky</option>
+<option value="2">Weak</option>
+</select>
+</div>
+
+          <div><label>Home ERA</label><input id="homeEra" type="number" step="0.01" value="4.10"></div>
+          <div><label>Away ERA</label><input id="awayEra" type="number" step="0.01" value="4.20"></div>
+
+<div><label>Home Injury Impact</label>
+<select id="homeInjuries">
+<option value="0">None</option>
+<option value="-2">Minor lineup hit</option>
+<option value="-4">Star hitter out</option>
+<option value="-6">Multiple starters out</option>
+<option value="-8">Pitcher scratched</option>
+</select>
+</div>
+
+<div><label>Away Injury Impact</label>
+<select id="awayInjuries">
+<option value="0">None</option>
+<option value="-2">Minor lineup hit</option>
+<option value="-4">Star hitter out</option>
+<option value="-6">Multiple starters out</option>
+<option value="-8">Pitcher scratched</option>
+</select>
+</div>
+
+	<div><label>Current Inning</label>
+<select id="inning">
+<option value="1">1st</option>
+<option value="2">2nd</option>
+<option value="3">3rd</option>
+<option value="4">4th</option>
+<option value="5" selected>5th</option>
+<option value="6">6th</option>
+<option value="7">7th</option>
+<option value="8">8th</option>
+<option value="9">9th+</option>
+</select>
+</div>
+
+          <div><label>Home Score Lead</label><input id="scoreLead" type="number" value="0"></div>
+
+          <div class="full">
+            <label>Runners On Base</label>
+            <div class="base-row">
+              <div id="base1" class="base-toggle" onclick="toggleBase('base1')">1st</div>
+              <div id="base2" class="base-toggle" onclick="toggleBase('base2')">2nd</div>
+              <div id="base3" class="base-toggle" onclick="toggleBase('base3')">3rd</div>
+            </div>
+          </div>
+
+          <div><label>Outs</label><select id="outs"><option value="0">0 outs</option><option value="1">1 out</option><option value="2">2 outs</option></select></div>
+          <div><label>Market Home Win %</label><input id="bookOdds" type="number" value="50"></div>
+        </div>
+        <button onclick="calculateOdds()">Calculate Odds</button>
+         </div>
+	 </div>
+
+    <div>
+      <div class="card">
+        <h2>Readout</h2>
+        <div class="team-name" id="winner">Home Team</div>
+        <div class="big" id="probability">50%</div>
+        <div class="meter"><div class="bar" id="bar"></div></div>
+
+        <div class="mini-grid">
+          <div class="mini"><strong id="homeProb">50%</strong><span>Model</span></div>
+          <div class="mini"><strong id="marketProb">50%</strong><span>Market</span></div>
+          <div class="mini"><strong id="edgeValue">0%</strong><span>Edge</span></div>
+        </div>
+
+        <div class="edge-box" id="edgeText">Load a game, pull odds, calculate.</div>
+        <button class="gold" onclick="addCurrentToSlip()">⭐ Add Current Pick</button>
+        <div class="data-box" id="whyBox"><strong>Why Panel</strong><br>No calculation yet.</div>
+      </div>
+
+      <div class="card"><h2>Live MLB Data</h2><div id="dataBox" class="data-box">No game loaded yet.</div></div>
+      <div class="card"><h2>Sportsbook Market</h2><div id="oddsBox" class="odds-list"><div class="data-box">No odds loaded yet.</div></div></div>
+    </div>
+  </div>
+</section>
+
 <section id="settings" class="section">
   <div class="card">
     <h2>Settings</h2>
@@ -184,11 +234,11 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}.footer{text
     <button class="secondary" onclick="clearApiKey()">Clear Saved Key</button>
     <div class="status" id="apiStatus">No key loaded yet.</div>
     <hr>
-    <div class="small">For screen recordings, stay off this tab. Later, this key should move to a backend.</div>
+    <div class="small">WagerVision2026</div>
   </div>
 </section>
 
-<div class="footer">WagerVision V6.2. Finds bad prices, not guaranteed money.</div>
+<div class="footer">WagerVision V6. Finds bad prices, not guaranteed money.</div>
 </div>
 
 <script>
@@ -199,7 +249,11 @@ let slip=[];
 
 document.getElementById("gameDate").value=new Date().toISOString().split("T")[0];
 
-function toggleInputs(){document.getElementById("inputsSection").classList.toggle("collapsed")}
+function toggleInputs(){
+  const el=document.getElementById("inputsSection");
+  el.style.display=el.style.display==="none"?"block":"none";
+}
+
 function showTab(id,el){
   document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
   document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
@@ -212,24 +266,40 @@ function setVal(id,value){document.getElementById(id).value=value}
 function clamp(value,min,max){return Math.max(min,Math.min(max,value))}
 function toggleBase(id){document.getElementById(id).classList.toggle("on")}
 function baseValue(){let v=0;if(base1.classList.contains("on"))v+=1;if(base2.classList.contains("on"))v+=1.4;if(base3.classList.contains("on"))v+=1.8;return v}
+function baseCount(){return ["base1","base2","base3"].filter(id=>document.getElementById(id).classList.contains("on")).length}
 async function fetchJSON(url){const res=await fetch(url);if(!res.ok)throw new Error("network");return await res.json()}
 
-function saveApiKey(){const key=text("oddsApiKey");if(!key){apiStatus.textContent="Paste a key first.";return}localStorage.setItem("wagervision_odds_key",key);apiStatus.textContent="API key saved."}
-function clearApiKey(){localStorage.removeItem("wagervision_odds_key");setVal("oddsApiKey","");apiStatus.textContent="API key cleared."}
-(function(){const key=localStorage.getItem("wagervision_odds_key");if(key){setVal("oddsApiKey",key);apiStatus.textContent="API key loaded from browser."}})();
+function saveApiKey(){
+  const key=text("oddsApiKey");
+  if(!key){apiStatus.textContent="Paste a key first.";return}
+  localStorage.setItem("wagervision_odds_key",key);
+  apiStatus.textContent="API key saved.";
+}
+function clearApiKey(){
+  localStorage.removeItem("wagervision_odds_key");
+  setVal("oddsApiKey","");
+  apiStatus.textContent="API key cleared.";
+}
+(function loadSavedKey(){
+  const key=localStorage.getItem("wagervision_odds_key");
+  if(key){setVal("oddsApiKey",key);apiStatus.textContent="API key loaded from browser."}
+})();
 
-function statValue(stats,name){try{return stats?.stats?.[0]?.splits?.[0]?.stat?.[name]??null}catch{return null}}
+function statValue(stats,name){
+  try{return stats?.stats?.[0]?.splits?.[0]?.stat?.[name]??null}catch{return null}
+}
 async function loadGames(){
   boardStatus.textContent="Loading MLB games...";
   loadStatus.textContent="Loading MLB games...";
   gameSelect.innerHTML="<option value=''>Loading...</option>";
   try{
-    const data=await fetchJSON(`https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${gameDate.value}&hydrate=probablePitcher`);
+    const date=gameDate.value;
+    const data=await fetchJSON(`https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${date}&hydrate=probablePitcher`);
     loadedGames=data.dates?.[0]?.games||[];
     gamesLoaded.textContent=loadedGames.length;
     if(!loadedGames.length){
       gameSelect.innerHTML="<option value=''>No games found</option>";
-      boardStatus.textContent="No games found.";
+      boardStatus.textContent="No games found for this date.";
       loadStatus.textContent="No games found.";
       return;
     }
@@ -239,8 +309,8 @@ async function loadGames(){
       const hp=g.teams.home.probablePitcher?.fullName||"TBD";
       return `<option value="${i}">${away} @ ${home} · ${ap} vs ${hp}</option>`;
     }).join("");
-    boardStatus.textContent=`${loadedGames.length} games loaded.`;
-    loadStatus.textContent=`${loadedGames.length} games loaded. Pick one and use game.`;
+    boardStatus.textContent=`${loadedGames.length} games loaded. Hit Scan Real Edge Board.`;
+    loadStatus.textContent=`${loadedGames.length} games loaded.`;
   }catch{
     boardStatus.textContent="Could not load MLB games.";
     loadStatus.textContent="Could not load MLB games.";
@@ -252,7 +322,12 @@ async function getTeamStats(teamId,season){
     fetchJSON(`https://statsapi.mlb.com/api/v1/teams/${teamId}/stats?stats=season&group=hitting&season=${season}`),
     fetchJSON(`https://statsapi.mlb.com/api/v1/teams/${teamId}/stats?stats=season&group=pitching&season=${season}`)
   ]);
-  return{avg:Number(statValue(hitting,"avg"))||0.250,ops:Number(statValue(hitting,"ops"))||0.700,era:Number(statValue(pitching,"era"))||4.20,whip:Number(statValue(pitching,"whip"))||1.30};
+  return{
+    avg:Number(statValue(hitting,"avg"))||0.250,
+    ops:Number(statValue(hitting,"ops"))||0.700,
+    era:Number(statValue(pitching,"era"))||4.20,
+    whip:Number(statValue(pitching,"whip"))||1.30
+  };
 }
 async function getPitcherStats(playerId,season){
   if(!playerId)return null;
@@ -326,10 +401,12 @@ async function refreshLiveState(showMessage=true){
     setVal("scoreLead",homeRuns-awayRuns);
     setVal("inning",clamp(Number(l?.currentInning||1),1,9));
     setVal("outs",clamp(Number(l?.outs||0),0,2));
+
     ["base1","base2","base3"].forEach(id=>document.getElementById(id).classList.remove("on"));
     if(l?.offense?.first)base1.classList.add("on");
     if(l?.offense?.second)base2.classList.add("on");
     if(l?.offense?.third)base3.classList.add("on");
+
     if(showMessage)loadStatus.textContent=`Live state updated: ${awayRuns}-${homeRuns}.`;
     calculateOdds();
   }catch{
@@ -337,11 +414,28 @@ async function refreshLiveState(showMessage=true){
   }
 }
 
-function normalizeTeamName(name){return String(name||"").toLowerCase().replace(/[^a-z0-9 ]/g,"").replace(/\s+/g," ").trim()}
-function americanToImplied(price){const p=Number(price);if(p>0)return(100/(p+100))*100;return((-p)/((-p)+100))*100}
-function noVigTwoWay(a,b){const total=a+b;if(!total)return{a,b};return{a:(a/total)*100,b:(b/total)*100}}
-function displayAmerican(price){const p=Number(price);return p>0?`+${p}`:`${p}`}
-function decimalFromAmerican(price){const p=Number(price);if(p>0)return 1+(p/100);return 1+(100/Math.abs(p))}
+function normalizeTeamName(name){
+  return String(name||"").toLowerCase().replace(/[^a-z0-9 ]/g,"").replace(/\s+/g," ").trim();
+}
+function americanToImplied(price){
+  const p=Number(price);
+  if(p>0)return(100/(p+100))*100;
+  return((-p)/((-p)+100))*100;
+}
+function noVigTwoWay(a,b){
+  const total=a+b;
+  if(!total)return{a,b};
+  return{a:(a/total)*100,b:(b/total)*100};
+}
+function displayAmerican(price){
+  const p=Number(price);
+  return p>0?`+${p}`:`${p}`;
+}
+function decimalFromAmerican(price){
+  const p=Number(price);
+  if(p>0)return 1+(p/100);
+  return 1+(100/Math.abs(p));
+}
 async function getOddsFeed(){
   const key=text("oddsApiKey")||localStorage.getItem("wagervision_odds_key");
   if(!key)throw new Error("No API key");
@@ -351,7 +445,7 @@ function findOddsGame(oddsFeed,homeName,awayName){
   const h=normalizeTeamName(homeName),a=normalizeTeamName(awayName);
   return oddsFeed.find(g=>{
     const gh=normalizeTeamName(g.home_team),ga=normalizeTeamName(g.away_team);
-    return(gh.includes(h)||h.includes(gh)||ga.includes(a)||a.includes(ga));
+    return (gh.includes(h)||h.includes(gh)||ga.includes(a)||a.includes(ga));
   });
 }
 function bestHomeLineFromOddsGame(game){
@@ -365,11 +459,11 @@ function bestHomeLineFromOddsGame(game){
     if(!homeOutcome||!awayOutcome)return;
     const rawHome=americanToImplied(homeOutcome.price);
     const rawAway=americanToImplied(awayOutcome.price);
-    const fair=noVigTwoWay(rawHome,rawAway);
+    const nv=noVigTwoWay(rawHome,rawAway);
     if(best===null||Number(homeOutcome.price)>Number(best)){
-      best=homeOutcome.price;bestBook=book.title;bestProb=fair.a;
+      best=homeOutcome.price;bestBook=book.title;bestProb=nv.a;
     }
-    rows.push({book:book.title,homeLine:homeOutcome.price,awayLine:awayOutcome.price,homeProb:fair.a});
+    rows.push({book:book.title,homeLine:homeOutcome.price,awayLine:awayOutcome.price,homeProb:nv.a});
   });
   if(best===null)return null;
   return{best,bestBook,bestProb,rows};
@@ -387,7 +481,7 @@ async function loadOdds(){
       <div class="book-row">
         <strong>${row.book}</strong>
         <div>Home ${displayAmerican(row.homeLine)}</div>
-        <div>Fair ${row.homeProb.toFixed(1)}%</div>
+        <div>No-vig ${row.homeProb.toFixed(1)}%</div>
       </div>
     `).join("");
     calculateOdds();
@@ -530,13 +624,31 @@ async function scanBoard(){
   boardStatus.textContent="Real edge board scanned.";
 }
 
-function addPickToSlip(p){slip.push(p);renderSlip();slipCount.textContent=slip.length;showTab("slip",document.querySelectorAll(".tab")[2])}
-function addCurrentToSlip(){addPickToSlip(calculateOdds())}
-function clearSlip(){slip=[];renderSlip();slipCount.textContent=0}
-function removeLeg(index){slip.splice(index,1);renderSlip();slipCount.textContent=slip.length}
+function addPickToSlip(p){
+  slip.push(p);
+  renderSlip();
+  slipCount.textContent=slip.length;
+  showTab("slip",document.querySelectorAll(".tab")[1]);
+}
+function addCurrentToSlip(){
+  addPickToSlip(calculateOdds());
+}
+function clearSlip(){
+  slip=[];
+  renderSlip();
+  slipCount.textContent=0;
+}
+function removeLeg(index){
+  slip.splice(index,1);
+  renderSlip();
+  slipCount.textContent=slip.length;
+}
 function renderSlip(){
-  const stake=Number(document.getElementById("slipStake").value)||10;
-  if(!slip.length){slipBox.innerHTML="No picks added yet. Add picks from Board or Game.";return}
+  const stake=Number(document.getElementById("slipStake").value)||Number(document.getElementById("defaultStake").value)||10;
+  if(!slip.length){
+    slipBox.innerHTML="No picks added yet. Add picks from Board or Game.";
+    return;
+  }
 
   if(betMode.value==="single"){
     slipBox.innerHTML=slip.map((p,i)=>{
