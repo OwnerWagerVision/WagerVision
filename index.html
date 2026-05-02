@@ -47,6 +47,7 @@ button.danger,.remove{background:rgba(239,68,68,.18);border:1px solid rgba(239,6
 .quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
 hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}.footer{text-align:center;color:#94a3b8;font-size:11px;margin-top:10px}
 @media(max-width:850px){.grid,.form-grid{grid-template-columns:1fr}.quick-grid{grid-template-columns:1fr}.button-row{grid-template-columns:1fr 1fr}.book-row{grid-template-columns:1fr}.hero{padding:13px}}
+@media(max-width:600px){.hero{display:none}.main-readout{padding:10px}.card{padding:10px;margin-bottom:8px}.big{font-size:56px}.tabs{bottom:6px;left:6px;right:6px}.tab{padding:8px 4px}}
 </style>
 </head>
 
@@ -573,7 +574,7 @@ function renderSlip(){
     </div>
   `).join("")+`
     <div class="edge-box ${avgEdge>=5?"green":avgEdge>=2?"yellow":"red"}">
-      <strong>Parlay Payout</strong><br>
+	<strong>💰 Potential Payout</strong>	
       Legs: ${slip.length}<br>
       Stake: $${stake.toFixed(2)}<br>
       Potential Return: $${returnAmount.toFixed(2)}<br>
