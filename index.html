@@ -48,6 +48,8 @@ button.danger,.remove{background:rgba(239,68,68,.18);border:1px solid rgba(239,6
 hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}.footer{text-align:center;color:#94a3b8;font-size:11px;margin-top:10px}
 @media(max-width:850px){.grid,.form-grid{grid-template-columns:1fr}.quick-grid{grid-template-columns:1fr}.button-row{grid-template-columns:1fr 1fr}.book-row{grid-template-columns:1fr}.hero{padding:13px}}
 @media(max-width:600px){.hero{display:none}.main-readout{padding:10px}.card{padding:10px;margin-bottom:8px}.big{font-size:56px}.tabs{bottom:6px;left:6px;right:6px}.tab{padding:8px 4px}}
+.leg{padding:8px;font-size:11px}
+.edge-box strong{letter-spacing:.3px}
 </style>
 </head>
 
@@ -573,16 +575,21 @@ function renderSlip(){
       <button class="remove" onclick="removeLeg(${i})">X</button>
     </div>
   `).join("")+`
-    <div class="edge-box ${avgEdge>=5?"green":avgEdge>=2?"yellow":"red"}">
-	<strong>💰 Potential Payout</strong>	
-      Legs: ${slip.length}<br>
-      Stake: $${stake.toFixed(2)}<br>
-      Potential Return: $${returnAmount.toFixed(2)}<br>
-      Profit: $${profit.toFixed(2)}<br>
-      Average Edge: ${avgEdge>=0?"+":""}${avgEdge.toFixed(1)}%<br>
-      Rough Model Confidence: ${roughConfidence.toFixed(1)}%<br><br>
-      ${slip.length>3?"Parlays get fragile after 3 legs. Pretty payout, ugly math.":"Reasonable leg count."}
-    </div>
+<div class="edge-box ${avgEdge>=5?"green":avgEdge>=2?"yellow":"red"}">
+  <strong style="font-size:18px">💰 Potential Payout</strong><br><br>
+
+  Stake: <strong>$${stake.toFixed(2)}</strong><br>
+  Profit: <strong>$${profit.toFixed(2)}</strong><br>
+  Total Return: <strong>$${returnAmount.toFixed(2)}</strong><br><br>
+
+  Legs: ${slip.length}<br>
+  Avg Edge: ${avgEdge>=0?"+":""}${avgEdge.toFixed(1)}%<br>
+  Confidence: ${roughConfidence.toFixed(1)}%<br><br>
+
+  ${slip.length>3
+    ? "⚠️ Parlays get fragile after 3 legs."
+    : "✔️ Solid leg count."}
+</div>
   `;
 }
 
