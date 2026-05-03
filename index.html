@@ -596,6 +596,13 @@ updateLiveBar("0.00", "0%", "0%", slip.length);
   const avgEdge=slip.reduce((sum,p)=>sum+p.edge,0)/slip.length;
   const roughConfidence=slip.reduce((total,p)=>total*(Math.max(p.model,100-p.model)/100),1)*100;
 
+updateLiveBar(
+  returnAmount.toFixed(2),
+  (avgEdge>=0?"+":"") + avgEdge.toFixed(1) + "%",
+  roughConfidence.toFixed(1) + "%",
+  slip.length
+);
+
   slipBox.innerHTML=slip.map((p,i)=>`
     <div class="leg">
       <div>
