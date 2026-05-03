@@ -494,13 +494,17 @@ function calculateOdds(){
   else{msg=`NO BET. Model and market are too close.`}
   edgeText.className=cls;edgeText.textContent=msg;
 
-  whyBox.innerHTML=`
-    <strong>Why Panel</strong><br>
-    Model Home Win: ${result.homeScore.toFixed(1)}%<br>
-    Market Home Win: ${market.toFixed(1)}%<br>
-    Edge: ${edge>=0?"+":""}${edge.toFixed(1)}%<br><br>
-    ${result.reasons.map(r=>"• "+r).join("<br>")}
-  `;
+const park = getParkFactor(selectedGameData?.venue?.name || "");
+const parkLine = `• Park factor (${park.type}): ${park.impact>=0?"+":""}${park.impact.toFixed(1)}`;
+
+whyBox.innerHTML=`
+  <strong>Why Panel</strong><br>
+  Model Home Win: ${result.homeScore.toFixed(1)}%<br>
+  Market Home Win: ${market.toFixed(1)}%<br>
+  Edge: ${edge>=0?"+":""}${edge.toFixed(1)}%<br><br>
+  ${result.reasons.map(r=>"• "+r).join("<br>")}<br>
+  ${parkLine}
+`;
   return{home,away,model:result.homeScore,market,edge,pick,american,book:text("bestHomeLine")};
 }
 
@@ -656,6 +660,23 @@ function handleLogin(){
   document.getElementById("signInBtn").textContent = email.split("@")[0];
 
   closeAuth();
+}
+
+function getParkFactor(stadium){
+  const parks = {
+    "Coors Field": {type:"Hitter-friendly", impact:2},
+    "Fenway Park": {type:"Hitter-friendly", impact:1.5},
+    "Yankee Stadium": {type:"HR-friendly", impact:1.5},
+    "Great American Ball Park": {type:"Hitter-friendly", impact:1.5},
+    "Citizens Bank Park": {type:"Hitter-friendly", impact:1.2},
+
+    "Oracle Park": {type:"Pitcher-friendly", impact:-1.5},
+    "Petco Park": {type:"Pitcher-friendly", impact:-1.5},
+    "T-Mobile Park": {type:"Pitcher-friendly", impact:-1.2},
+    "Comerica Park": {type:"Pitcher-friendly", impact:-1.0}
+  };
+
+  return parks[stadium] || {type:"Neutral", impact:0};
 }
 </script>
 <div id="authModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);align-items:center;justify-content:center;z-index:1000;">
