@@ -8,6 +8,7 @@
 <style>
 body{ min-height:100vh; color:#f8fafc; background: linear-gradient(rgba(2,6,23,0.75), rgba(2,6,23,0.95)), url("bg.jpg") center center / cover no-repeat fixed; padding:12px; padding-bottom:86px;}
 body{min-height:100vh;color:#f8fafc;background:linear-gradient(rgba(2,6,23,.64),rgba(2,6,23,.86)),url("bg.jpg") center/cover fixed no-repeat;padding:12px;padding-bottom:86px}
+#liveBar { position: sticky;top: 0;z-index: 999;display: flex;justify-content: space-around;gap: 10px;padding: 10px; margin-bottom: 10px;background: rgba(15,23,42,0.6);backdrop-filter: blur(12px);border: 1px solid rgba(255,255,255,0.1);border-radius: 12px;font-weight: 600;}
 .app{max-width:1180px;margin:auto}
 header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px}
 .logo{font-size:27px;font-weight:950;letter-spacing:-1px}.logo span{color:#60a5fa}
@@ -59,6 +60,12 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}.footer{text
 
 <body>
 <div class="app">
+<div id="liveBar">
+  <div>💰 $<span id="livePayout">0.00</span></div>
+  <div>📊 <span id="liveEdge">0%</span></div>
+  <div>🎯 <span id="liveConfidence">0%</span></div>
+  <div>🧩 <span id="liveLegs">0</span> legs</div>
+</div>
 <header>
   <div class="logo">Wager<span>Vision</span></div>
   <div class="tag">V6.2 · Clean Mobile</div>
