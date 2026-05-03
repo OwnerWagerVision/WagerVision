@@ -187,7 +187,7 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}.footer{text
     <button class="secondary" onclick="clearApiKey()">Clear Saved Key</button>
     <div class="status" id="apiStatus">No key loaded yet.</div>
     <hr>
-    <div class="small">For screen recordings, stay off this tab. Later, this key should move to a backend.</div>
+    <div class="small">Save api for real time stats and real time odds.</div>
   </div>
 </section>
 
@@ -478,7 +478,8 @@ async function scanBoard(){
   let picks=[];
 
   for(const game of loadedGames){
-    try{
+boardStatus.textContent = `Scanning ${picks.length + 1} of ${loadedGames.length} games...`;   
+ try{
       const home=game.teams.home.team,away=game.teams.away.team;
       const [hs,as,hp,ap]=await Promise.all([
         getTeamStats(home.id,season),
