@@ -633,6 +633,31 @@ updateLiveBar(
 }
 
 calculateOdds();
+document.getElementById("signInBtn").onclick = ()=>{
+  document.getElementById("authModal").style.display = "flex";
+};
+
+function closeAuth(){
+  document.getElementById("authModal").style.display = "none";
+}
+
+function handleLogin(){
+  const email = document.getElementById("authEmail").value;
+  if(!email) return alert("Enter email");
+
+  localStorage.setItem("wv_user", email);
+  document.getElementById("signInBtn").textContent = email.split("@")[0];
+
+  closeAuth();
+}
 </script>
+<div id="authModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);align-items:center;justify-content:center;z-index:1000;">
+  <div style="background:#0f172a;padding:20px;border-radius:12px;width:280px;text-align:center;position:relative;">
+    <div style="position:absolute;top:8px;right:10px;cursor:pointer;" onclick="closeAuth()">✕</div>
+    <h3 style="margin-bottom:10px;">Sign In</h3>
+    <input id="authEmail" type="email" placeholder="you@email.com" style="width:100%;padding:8px;margin-bottom:10px;border-radius:6px;border:none;">
+    <button onclick="handleLogin()" style="width:100%;padding:8px;border:none;border-radius:6px;background:#60a5fa;color:black;font-weight:700;cursor:pointer;">Continue</button>
+  </div>
+</div>
 </body>
 </html>
