@@ -206,6 +206,23 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}.footer{text
 </div>
 
 <script>
+
+function updateLiveBar(payout, edge, confidence, legs){
+  const payoutEl = document.getElementById("livePayout");
+  const edgeEl = document.getElementById("liveEdge");
+  const confidenceEl = document.getElementById("liveConfidence");
+  const legsEl = document.getElementById("liveLegs");
+
+  if(!payoutEl || !edgeEl || !confidenceEl || !legsEl) return;
+
+  payoutEl.textContent = payout;
+  edgeEl.textContent = edge;
+  confidenceEl.textContent = confidence;
+  legsEl.textContent = legs;
+}
+
+// your existing code continues below...
+
 let loadedGames=[];
 let selectedGamePk=null;
 let selectedGameData=null;
@@ -550,6 +567,7 @@ function addCurrentToSlip(){addPickToSlip(calculateOdds())}
 function clearSlip(){slip=[];renderSlip();slipCount.textContent=0}
 function removeLeg(index){slip.splice(index,1);renderSlip();slipCount.textContent=slip.length}
 function renderSlip(){
+updateLiveBar("0.00", "0%", "0%", slip.length);
   const stake=Number(document.getElementById("slipStake").value)||10;
   if(!slip.length){slipBox.innerHTML="No picks added yet. Add picks from Board or Game.";return}
 
