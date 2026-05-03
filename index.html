@@ -231,6 +231,11 @@ let selectedGamePk=null;
 let selectedGameData=null;
 let slip=[];
 
+const savedUser = localStorage.getItem("wv_user");
+if(savedUser){
+  document.getElementById("signInBtn").textContent = savedUser.split("@")[0];
+}
+
 document.getElementById("gameDate").value=new Date().toISOString().split("T")[0];
 
 function toggleInputs(){document.getElementById("inputsSection").classList.toggle("collapsed")}
