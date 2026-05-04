@@ -509,6 +509,13 @@ const aceList = [
 const homePitcherRating = getPitcherScore(homeStarter);
 const awayPitcherRating = getPitcherScore(awayStarter);
 const pitcherEdge = homePitcherRating - awayPitcherRating;
+console.log("PITCHER DEBUG:", {
+  homeStarter,
+  awayStarter,
+  homePitcherRating,
+  awayPitcherRating,
+  pitcherEdge
+});
 
 result.reasons.push(
   `Starting pitchers: ${homeStarter} vs ${awayStarter}.`
