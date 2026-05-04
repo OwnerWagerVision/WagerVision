@@ -513,7 +513,6 @@ if (homeStarter && awayStarter) {
   else{msg=`NO BET. Model and market are too close.`}
   edgeText.className=cls;edgeText.textContent=msg;
 
-const park = getParkFactor(selectedGameData?.venue?.name || "");
 const parkLine = `• Park factor (${park.type}): ${park.impact>=0?"+":""}${park.impact.toFixed(1)}`;
 
 whyBox.innerHTML=`
