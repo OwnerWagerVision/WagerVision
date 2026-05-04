@@ -482,6 +482,16 @@ function calculateOdds(){
   result.homeScore = clamp(result.homeScore,2,98);
   result.reasons.push(`Park factor impact (${park.type}): ${parkAdjustment>=0?"+":""}${parkAdjustment.toFixed(1)}.`);
 
+  // Starting pitcher why logic
+const homeStarter = selectedGameData?.probablePitchers?.home || "Home starter";
+const awayStarter = selectedGameData?.probablePitchers?.away || "Away starter";
+
+if (homeStarter && awayStarter) {
+  result.reasons.push(
+    `Starting pitchers: ${homeStarter} vs ${awayStarter}.`
+  );
+}
+
   const market=num("bookOdds");
   const edge=result.homeScore-market;
   const awayScore=100-result.homeScore;
