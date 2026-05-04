@@ -484,8 +484,11 @@ function calculateOdds(){
 
   // Starting pitcher why logic
 // Starting pitcher why logic
-const homeStarter = selectedGameData?.probablePitchers?.home || "Home starter";
-const awayStarter = selectedGameData?.probablePitchers?.away || "Away starter";
+const homeStarter =
+  selectedGameData?.teams?.home?.probablePitcher?.fullName || "";
+
+const awayStarter =
+  selectedGameData?.teams?.away?.probablePitcher?.fullName || "";
 // Simple pitcher strength (temporary)
 function getPitcherScore(name) {
   if (!name) return 0;
