@@ -442,7 +442,7 @@ function modelCalc(input){
   s+=4;reasons.push("Home field advantage added +4.");
   const avgImpact=(input.homeAvg-input.awayAvg)*170;s+=avgImpact;reasons.push(`Batting average impact: ${avgImpact>=0?"+":""}${avgImpact.toFixed(1)}.`);
   const opsImpact=(input.homeOps-input.awayOps)*55;s+=opsImpact;reasons.push(`OPS impact: ${opsImpact>=0?"+":""}${opsImpact.toFixed(1)}.`);
-  const pitcherImpact=(input.homePitcher-input.awayPitcher)*3.15;s+=pitcherImpact;reasons.push(`Starting pitcher impact: ${pitcherImpact>=0?"+":""}${pitcherImpact.toFixed(1)}.`);
+  let pitcherImpact=(input.homePitcher-input.awayPitcher)*2.0;if(pitcherImpact>6)pitcherImpact=6;if(pitcherImpact<-6)pitcherImpact=-6;s+=pitcherImpact;reasons.push(`Starting pitcher impact: ${pitcherImpact>=0?"+":""}${pitcherImpact.toFixed(1)}.`);
   const eraImpact=(input.awayEra-input.homeEra)*2.65;s+=eraImpact;reasons.push(`Team ERA impact: ${eraImpact>=0?"+":""}${eraImpact.toFixed(1)}.`);
   s+=input.homeInjuries;s-=input.awayInjuries;
   if(input.homeInjuries!==0)reasons.push(`Home injury penalty: ${input.homeInjuries}.`);
