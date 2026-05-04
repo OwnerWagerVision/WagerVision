@@ -504,10 +504,6 @@ const homePitcherRating = getPitcherScore(homeStarter);
 const awayPitcherRating = getPitcherScore(awayStarter);
 const pitcherEdge = homePitcherRating - awayPitcherRating;
 
-const homePitcherRating = selectedGameData?.probablePitchers?.home ? 0 : 0;
-const awayPitcherRating = selectedGameData?.probablePitchers?.away ? 0 : 0;
-const pitcherEdge = homePitcherRating - awayPitcherRating;
-
 result.reasons.push(
   `Starting pitchers: ${homeStarter} vs ${awayStarter}.`
 );
