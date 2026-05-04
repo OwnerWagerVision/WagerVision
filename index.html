@@ -473,6 +473,15 @@ function calculateOdds(){
   const home=text("homeTeam")||"Home Team";
   const away=text("awayTeam")||"Away Team";
   const result=modelCalc(currentInput());
+
+  const park = getParkFactor(selectedGameData?.venue?.name || "");
+  let parkAdjustment = park.impact;
+  if(parkAdjustment > 2) parkAdjustment = 2;
+  if(parkAdjustment < -2) parkAdjustment = -2;
+  result.homeScore += parkAdjustment;
+  result.homeScore = clamp(result.homeScore,2,98);
+  result.reasons.push(`Park factor impact (${park.type}): ${parkAdjustment>=0?"+":""}${parkAdjustment.toFixed(1)}.`);
+
   const market=num("bookOdds");
   const edge=result.homeScore-market;
   const awayScore=100-result.homeScore;
