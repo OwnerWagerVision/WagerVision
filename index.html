@@ -483,12 +483,29 @@ function calculateOdds(){
   result.reasons.push(`Park factor impact (${park.type}): ${parkAdjustment>=0?"+":""}${parkAdjustment.toFixed(1)}.`);
 
   // Starting pitcher why logic
+// Starting pitcher why logic
 const homeStarter = selectedGameData?.probablePitchers?.home || "Home starter";
 const awayStarter = selectedGameData?.probablePitchers?.away || "Away starter";
 
-if (homeStarter && awayStarter) {
+const homePitcherRating = num("homePitcherRating");
+const awayPitcherRating = num("awayPitcherRating");
+const pitcherEdge = homePitcherRating - awayPitcherRating;
+
+result.reasons.push(
+  `Starting pitchers: ${homeStarter} vs ${awayStarter}.`
+);
+
+if (Math.abs(pitcherEdge) >= 1.5) {
   result.reasons.push(
-    `Starting pitchers: ${homeStarter} vs ${awayStarter}.`
+    `${pitcherEdge > 0 ? home : away} has the stronger starter on paper.`
+  );
+} else if (Math.abs(pitcherEdge) >= 0.5) {
+  result.reasons.push(
+    `Small starting pitcher lean toward ${pitcherEdge > 0 ? home : away}.`
+  );
+} else {
+  result.reasons.push(
+    "Starting pitching looks fairly even."
   );
 }
 
