@@ -486,6 +486,23 @@ function calculateOdds(){
 // Starting pitcher why logic
 const homeStarter = selectedGameData?.probablePitchers?.home || "Home starter";
 const awayStarter = selectedGameData?.probablePitchers?.away || "Away starter";
+// Simple pitcher strength (temporary)
+function getPitcherScore(name) {
+  if (!name) return 0;
+
+  // VERY basic logic (we upgrade later)
+  const aceList = ["Cole", "Strider", "Burnes", "Gausman", "Wheeler"];
+  const weakList = ["Bullpen", "TBD"];
+
+  if (aceList.some(n => name.includes(n))) return 2;
+  if (weakList.some(n => name.includes(n))) return -2;
+
+  return 0;
+}
+
+const homePitcherRating = getPitcherScore(homeStarter);
+const awayPitcherRating = getPitcherScore(awayStarter);
+const pitcherEdge = homePitcherRating - awayPitcherRating;
 
 const homePitcherRating = selectedGameData?.probablePitchers?.home ? 0 : 0;
 const awayPitcherRating = selectedGameData?.probablePitchers?.away ? 0 : 0;
