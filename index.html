@@ -491,7 +491,13 @@ function getPitcherScore(name) {
   if (!name) return 0;
 
   // VERY basic logic (we upgrade later)
-  const aceList = ["Cole", "Strider", "Burnes", "Gausman", "Wheeler"];
+const aceList = [
+  "Skubal", "Skenes", "Wheeler", "Sale", "Burnes",
+  "Cole", "Gausman", "Strider", "Glasnow", "Cease",
+  "Yamamoto", "Fried", "Ragans", "Gilbert", "Kirby",
+  "Webb", "Valdez", "Castillo", "Luzardo", "Peralta",
+  "Rodón", "Ryan", "Imanaga", "Greene", "Flaherty"
+];
   const weakList = ["Bullpen", "TBD"];
 
   if (aceList.some(n => name.includes(n))) return 2;
