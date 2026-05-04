@@ -487,8 +487,8 @@ function calculateOdds(){
 const homeStarter = selectedGameData?.probablePitchers?.home || "Home starter";
 const awayStarter = selectedGameData?.probablePitchers?.away || "Away starter";
 
-const homePitcherRating = num("homePitcherRating");
-const awayPitcherRating = num("awayPitcherRating");
+const homePitcherRating = selectedGameData?.probablePitchers?.home ? 0 : 0;
+const awayPitcherRating = selectedGameData?.probablePitchers?.away ? 0 : 0;
 const pitcherEdge = homePitcherRating - awayPitcherRating;
 
 result.reasons.push(
