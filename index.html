@@ -208,8 +208,13 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}.footer{text
 
 <div class="footer">WagerVision V6.2. Finds bad prices, not guaranteed money.</div>
 </div>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+const SUPABASE_URL = "https://zejuncnaujnofzzreaoo.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 
 function updateLiveBar(payout, edge, confidence, legs){
   const payoutEl = document.getElementById("livePayout");
