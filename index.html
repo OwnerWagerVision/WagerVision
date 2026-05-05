@@ -75,17 +75,6 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}.footer{text
   <button id="signInBtn" class="signin-btn">👤 Sign In</button>
 </header>
 
-<div id="authBox" style="display:none; padding:15px; background:#111; color:white;">
-  <input id="email" type="email" placeholder="Email" style="display:block; margin-bottom:10px;">
-  <input id="password" type="password" placeholder="Password" style="display:block; margin-bottom:10px;">
-
-  <button onclick="signUp()">Sign Up</button>
-  <button onclick="signIn()">Log In</button>
-  <button onclick="signOut()">Log Out</button>
-
-  <p id="authStatus"></p>
-</div>
-
 <section class="hero">
   <h1>Vegas sets the line, we correct it.</h1>
   <p>Live MLB data, sportsbook odds, real edge ranking and bet slip payouts.</p>
@@ -760,13 +749,58 @@ document.getElementById("signInBtn").addEventListener("click", () => {
 function closeAuth() {
   document.getElementById("authModal").style.display = "none";
 }
+
+async function signUp() {
+  const email = document.getElementById("authEmail").value;
+  const password = document.getElementById("authPassword").value;
+  const status = document.getElementById("authStatus");
+
+  const { error } = await supabaseClient.auth.signUp({
+    email: email,
+    password: password
+  });
+
+  status.textContent = error ? error.message : "Signup worked. Check your email.";
+}
+
+async function signIn() {
+  const email = document.getElementById("authEmail").value;
+  const password = document.getElementById("authPassword").value;
+  const status = document.getElementById("authStatus");
+
+  const { error } = await supabaseClient.auth.signInWithPassword({
+    email: email,
+    password: password
+  });
+
+  status.textContent = error ? error.message : "Logged in.";
+}
 </script>
 <div id="authModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);align-items:center;justify-content:center;z-index:1000;">
   <div style="background:#0f172a;padding:20px;border-radius:12px;width:280px;text-align:center;position:relative;">
+    
     <div style="position:absolute;top:8px;right:10px;cursor:pointer;" onclick="closeAuth()">✕</div>
-    <h3 style="margin-bottom:10px;">Sign In</h3>
-    <input id="authEmail" type="email" placeholder="you@email.com" style="width:100%;padding:8px;margin-bottom:10px;border-radius:6px;border:none;">
-    <button onclick="handleLogin()" style="width:100%;padding:8px;border:none;border-radius:6px;background:#60a5fa;color:black;font-weight:700;cursor:pointer;">Continue</button>
+
+    <h3 style="margin-bottom:10px;">Account</h3>
+
+    <input id="authEmail" type="email" placeholder="you@email.com"
+      style="width:100%;padding:8px;margin-bottom:10px;border-radius:6px;border:none;">
+
+    <input id="authPassword" type="password" placeholder="Password"
+      style="width:100%;padding:8px;margin-bottom:10px;border-radius:6px;border:none;">
+
+    <button onclick="signIn()"
+      style="width:100%;padding:8px;border:none;border-radius:6px;background:#60a5fa;color:black;font-weight:700;margin-bottom:8px;cursor:pointer;">
+      Log In
+    </button>
+
+    <button onclick="signUp()"
+      style="width:100%;padding:8px;border:none;border-radius:6px;background:#22c55e;color:black;font-weight:700;cursor:pointer;">
+      Sign Up
+    </button>
+
+    <p id="authStatus" style="margin-top:10px;font-size:13px;"></p>
+
   </div>
 </div>
 </body>
