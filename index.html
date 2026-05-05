@@ -388,9 +388,19 @@ function noVigTwoWay(a,b){const total=a+b;if(!total)return{a,b};return{a:(a/tota
 function displayAmerican(price){const p=Number(price);return p>0?`+${p}`:`${p}`}
 function decimalFromAmerican(price){const p=Number(price);if(p>0)return 1+(p/100);return 1+(100/Math.abs(p))}
 async function getOddsFeed(){
-  const key=text("oddsApiKey")||localStorage.getItem("wagervision_odds_key");
-  if(!key)throw new Error("No API key");
-  return await fetchJSON(`https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?regions=us&markets=h2h&oddsFormat=american&apiKey=${key}`);
+const { data } = await supabaseClient.auth.getUser();
+
+if (!data.user) {
+  alert("Please sign in to use live odds.");
+  document.getElementById("authModal").style.display = "flex";
+  throw new Error("User not signed in");
+}
+
+const key = text("oddsApiKey") || localStorage.getItem("wagervision_odds_key");
+
+if (!key) throw new Error("No API key");
+
+return await fetchJSON(`https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?regions=us&markets=h2h&oddsFormat=american&apiKey=${key}`);
 }
 function findOddsGame(oddsFeed,homeName,awayName){
   const h=normalizeTeamName(homeName),a=normalizeTeamName(awayName);
