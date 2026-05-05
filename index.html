@@ -773,6 +773,13 @@ async function signIn() {
     password: password
   });
 
+async function signOut() {
+  const status = document.getElementById("authStatus");
+
+  const { error } = await supabaseClient.auth.signOut();
+
+  status.textContent = error ? error.message : "Logged out.";
+}
   status.textContent = error ? error.message : "Logged in.";
 }
 </script>
