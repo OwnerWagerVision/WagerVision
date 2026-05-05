@@ -211,10 +211,10 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}.footer{text
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = "https://zejuncnaujnofzzreaoo.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
+
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InplanVuY25hdWpub2Z6enJlYW9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5OTM0MDgsImV4cCI6MjA5MzU2OTQwOH0.1JM5SWGZ2gpQhEm04gADhbLYnl-n86EXsAqn_hQMETM";
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
 
 function updateLiveBar(payout, edge, confidence, legs){
   const payoutEl = document.getElementById("livePayout");
