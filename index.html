@@ -447,8 +447,8 @@ function modelCalc(input){
   s+=input.homeInjuries;s-=input.awayInjuries;
   if(input.homeInjuries!==0)reasons.push(`Home injury penalty: ${input.homeInjuries}.`);
   if(input.awayInjuries!==0)reasons.push(`Away injury penalty benefits home by ${-input.awayInjuries}.`);
-  const mult=input.inning>=8?6.2:input.inning>=7?5.2:input.inning>=5?3.4:2.1;
-  const scoreImpact=input.scoreLead*mult;s+=scoreImpact;reasons.push(`Score/inning leverage: ${scoreImpact>=0?"+":""}${scoreImpact.toFixed(1)}.`);
+  const mult=input.inning>=8?4.5:input.inning>=7?3.8:input.inning>=5?2.8:2.0;
+  const scoreImpact=input.scoreLead*mult;s+=scoreImpact;reasons.push(`Score per inning factor: ${scoreImpact>=0?"+":""}${scoreImpact.toFixed(1)}.`);
   const basePressure=input.baseValue*(3-input.outs)*0.85;s+=basePressure;
   if(input.baseValue>0)reasons.push(`Base runner pressure added +${basePressure.toFixed(1)}.`);
   if(input.inning>=8&&input.scoreLead>0){s+=4;reasons.push("Late-game lead bonus added +4.")}
@@ -555,7 +555,6 @@ if (Math.abs(pitcherEdge) >= 1.5) {
   else{msg=`NO BET. Model and market are too close.`}
   edgeText.className=cls;edgeText.textContent=msg;
 
-const parkLine = `• Park factor (${park.type}): ${park.impact>=0?"+":""}${park.impact.toFixed(1)}`;
 
 whyBox.innerHTML=`
   <strong>Why Panel</strong><br>
