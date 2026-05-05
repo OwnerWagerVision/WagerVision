@@ -532,10 +532,6 @@ if (Math.abs(pitcherEdge) >= 1.5) {
   result.reasons.push(
     `Small starting pitcher lean toward ${pitcherEdge > 0 ? home : away}.`
   );
-} else {
-  result.reasons.push(
-    "Starting pitching looks fairly even."
-  );
 }
 
   const market=num("bookOdds");
