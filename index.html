@@ -794,31 +794,8 @@ async function signOut() {
 <div id="authModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);align-items:center;justify-content:center;z-index:1000;">
   <div style="background:#0f172a;padding:20px;border-radius:12px;width:280px;text-align:center;position:relative;">
     
- const { error } = await supabaseClient.auth.signInWithPassword({
-    email: email,
-    password: password
-  });
 
-  status.textContent = error ? error.message : "Logged in.";
-}
-
-async function signOut() {
-  const status = document.getElementById("authStatus");
-
-  const { error } = await supabaseClient.auth.signOut();
-
-  if (error) {
-    status.textContent = error.message;
-    return;
-  }
-
-  status.textContent = "Logged out.";
-  document.getElementById("signInBtn").textContent = "👤 Sign In";
-}
-
-  status.textContent = "Logged out.";
-  document.getElementById("signInBtn").textContent = "👤 Sign In";
-}    <div style="position:absolute;top:8px;right:10px;cursor:pointer;" onclick="closeAuth()">✕</div>
+    <div style="position:absolute;top:8px;right:10px;cursor:pointer;" onclick="closeAuth()">✕</div>
 
     <h3 style="margin-bottom:10px;">Account</h3>
 
