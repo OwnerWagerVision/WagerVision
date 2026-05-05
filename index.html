@@ -773,14 +773,25 @@ async function signIn() {
     password: password
   });
 
+  status.textContent = error ? error.message : "Logged in.";
+}
+
 async function signOut() {
   const status = document.getElementById("authStatus");
 
   const { error } = await supabaseClient.auth.signOut();
 
-  status.textContent = error ? error.message : "Logged out.";
+  if (error) {
+    status.textContent = error.message;
+    return;
+  }
+
+  status.textContent = "Logged out.";
+  document.getElementById("signInBtn").textContent = "👤 Sign In";
 }
-  status.textContent = error ? error.message : "Logged in.";
+
+  status.textContent = "Logged out.";
+  document.getElementById("signInBtn").textContent = "👤 Sign In";
 }
 </script>
 <div id="authModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);align-items:center;justify-content:center;z-index:1000;">
