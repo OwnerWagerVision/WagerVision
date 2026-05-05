@@ -773,7 +773,14 @@ async function signIn() {
     password: password
   });
 
-  status.textContent = error ? error.message : "Logged in.";
+if (error) {
+  status.textContent = error.message;
+  return;
+}
+
+status.textContent = "Logged in.";
+document.getElementById("signInBtn").textContent = `👤 ${email}`;
+closeAuth();
 }
 
 async function signOut() {
