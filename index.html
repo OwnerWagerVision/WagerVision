@@ -72,8 +72,19 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}.footer{text
 <header>
   <div class="logo">Wager<span>Vision</span></div>
   <div class="tag">V6.2 · Clean Mobile</div>
-<button id="signInBtn" class="signin-btn">👤 Sign In</button>
+  <button id="signInBtn" class="signin-btn">👤 Sign In</button>
 </header>
+
+<div id="authBox" style="display:none; padding:15px; background:#111; color:white;">
+  <input id="email" type="email" placeholder="Email" style="display:block; margin-bottom:10px;">
+  <input id="password" type="password" placeholder="Password" style="display:block; margin-bottom:10px;">
+
+  <button onclick="signUp()">Sign Up</button>
+  <button onclick="signIn()">Log In</button>
+  <button onclick="signOut()">Log Out</button>
+
+  <p id="authStatus"></p>
+</div>
 
 <section class="hero">
   <h1>Vegas sets the line, we correct it.</h1>
@@ -740,6 +751,14 @@ function getParkFactor(stadium){
   };
 
   return parks[stadium] || {type:"Neutral", impact:0};
+}
+
+document.getElementById("signInBtn").addEventListener("click", () => {
+  document.getElementById("authModal").style.display = "flex";
+});
+
+function closeAuth() {
+  document.getElementById("authModal").style.display = "none";
 }
 </script>
 <div id="authModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);align-items:center;justify-content:center;z-index:1000;">
