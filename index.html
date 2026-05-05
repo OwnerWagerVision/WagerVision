@@ -561,8 +561,7 @@ whyBox.innerHTML=`
   Model Home Win: ${result.homeScore.toFixed(1)}%<br>
   Market Home Win: ${market.toFixed(1)}%<br>
   Edge: ${edge>=0?"+":""}${edge.toFixed(1)}%<br><br>
-  ${result.reasons.map(r=>"• "+r).join("<br>")}<br>
-  ${parkLine}
+  ${result.reasons.map(r=>"• "+r).join("<br>")}
 `;
   return{home,away,model:result.homeScore,market,edge,pick,american,book:text("bestHomeLine")};
 }
