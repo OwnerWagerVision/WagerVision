@@ -259,9 +259,38 @@ function toggleBase(id){document.getElementById(id).classList.toggle("on")}
 function baseValue(){let v=0;if(base1.classList.contains("on"))v+=1;if(base2.classList.contains("on"))v+=1.4;if(base3.classList.contains("on"))v+=1.8;return v}
 async function fetchJSON(url){const res=await fetch(url);if(!res.ok)throw new Error("network");return await res.json()}
 
-function saveApiKey(){const key=text("oddsApiKey");if(!key){apiStatus.textContent="Paste a key first.";return}localStorage.setItem("wagervision_odds_key",key);apiStatus.textContent="API key saved."}
+async function saveApiKey() {
+  const { data } = await supabaseClient.auth.getUser();
+
+  if (!data.user) {
+    alert("You must be signed in to save an API key.");
+    document.getElementById("authModal").style.display = "flex";
+    return;
+  }
+
+  const key = document.getElementById("oddsApiKey").value;
+
+  if (!key) {
+    document.getElementById("apiStatus").textContent = "Paste a key first.";
+    return;
+  }
+
+  localStorage.setItem("wagervision_odds_key", key);
+  document.getElementById("apiStatus").textContent = "API key saved.";
+}
 function clearApiKey(){localStorage.removeItem("wagervision_odds_key");setVal("oddsApiKey","");apiStatus.textContent="API key cleared."}
-(function(){const key=localStorage.getItem("wagervision_odds_key");if(key){setVal("oddsApiKey",key);apiStatus.textContent="API key loaded from browser."}})();
+(async function(){
+  const { data } = await supabaseClient.auth.getUser();
+
+  if (!data.user) return;
+
+  const key = localStorage.getItem("wagervision_odds_key");
+
+  if (key) {
+    setVal("oddsApiKey", key);
+    document.getElementById("apiStatus").textContent = "API key loaded.";
+  }
+})();
 
 function statValue(stats,name){try{return stats?.stats?.[0]?.splits?.[0]?.stat?.[name]??null}catch{return null}}
 async function loadGames(){
