@@ -886,8 +886,8 @@ function handleLogin(){
   if(!email) return alert("Enter email");
 
   localStorage.setItem("wv_user", email);
-  document.getElementById("signInBtn").textContent = email.split("@")[0];
-
+const signInBtn = document.getElementById("signInBtn");
+if(signInBtn) signInBtn.textContent = email.split("@")[0];
   closeAuth();
 }
 
@@ -930,23 +930,33 @@ async function signUp() {
 }
 
 async function signIn() {
-  const email = document.getElementById("authEmail").value;
-  const password = document.getElementById("authPassword").value;
+  const emailInput = document.getElementById("authEmail");
+  const passwordInput = document.getElementById("authPassword");
   const status = document.getElementById("authStatus");
 
-  const { error } = await supabaseClient.auth.signInWithPassword({
-    email: email,
-    password: password
+  const email = emailInput ? emailInput.value.trim() : "";
+  const password = passwordInput ? passwordInput.value : "";
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({
+    email,
+    password
   });
 
-if (error) {
-  status.textContent = error.message;
-  return;
-}
+  if (error) {
+    if (status) status.textContent = error.message;
+    else alert(error.message);
+    return;
+  }
 
-status.textContent = "Logged in.";
-document.getElementById("signInBtn").textContent = `👤 ${email}`;
-closeAuth();
+  localStorage.setItem("wv_user", email);
+
+  const signInBtn = document.getElementById("signInBtn");
+  if (signInBtn) signInBtn.textContent = email.split("@")[0];
+
+  const authModal = document.getElementById("authModal");
+  if (authModal) authModal.style.display = "none";
+
+  if (status) status.textContent = "Signed in.";
 }
 
 async function signOut() {
@@ -996,6 +1006,8 @@ supabaseClient.auth.getUser().then(({ data }) => {
 
     <input id="authPassword" type="password" placeholder="Password"
       style="width:100%;padding:8px;margin-bottom:10px;border-radius:6px;border:none;">
+
+	<div id="authStatus" style="font-size:12px;margin-bottom:10px;color:#fbbf24;"></div>
 
     <button onclick="signIn()" style="width:100%;padding:10px;margin-bottom:8px;border-radius:8px;border:none;cursor:pointer;">
       Sign In
