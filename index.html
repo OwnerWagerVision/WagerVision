@@ -280,6 +280,7 @@ async function saveApiKey() {
   localStorage.setItem(`wagervision_odds_key_${data.user.id}`, key);
   document.getElementById("apiStatus").textContent = "API key saved.";
 }
+
 function clearApiKey(){localStorage.removeItem("wagervision_odds_key");setVal("oddsApiKey","");apiStatus.textContent="API key cleared."}
 (async function(){
   const { data } = await supabaseClient.auth.getUser();
@@ -906,9 +907,9 @@ supabaseClient.auth.getUser().then(({ data }) => {
   }
 });
 </script>
+
 <div id="authModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);align-items:center;justify-content:center;z-index:1000;">
   <div style="background:#0f172a;padding:20px;border-radius:12px;width:280px;text-align:center;position:relative;">
-    
 
     <div style="position:absolute;top:8px;right:10px;cursor:pointer;" onclick="closeAuth()">✕</div>
 
@@ -920,24 +921,16 @@ supabaseClient.auth.getUser().then(({ data }) => {
     <input id="authPassword" type="password" placeholder="Password"
       style="width:100%;padding:8px;margin-bottom:10px;border-radius:6px;border:none;">
 
-    <button onclick="signIn()"
-      style="width:100%;padding:8px;border:none;border-radius:6px;background:#60a5fa;color:black;font-weight:700;margin-bottom:8px;cursor:pointer;">
-      Log In
+    <button onclick="signIn()" style="width:100%;padding:10px;margin-bottom:8px;border-radius:8px;border:none;cursor:pointer;">
+      Sign In
     </button>
 
-    <button onclick="signUp()"
-      style="width:100%;padding:8px;border:none;border-radius:6px;background:#22c55e;color:black;font-weight:700;cursor:pointer;">
-      Sign Up
+    <button onclick="signUp()" style="width:100%;padding:10px;border-radius:8px;border:none;cursor:pointer;">
+      Create Account
     </button>
-
-   <button onclick="signOut()"
-  style="width:100%;padding:8px;border:none;border-radius:6px;background:#ef4444;color:white;font-weight:700;margin-top:8px;cursor:pointer;">
-  Log Out
-</button>
-
-    <p id="authStatus" style="margin-top:10px;font-size:13px;"></p>
 
   </div>
 </div>
+
 </body>
 </html>
