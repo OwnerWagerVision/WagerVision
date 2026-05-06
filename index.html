@@ -214,7 +214,7 @@ const SUPABASE_URL = "https://zejuncnaujnofzzreaoo.supabase.co";
 
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InplanVuY25hdWpub2Z6enJlYW9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5OTM0MDgsImV4cCI6MjA5MzU2OTQwOH0.1JM5SWGZ2gpQhEm04gADhbLYnl-n86EXsAqn_hQMETM";
 
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 function updateLiveBar(payout, edge, confidence, legs){
   const payoutEl = document.getElementById("livePayout");
@@ -240,11 +240,16 @@ let cachedOddsFeed = null;
 let oddsLoadedForSession = false;
 
 const savedUser = localStorage.getItem("wv_user");
-if(savedUser){
-  document.getElementById("signInBtn").textContent = savedUser.split("@")[0];
+const signInBtn = document.getElementById("signInBtn");
+
+if(savedUser && signInBtn){
+  signInBtn.textContent = savedUser.split("@")[0];
 }
 
-document.getElementById("gameDate").value=new Date().toISOString().split("T")[0];
+const gameDate = document.getElementById("gameDate");
+if(gameDate){
+  gameDate.value = new Date().toISOString().split("T")[0];
+}
 
 function toggleInputs(){document.getElementById("inputsSection").classList.toggle("collapsed")}
 function showTab(id,el){
@@ -253,9 +258,64 @@ function showTab(id,el){
   document.getElementById(id).classList.add("active");
   el.classList.add("active");
 }
-function num(id){return Number(document.getElementById(id).value)}
-function text(id){return document.getElementById(id).value.trim()}
-function setVal(id,value){document.getElementById(id).value=value}
+function toggleInputs(){
+  const el = document.getElementById("inputsSection");
+  if(el) el.classList.toggle("collapsed");
+}
+
+function showTab(id, el){
+  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+
+  const section = document.getElementById(id);
+  if(section) section.classList.add("active");
+
+  if(el) el.classList.add("active");
+}
+
+function num(id){
+  const el = document.getElementById(id);
+  return el ? Number(el.value) : 0;
+}
+
+function text(id){
+  const el = document.getElementById(id);
+  return el ? el.value.trim() : "";
+}
+
+function setVal(id, value){
+  const el = document.getElementById(id);
+  if(el) el.value = value;
+}
+
+function clamp(value,min,max){
+  return Math.max(min, Math.min(max,value));
+}
+
+function toggleBase(id){
+  const el = document.getElementById(id);
+  if(el) el.classList.toggle("on");
+}
+
+function baseValue(){
+  let v = 0;
+
+  const base1 = document.getElementById("base1");
+  const base2 = document.getElementById("base2");
+  const base3 = document.getElementById("base3");
+
+  if(base1 && base1.classList.contains("on")) v += 1;
+  if(base2 && base2.classList.contains("on")) v += 1.4;
+  if(base3 && base3.classList.contains("on")) v += 1.8;
+
+  return v;
+}
+
+async function fetchJSON(url){
+  const res = await fetch(url);
+  if(!res.ok) throw new Error("network");
+  return await res.json();
+}
 function clamp(value,min,max){return Math.max(min,Math.min(max,value))}
 function toggleBase(id){document.getElementById(id).classList.toggle("on")}
 function baseValue(){let v=0;if(base1.classList.contains("on"))v+=1;if(base2.classList.contains("on"))v+=1.4;if(base3.classList.contains("on"))v+=1.8;return v}
@@ -266,32 +326,51 @@ async function saveApiKey() {
 
   if (!data.user) {
     alert("You must be signed in to save an API key.");
-    document.getElementById("authModal").style.display = "flex";
+   const authModal = document.getElementById("authModal");
+if(authModal) authModal.style.display = "flex";
     return;
   }
 
-  const key = document.getElementById("oddsApiKey").value;
+const keyInput = document.getElementById("oddsApiKey");
+const apiStatus = document.getElementById("apiStatus");
 
-  if (!key) {
-    document.getElementById("apiStatus").textContent = "Paste a key first.";
-    return;
-  }
+const key = keyInput ? keyInput.value.trim() : "";
 
-  localStorage.setItem(`wagervision_odds_key_${data.user.id}`, key);
-  document.getElementById("apiStatus").textContent = "API key saved.";
+if (!key) {
+  if(apiStatus) apiStatus.textContent = "Paste a key first.";
+  return;
 }
 
-function clearApiKey(){localStorage.removeItem("wagervision_odds_key");setVal("oddsApiKey","");apiStatus.textContent="API key cleared."}
+localStorage.setItem(`wagervision_odds_key_${data.user.id}`, key);
+
+if(apiStatus) apiStatus.textContent = "API key saved.";
+}
+
+async function clearApiKey(){
+  const { data } = await supabaseClient.auth.getUser();
+
+  if(data.user){
+    localStorage.removeItem(`wagervision_odds_key_${data.user.id}`);
+  }
+
+  setVal("oddsApiKey", "");
+
+  const apiStatus = document.getElementById("apiStatus");
+  if(apiStatus) apiStatus.textContent = "API key cleared.";
+}
+
 (async function(){
   const { data } = await supabaseClient.auth.getUser();
 
   if (!data.user) return;
 
-  const key = localStorage.getItem("wagervision_odds_key");
+  const key = localStorage.getItem(`wagervision_odds_key_${data.user.id}`);
 
   if (key) {
     setVal("oddsApiKey", key);
-    document.getElementById("apiStatus").textContent = "API key loaded.";
+
+    const apiStatus = document.getElementById("apiStatus");
+    if(apiStatus) apiStatus.textContent = "API key loaded.";
   }
 })();
 
