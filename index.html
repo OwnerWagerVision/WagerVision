@@ -277,7 +277,7 @@ async function saveApiKey() {
     return;
   }
 
-  localStorage.setItem("wagervision_odds_key", key);
+  localStorage.setItem(`wagervision_odds_key_${data.user.id}`, key);
   document.getElementById("apiStatus").textContent = "API key saved.";
 }
 function clearApiKey(){localStorage.removeItem("wagervision_odds_key");setVal("oddsApiKey","");apiStatus.textContent="API key cleared."}
@@ -454,7 +454,7 @@ async function loadOddsFeed(){
 
   return cachedOddsFeed;
 }
-}
+
 function findOddsGame(oddsFeed,homeName,awayName){
   const h=normalizeTeamName(homeName),a=normalizeTeamName(awayName);
   return oddsFeed.find(g=>{
