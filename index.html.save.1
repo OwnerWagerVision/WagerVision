@@ -236,8 +236,6 @@ let loadedGames=[];
 let selectedGamePk=null;
 let selectedGameData=null;
 let slip = JSON.parse(localStorage.getItem("wagervision_bet_slip")) || [];
-let cachedOddsFeed = null;
-let oddsLoadedForSession = false;
 
 const savedUser = localStorage.getItem("wv_user");
 if(savedUser){
@@ -431,29 +429,7 @@ const key = text("oddsApiKey") || localStorage.getItem("wagervision_odds_key");
 
 if (!key) throw new Error("No API key");
 
-async function loadOddsFeed(){
-  const { data } = await supabaseClient.auth.getUser();
-
-  if (!data.user) {
-    alert("Please sign in to use live odds.");
-    document.getElementById("authModal").style.display = "flex";
-    throw new Error("User not signed in");
-  }
-
-  if (cachedOddsFeed && oddsLoadedForSession) {
-    return cachedOddsFeed;
-  }
-
-  const key = text("oddsApiKey") || localStorage.getItem("wagervision_odds_key");
-
-  if (!key) throw new Error("No API key");
-
-  cachedOddsFeed = await fetchJSON(`https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?regions=us&markets=h2h&oddsFormat=american&apiKey=${key}`);
-
-  oddsLoadedForSession = true;
-
-  return cachedOddsFeed;
-}
+return await fetchJSON(`https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?regions=us&markets=h2h&oddsFormat=american&apiKey=${key}`);
 }
 function findOddsGame(oddsFeed,homeName,awayName){
   const h=normalizeTeamName(homeName),a=normalizeTeamName(awayName);
@@ -733,6 +709,7 @@ function removeLeg(index){
 
 function renderSlip(){
 updateLiveBar("0.00", "0%", "0%", slip.length);
+
   const stake=Number(document.getElementById("slipStake").value)||10;
   if(!slip.length){slipBox.innerHTML="No picks added yet. Add picks from Board or Game.";return}
 
@@ -741,7 +718,7 @@ updateLiveBar("0.00", "0%", "0%", slip.length);
       const dec=decimalFromAmerican(p.american);
       const ret=stake*dec;
       const profit=ret-stake;
-      return`
+     return`
         <div class="leg">
           <div>
             <strong>${p.pick}</strong><br>
@@ -885,17 +862,8 @@ async function signOut() {
   status.textContent = "Logged out.";
   document.getElementById("signInBtn").textContent = "👤 Sign In";
 
-  // clear bet slip from screen
-  slip = [];
-  renderSlip();
-  slipCount.textContent = 0;
-
-  // clear odds cache
-  cachedOddsFeed = null;
-  oddsLoadedForSession = false;
-
-  closeAuth();
-  showTab("game", document.querySelector(".tab"));
+closeAuth();
+showTab('game', document.querySelector('.tab'));
 }
 
 supabaseClient.auth.getUser().then(({ data }) => {
