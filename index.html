@@ -358,7 +358,6 @@ async function clearApiKey(){
   if(userData && userData.user){
     localStorage.removeItem(`wagervision_odds_key_${userData.user.id}`);
   }
-}
 
 setVal("oddsApiKey", "");
 
