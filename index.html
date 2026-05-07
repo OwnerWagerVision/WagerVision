@@ -250,7 +250,7 @@ let cachedOddsFeed = null;
 let oddsLoadedForSession = false;
 
 const savedUser = localStorage.getItem("wv_user");
-const signInBtn = document.getElementById("signInBtn");
+var signInBtn = document.getElementById("signInBtn");
 
 if(savedUser && signInBtn){
   signInBtn.textContent = savedUser.split("@")[0];
@@ -389,7 +389,7 @@ function statValue(stats,name){
 }
 
 async function loadGames(){
-  const boardStatus = document.getElementById("boardStatus");
+  var boardStatus = document.getElementById("boardStatus");
   const loadStatus = document.getElementById("loadStatus");
   const gameSelect = document.getElementById("gameSelect");
   const gamesLoaded = document.getElementById("gamesLoaded");
@@ -1049,7 +1049,7 @@ updateLiveBar(
 
 calculateOdds();
 
-const signInBtn = document.getElementById("signInBtn");
+var signInBtn = document.getElementById("signInBtn");
 
 if(signInBtn){
   signInBtn.onclick = () => {
@@ -1089,7 +1089,7 @@ async function handleLogin(){
   if(data && data.user){
     localStorage.setItem("wv_user", data.user.email);
 
-    const signInBtn = document.getElementById("signInBtn");
+    var signInBtn = document.getElementById("signInBtn");
     if(signInBtn) signInBtn.textContent = data.user.email.split("@")[0];
   }
 
@@ -1113,7 +1113,7 @@ function getParkFactor(stadium){
   return parks[stadium] || {type:"Neutral", impact:0};
 }
 
-const signInBtn = document.getElementById("signInBtn");
+var signInBtn = document.getElementById("signInBtn");
 
 if(signInBtn){
   signInBtn.addEventListener("click", () => {
@@ -1167,7 +1167,7 @@ async function signIn() {
   if(data && data.user){
     localStorage.setItem("wv_user", data.user.email);
 
-    const signInBtn = document.getElementById("signInBtn");
+    var signInBtn = document.getElementById("signInBtn");
     if(signInBtn){
       signInBtn.textContent = data.user.email.split("@")[0];
     }
@@ -1187,7 +1187,7 @@ async function signIn() {
 
   localStorage.setItem("wv_user", userEmail);
 
-  const signInBtn = document.getElementById("signInBtn");
+  var signInBtn = document.getElementById("signInBtn");
   if (signInBtn) signInBtn.textContent = userEmail.split("@")[0];
 
   const authModal = document.getElementById("authModal");
@@ -1209,7 +1209,7 @@ async function signOut() {
 
 if (status) status.textContent = "Logged out.";
 
-const signInBtn = document.getElementById("signInBtn");
+var signInBtn = document.getElementById("signInBtn");
 if (signInBtn) signInBtn.textContent = "👤 Sign In";
 
 // clear bet slip from memory + storage + UI
@@ -1232,7 +1232,7 @@ const firstTab = document.querySelector(".tab");
 if(firstTab) showTab("game", firstTab);
 
 supabaseClient.auth.getUser().then(({ data }) => {
-  const signInBtn = document.getElementById("signInBtn");
+  var signInBtn = document.getElementById("signInBtn");
 
   if (!signInBtn) return;
 
