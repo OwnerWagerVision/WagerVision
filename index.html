@@ -972,6 +972,7 @@ async function signUp() {
 
 if (status) status.textContent = error ? error.message : "Signup worked. Check your email.";
 else alert(error ? error.message : "Signup worked. Check your email.");
+}
 
 async function signIn() {
   const emailInput = document.getElementById("authEmail");
@@ -1033,16 +1034,6 @@ if (slipCountEl) slipCountEl.textContent = 0;
   showTab("game", document.querySelector(".tab"));
 }
 
-supabaseClient.auth.getUser().then(({ data }) => {
-const signInBtn = document.getElementById("signInBtn");
-
-if(signInBtn){
-  if (data.user) {
-    signInBtn.textContent = `👤 ${data.user.email}`;
-  } else {
-    signInBtn.textContent = "👤 Sign In";
-  }
-}
 supabaseClient.auth.getUser().then(({ data }) => {
   const signInBtn = document.getElementById("signInBtn");
 
