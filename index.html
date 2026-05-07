@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>WagerVision</title>
 
 <style>
@@ -159,10 +159,20 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}.footer{text
     </div>
   </div>
 
-  <div class="grid">
-    <div class="card soft"><h2>Why Panel</h2><div class="data-box" id="whyBox">No calculation yet.</div></div>
-    <div class="card soft"><h2>Live + Market</h2><div id="dataBox" class="data-box">No game loaded yet.</div><div id="oddsBox" class="odds-list"><div class="data-box">No odds loaded yet.</div></div></div>
+<div class="grid">
+  <div class="card soft">
+    <h2>Why Panel</h2>
+    <div class="data-box" id="whyBox">No calculation yet.</div>
   </div>
+
+  <div class="card soft">
+    <h2>Live + Market</h2>
+    <div id="dataBox" class="data-box">No game loaded yet.</div>
+    <div id="oddsBox" class="odds-list">
+      <div class="data-box">No odds loaded yet.</div>
+    </div>
+  </div>
+</div>
 </section>
 
 <section id="board" class="section">
@@ -202,7 +212,7 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}.footer{text
     <button class="secondary" onclick="clearApiKey()">Clear Saved Key</button>
     <div class="status" id="apiStatus">No key loaded yet.</div>
     <hr>
-    <div class="small">Save api for real time stats and real time odds.</div>
+    <div class="small">Save api for real time stats and real time odds and live market data.</div>
   </div>
 </section>
 
@@ -316,55 +326,52 @@ async function fetchJSON(url){
   if(!res.ok) throw new Error("network");
   return await res.json();
 }
-function clamp(value,min,max){return Math.max(min,Math.min(max,value))}
-function toggleBase(id){document.getElementById(id).classList.toggle("on")}
-function baseValue(){let v=0;if(base1.classList.contains("on"))v+=1;if(base2.classList.contains("on"))v+=1.4;if(base3.classList.contains("on"))v+=1.8;return v}
-async function fetchJSON(url){const res=await fetch(url);if(!res.ok)throw new Error("network");return await res.json()}
 
 async function saveApiKey() {
-const { data: userData } = await supabaseClient.auth.getUser();
+  const { data: userData } = await supabaseClient.auth.getUser();
 
-  if (!data.user) {
+  if (!userData || !userData.user) {
     alert("You must be signed in to save an API key.");
-   const authModal = document.getElementById("authModal");
-if(authModal) authModal.style.display = "flex";
+    const authModal = document.getElementById("authModal");
+    if(authModal) authModal.style.display = "flex";
     return;
   }
 
-const keyInput = document.getElementById("oddsApiKey");
-const apiStatus = document.getElementById("apiStatus");
+  const keyInput = document.getElementById("oddsApiKey");
+  const apiStatus = document.getElementById("apiStatus");
 
-const key = keyInput ? keyInput.value.trim() : "";
+  const key = keyInput ? keyInput.value.trim() : "";
 
-if (!key) {
-  if(apiStatus) apiStatus.textContent = "Paste a key first.";
-  return;
-}
+  if (!key) {
+    if(apiStatus) apiStatus.textContent = "Paste a key first.";
+    return;
+  }
 
-localStorage.setItem(`wagervision_odds_key_${data.user.id}`, key);
+  localStorage.setItem(`wagervision_odds_key_${userData.user.id}`, key);
 
-if(apiStatus) apiStatus.textContent = "API key saved.";
+  if(apiStatus) apiStatus.textContent = "API key saved.";
 }
 
 async function clearApiKey(){
-	const { data: userData } = await supabaseClient.auth.getUser();
+  const { data: userData } = await supabaseClient.auth.getUser();
 
-  if(data.user){
-    localStorage.removeItem(`wagervision_odds_key_${data.user.id}`);
+  if(userData && userData.user){
+    localStorage.removeItem(`wagervision_odds_key_${userData.user.id}`);
   }
+}
 
-  setVal("oddsApiKey", "");
+setVal("oddsApiKey", "");
 
-  const apiStatus = document.getElementById("apiStatus");
-  if(apiStatus) apiStatus.textContent = "API key cleared.";
+const apiStatus = document.getElementById("apiStatus");
+if(apiStatus) apiStatus.textContent = "API key cleared.";
 }
 
 (async function(){
-const { data: userData } = await supabaseClient.auth.getUser();
+  const { data: userData } = await supabaseClient.auth.getUser();
 
-  if (!data.user) return;
+  if (!userData || !userData.user) return;
 
-  const key = localStorage.getItem(`wagervision_odds_key_${data.user.id}`);
+  const key = localStorage.getItem(`wagervision_odds_key_${userData.user.id}`);
 
   if (key) {
     setVal("oddsApiKey", key);
@@ -374,32 +381,53 @@ const { data: userData } = await supabaseClient.auth.getUser();
   }
 })();
 
-function statValue(stats,name){try{return stats?.stats?.[0]?.splits?.[0]?.stat?.[name]??null}catch{return null}}
-async function loadGames(){
-  boardStatus.textContent="Loading MLB games...";
-  loadStatus.textContent="Loading MLB games...";
-  gameSelect.innerHTML="<option value=''>Loading...</option>";
+function statValue(stats,name){
   try{
-    const data=await fetchJSON(`https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${gameDate.value}&hydrate=probablePitcher`);
-    loadedGames=data.dates?.[0]?.games||[];
-    gamesLoaded.textContent=loadedGames.length;
+    return stats?.stats?.[0]?.splits?.[0]?.stat?.[name] ?? null;
+  }catch{
+    return null;
+  }
+}
+
+async function loadGames(){
+  const boardStatus = document.getElementById("boardStatus");
+  const loadStatus = document.getElementById("loadStatus");
+  const gameSelect = document.getElementById("gameSelect");
+  const gamesLoaded = document.getElementById("gamesLoaded");
+  const gameDate = document.getElementById("gameDate");
+
+  if(boardStatus) boardStatus.textContent = "Loading MLB games...";
+  if(loadStatus) loadStatus.textContent = "Loading MLB games...";
+  if(gameSelect) gameSelect.innerHTML = "<option value=''>Loading...</option>";
+
+  try{
+    const data = await fetchJSON(`https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${gameDate.value}&hydrate=probablePitcher`);
+    loadedGames = data.dates?.[0]?.games || [];
+
+    if(gamesLoaded) gamesLoaded.textContent = loadedGames.length;
+
     if(!loadedGames.length){
-      gameSelect.innerHTML="<option value=''>No games found</option>";
-      boardStatus.textContent="No games found.";
-      loadStatus.textContent="No games found.";
+      if(gameSelect) gameSelect.innerHTML = "<option value=''>No games found</option>";
+      if(boardStatus) boardStatus.textContent = "No games found.";
+      if(loadStatus) loadStatus.textContent = "No games found.";
       return;
     }
-    gameSelect.innerHTML=loadedGames.map((g,i)=>{
-      const away=g.teams.away.team.name,home=g.teams.home.team.name;
-      const ap=g.teams.away.probablePitcher?.fullName||"TBD";
-      const hp=g.teams.home.probablePitcher?.fullName||"TBD";
-      return `<option value="${i}">${away} @ ${home} · ${ap} vs ${hp}</option>`;
-    }).join("");
-    boardStatus.textContent=`${loadedGames.length} games loaded.`;
-    loadStatus.textContent=`${loadedGames.length} games loaded. Pick one and use game.`;
+
+    if(gameSelect){
+      gameSelect.innerHTML = loadedGames.map((g,i)=>{
+        const away = g.teams.away.team.name;
+        const home = g.teams.home.team.name;
+        const ap = g.teams.away.probablePitcher?.fullName || "TBD";
+        const hp = g.teams.home.probablePitcher?.fullName || "TBD";
+        return `<option value="${i}">${away} @ ${home} · ${ap} vs ${hp}</option>`;
+      }).join("");
+    }
+
+    if(boardStatus) boardStatus.textContent = `${loadedGames.length} games loaded.`;
+    if(loadStatus) loadStatus.textContent = `${loadedGames.length} games loaded. Pick one and use game.`;
   }catch{
-    boardStatus.textContent="Could not load MLB games.";
-    loadStatus.textContent="Could not load MLB games.";
+    if(boardStatus) boardStatus.textContent = "Could not load MLB games.";
+    if(loadStatus) loadStatus.textContent = "Could not load MLB games.";
   }
 }
 
@@ -431,65 +459,110 @@ function ratePitcher(stats){
 }
 
 async function loadSelectedGame(){
-  const index=gameSelect.value;
-  if(index===""){loadStatus.textContent="Pick a game first.";return}
-  const game=loadedGames[Number(index)];
-  selectedGamePk=game.gamePk;
-  selectedGameData=game;
-  const season=new Date(gameDate.value).getFullYear();
-  const home=game.teams.home.team,away=game.teams.away.team;
+  const gameSelect = document.getElementById("gameSelect");
+  const loadStatus = document.getElementById("loadStatus");
+  const gameDate = document.getElementById("gameDate");
 
-  loadStatus.textContent="Pulling team stats, pitcher stats, and live state...";
+  const index = gameSelect ? gameSelect.value : "";
+
+  if(index === ""){
+    if(loadStatus) loadStatus.textContent = "Pick a game first.";
+    return;
+  }
+
+  const game = loadedGames[Number(index)];
+  if(!game){
+    if(loadStatus) loadStatus.textContent = "Game not found.";
+    return;
+  }
+
+  selectedGamePk = game.gamePk;
+  selectedGameData = game;
+
+  const season = new Date(gameDate.value).getFullYear();
+  const home = game.teams.home.team;
+  const away = game.teams.away.team;
+
+  if(loadStatus) loadStatus.textContent = "Pulling team stats, pitcher stats, and live state...";
+
   try{
-    const [hs,as,hp,ap]=await Promise.all([
-      getTeamStats(home.id,season),
-      getTeamStats(away.id,season),
-      getPitcherStats(game.teams.home.probablePitcher?.id,season),
-      getPitcherStats(game.teams.away.probablePitcher?.id,season)
+    const [hs, awayStats, hp, ap] = await Promise.all([
+      getTeamStats(home.id, season),
+      getTeamStats(away.id, season),
+      getPitcherStats(game.teams.home.probablePitcher?.id, season),
+      getPitcherStats(game.teams.away.probablePitcher?.id, season)
     ]);
 
-    setVal("homeTeam",home.name);setVal("awayTeam",away.name);
-    setVal("homeAvg",hs.avg.toFixed(3));setVal("awayAvg",as.avg.toFixed(3));
-    setVal("homeOps",hs.ops.toFixed(3));setVal("awayOps",as.ops.toFixed(3));
-    setVal("homeEra",hs.era.toFixed(2));setVal("awayEra",as.era.toFixed(2));
-    setVal("homePitcher",ratePitcher(hp));setVal("awayPitcher",ratePitcher(ap));
+    setVal("homeTeam", home.name);
+    setVal("awayTeam", away.name);
+    setVal("homeAvg", hs.avg.toFixed(3));
+    setVal("awayAvg", awayStats.avg.toFixed(3));
+    setVal("homeOps", hs.ops.toFixed(3));
+    setVal("awayOps", awayStats.ops.toFixed(3));
+    setVal("homeEra", hs.era.toFixed(2));
+    setVal("awayEra", awayStats.era.toFixed(2));
+    setVal("homePitcher", ratePitcher(hp));
+    setVal("awayPitcher", ratePitcher(ap));
 
     await refreshLiveState(false);
 
-    dataBox.innerHTML=`
-      <strong>Live MLB Data Loaded</strong><br>
-      ${away.name} @ ${home.name}<br>
-      Away pitcher: ${game.teams.away.probablePitcher?.fullName||"TBD"}<br>
-      Home pitcher: ${game.teams.home.probablePitcher?.fullName||"TBD"}<br><br>
-      ${home.name}: AVG ${hs.avg.toFixed(3)}, OPS ${hs.ops.toFixed(3)}, ERA ${hs.era.toFixed(2)}, WHIP ${hs.whip.toFixed(2)}<br>
-      ${away.name}: AVG ${as.avg.toFixed(3)}, OPS ${as.ops.toFixed(3)}, ERA ${as.era.toFixed(2)}, WHIP ${as.whip.toFixed(2)}
-    `;
-    loadStatus.textContent="Game loaded.";
-    calculateOdds();
-  }catch{
-    loadStatus.textContent="Some stats failed. Using what is available.";
-    calculateOdds();
-  }
-}
+    const dataBox = document.getElementById("dataBox");
+    const loadStatus = document.getElementById("loadStatus");
 
-async function refreshLiveState(showMessage=true){
-  if(!selectedGamePk){if(showMessage)loadStatus.textContent="Load a game first.";return}
+if(dataBox){
+  dataBox.innerHTML = `
+    <strong>Live MLB Data Loaded</strong><br>
+    ${away.name} @ ${home.name}<br>
+    Away pitcher: ${game.teams.away.probablePitcher?.fullName || "TBD"}<br>
+    Home pitcher: ${game.teams.home.probablePitcher?.fullName || "TBD"}<br><br>
+    ${home.name}: AVG ${hs.avg.toFixed(3)}, OPS ${hs.ops.toFixed(3)}, ERA ${hs.era.toFixed(2)}, WHIP ${hs.whip.toFixed(2)}<br>
+    ${away.name}: AVG ${awayStats.avg.toFixed(3)}, OPS ${awayStats.ops.toFixed(3)}, ERA ${awayStats.era.toFixed(2)}, WHIP ${awayStats.whip.toFixed(2)}
+  `;
+};
+
+if(loadStatus) loadStatus.textContent = "Game loaded.";
+
+calculateOdds();
+
+async function refreshLiveState(showMessage = true){
+  const loadStatus = document.getElementById("loadStatus");
+
+  if(!selectedGamePk){
+    if(showMessage && loadStatus) loadStatus.textContent = "Load a game first.";
+    return;
+  }
+
   try{
-    const data=await fetchJSON(`https://statsapi.mlb.com/api/v1.1/game/${selectedGamePk}/feed/live`);
-    const l=data.liveData?.linescore;
-    const homeRuns=Number(l?.teams?.home?.runs||0);
-    const awayRuns=Number(l?.teams?.away?.runs||0);
-    setVal("scoreLead",homeRuns-awayRuns);
-    setVal("inning",clamp(Number(l?.currentInning||1),1,9));
-    setVal("outs",clamp(Number(l?.outs||0),0,2));
-    ["base1","base2","base3"].forEach(id=>document.getElementById(id).classList.remove("on"));
-    if(l?.offense?.first)base1.classList.add("on");
-    if(l?.offense?.second)base2.classList.add("on");
-    if(l?.offense?.third)base3.classList.add("on");
-    if(showMessage)loadStatus.textContent=`Live state updated: ${awayRuns}-${homeRuns}.`;
+    const data = await fetchJSON(`https://statsapi.mlb.com/api/v1.1/game/${selectedGamePk}/feed/live`);
+    const l = data.liveData?.linescore;
+
+    const homeRuns = Number(l?.teams?.home?.runs || 0);
+    const awayRuns = Number(l?.teams?.away?.runs || 0);
+
+    setVal("scoreLead", homeRuns - awayRuns);
+    setVal("inning", clamp(Number(l?.currentInning || 1), 1, 9));
+    setVal("outs", clamp(Number(l?.outs || 0), 0, 2));
+
+    ["base1","base2","base3"].forEach(id => {
+      const base = document.getElementById(id);
+      if(base) base.classList.remove("on");
+    });
+
+    const base1 = document.getElementById("base1");
+    const base2 = document.getElementById("base2");
+    const base3 = document.getElementById("base3");
+
+    if(l?.offense?.first && base1) base1.classList.add("on");
+    if(l?.offense?.second && base2) base2.classList.add("on");
+    if(l?.offense?.third && base3) base3.classList.add("on");
+
+    if(showMessage && loadStatus) {
+      loadStatus.textContent = `Live state updated: ${awayRuns}-${homeRuns}.`;
+    }
+
     calculateOdds();
   }catch{
-    if(showMessage)loadStatus.textContent="Could not refresh live state.";
+    if(showMessage && loadStatus) loadStatus.textContent = "Could not refresh live state.";
   }
 }
 
@@ -501,13 +574,12 @@ function decimalFromAmerican(price){const p=Number(price);if(p>0)return 1+(p/100
 
 async function getOddsFeed(){
   const { data: userData } = await supabaseClient.auth.getUser();
-
-  if (!userData.user) {
-    alert("Please sign in to use live odds.");
-    const authModal = document.getElementById("authModal");
-    if(authModal) authModal.style.display = "flex";
-    throw new Error("User not signed in");
-  }
+if (!userData || !userData.user) {
+  alert("Please sign in to use live odds.");
+  const authModal = document.getElementById("authModal");
+  if(authModal) authModal.style.display = "flex";
+  throw new Error("User not signed in");
+}
 
   const key =
     text("oddsApiKey") ||
@@ -590,6 +662,7 @@ async function loadOdds(){
   }catch(error){
     console.error("loadOdds failed:", error);
     if(oddsBox) oddsBox.innerHTML = `<div class="data-box">Could not load odds. Check API key or request limit.</div>`;
+   if(loadStatus) loadStatus.textContent = "Could not load odds.";
   }
 }
 
@@ -730,93 +803,142 @@ function calculateOdds(){
   );
 
   // Final calc
-  const market = num("bookOdds");
-  const edge = result.homeScore - market;
-  const awayScore = 100 - result.homeScore;
+// Final calc
+const market = num("bookOdds");
+const edge = result.homeScore - market;
+const awayScore = 100 - result.homeScore;
 
-  const pick = edge >= 0 ? home : away;
-  const american = parseBestHomeAmerican();
+const pick = edge >= 0 ? home : away;
+const american = parseBestHomeAmerican();
 
 const winnerEl = document.getElementById("winner");
 const probabilityEl = document.getElementById("probability");
-const edgeBoxEl = document.getElementById("edgeBox");
+const edgeBoxEl = document.getElementById("edgeText");
+const whyBox = document.getElementById("whyBox");
 
 if(winnerEl) winnerEl.textContent = result.homeScore >= awayScore ? home : away;
 if(probabilityEl) probabilityEl.textContent = Math.round(result.homeScore) + "%";
 if(edgeBoxEl) edgeBoxEl.textContent = (edge >= 0 ? "+" : "") + edge.toFixed(1) + "%";
 
-  // Why panel
-  whyPanel.innerHTML = result.reasons
+if(whyBox){
+  whyBox.innerHTML = result.reasons
     .map(r => `<div class="reason">${r}</div>`)
     .join("");
 }
 
 async function scanBoard(){
-  if(!loadedGames.length)await loadGames();
-  if(!loadedGames.length)return;
-  let oddsFeed=[];
-  try{oddsFeed=await getOddsFeed()}catch{boardStatus.textContent="Need Odds API key saved in Settings to scan real edge.";return}
+  const boardStatus = document.getElementById("boardStatus");
+  const gameDate = document.getElementById("gameDate");
 
-  boardStatus.textContent="Scanning full board with real sportsbook odds...";
-  const season=new Date(gameDate.value).getFullYear();
-  let picks=[];
+  if(!loadedGames.length) await loadGames();
+  if(!loadedGames.length) return;
 
-  for(const game of loadedGames){
-const boardStatusEl = document.getElementById("boardStatus");
-if(boardStatusEl) boardStatusEl.textContent = `Scanning ${picks.length + 1} of ${loadedGames.length} games...`;
- try{
-      const home=game.teams.home.team,away=game.teams.away.team;
-      const [hs,as,hp,ap]=await Promise.all([
-        getTeamStats(home.id,season),
-        getTeamStats(away.id,season),
-        getPitcherStats(game.teams.home.probablePitcher?.id,season),
-        getPitcherStats(game.teams.away.probablePitcher?.id,season)
-      ]);
+  let oddsFeed = [];
 
-      const model=modelCalc({
-        homeAvg:hs.avg,awayAvg:as.avg,homeOps:hs.ops,awayOps:as.ops,
-        homePitcher:ratePitcher(hp),awayPitcher:ratePitcher(ap),
-        homeEra:hs.era,awayEra:as.era,
-        homeInjuries:0,awayInjuries:0,inning:1,scoreLead:0,baseValue:0,outs:0
-      });
-
-      const oddsGame=findOddsGame(oddsFeed,home.name,away.name);
-      const oddsInfo=bestHomeLineFromOddsGame(oddsGame);
-      if(!oddsInfo)continue;
-
-      const edge=model.homeScore-oddsInfo.bestProb;
-      picks.push({
-        home:home.name,away:away.name,
-        model:model.homeScore,market:oddsInfo.bestProb,edge,
-        american:oddsInfo.best,book:oddsInfo.bestBook,
-        pick:edge>=0?home.name:away.name
-      });
-    }catch{}
+  try{
+    oddsFeed = await getOddsFeed();
+  }catch{
+    if(boardStatus) boardStatus.textContent = "Need Odds API key saved in Settings to scan real edge.";
+    return;
   }
 
-  picks.sort((a,b)=>b.edge-a.edge);
-  if(picks.length)topEdge.textContent=(picks[0].edge>=0?"+":"")+picks[0].edge.toFixed(1)+"%";
-  pickBoard.innerHTML=picks.length?picks.map((p,i)=>`
-    <div class="pick-card">
-      <div class="pick-top">
-        <div>
-          <div class="pick-title">${i===0?"⭐ ":i===1?"🔥 ":""}${p.away} @ ${p.home}</div>
-          <div class="pick-meta">
-            Pick: <strong>${p.pick}</strong><br>
-            Model home: ${p.model.toFixed(1)}% · Market home: ${p.market.toFixed(1)}%<br>
-            Best home line: ${displayAmerican(p.american)} at ${p.book}
+  if(boardStatus) boardStatus.textContent = "Scanning full board with real sportsbook odds.";
+
+  const season = gameDate?.value
+    ? new Date(gameDate.value).getFullYear()
+    : new Date().getFullYear();
+
+  let picks = [];
+
+  for(const game of loadedGames){
+    if(boardStatus) {
+      boardStatus.textContent = `Scanning ${picks.length + 1} of ${loadedGames.length} games...`;
+    }
+
+    try{
+      const home = game.teams.home.team;
+      const away = game.teams.away.team;
+
+      const [hs, awayStats, hp, ap] = await Promise.all([
+        getTeamStats(home.id, season),
+        getTeamStats(away.id, season),
+        getPitcherStats(game.teams.home.probablePitcher?.id, season),
+        getPitcherStats(game.teams.away.probablePitcher?.id, season)
+      ]);
+
+      const model = modelCalc({
+        homeAvg: hs.avg,
+        awayAvg: awayStats.avg,
+        homeOps: hs.ops,
+        awayOps: awayStats.ops,
+        homePitcher: ratePitcher(hp),
+        awayPitcher: ratePitcher(ap),
+        homeEra: hs.era,
+        awayEra: awayStats.era,
+        homeInjuries: 0,
+        awayInjuries: 0,
+        inning: 1,
+        scoreLead: 0,
+        baseValue: 0,
+        outs: 0
+      });
+
+      const oddsGame = findOddsGame(oddsFeed, home.name, away.name);
+      const oddsInfo = bestHomeLineFromOddsGame(oddsGame);
+      if(!oddsInfo) continue;
+
+      const edge = model.homeScore - oddsInfo.bestProb;
+
+      picks.push({
+        home: home.name,
+        away: away.name,
+        model: model.homeScore,
+        market: oddsInfo.bestProb,
+        edge,
+        american: oddsInfo.best,
+        book: oddsInfo.bestBook,
+        pick: edge >= 0 ? home.name : away.name
+      });
+
+    }catch(error){
+      console.error("scanBoard game failed:", error);
+    }
+  }
+
+  picks.sort((a,b) => b.edge - a.edge);
+
+  const topEdge = document.getElementById("topEdge");
+  const pickBoard = document.getElementById("pickBoard");
+  const boardStatus = document.getElementById("boardStatus");
+
+  if(picks.length && topEdge){
+    topEdge.textContent = (picks[0].edge >= 0 ? "+" : "") + picks[0].edge.toFixed(1) + "%";
+  }
+
+  if(pickBoard){
+    pickBoard.innerHTML = picks.length ? picks.map((p,i) => `
+      <div class="pick-card">
+        <div class="pick-top">
+          <div>
+            <div class="pick-title">${i === 0 ? "⭐ " : i === 1 ? "🔥 " : ""}${p.away} @ ${p.home}</div>
+            <div class="pick-meta">
+              Pick: <strong>${p.pick}</strong><br>
+              Model home: ${p.model.toFixed(1)}% · Market home: ${p.market.toFixed(1)}%<br>
+              Best home line: ${displayAmerican(p.american)} at ${p.book}
+            </div>
           </div>
+          <div class="pick-edge ${p.edge < 0 ? "bad" : ""}">${p.edge >= 0 ? "+" : ""}${p.edge.toFixed(1)}%</div>
         </div>
-        <div class="pick-edge ${p.edge<0?"bad":""}">${p.edge>=0?"+":""}${p.edge.toFixed(1)}%</div>
+        <div class="pill-row">
+          <span class="pill">${p.edge >= 8 ? "Strong Value" : p.edge >= 4 ? "Lean" : p.edge <= -4 ? "Fade/Check Away" : "Pass"}</span>
+          <span class="pill">Real market edge</span>
+        </div>
+        <button class="gold" onclick='addPickToSlip(${JSON.stringify(p)})'>⭐ Add to Bet Slip</button>
       </div>
-      <div class="pill-row">
-        <span class="pill">${p.edge>=8?"Strong Value":p.edge>=4?"Lean":p.edge<=-4?"Fade/Check Away":"Pass"}</span>
-        <span class="pill">Real market edge</span>
-      </div>
-      <button class="gold" onclick='addPickToSlip(${JSON.stringify(p)})'>⭐ Add to Bet Slip</button>
-    </div>
-  `).join(""):`<div class="data-box">No matching odds found for today’s games.</div>`;
-  boardStatus.textContent="Real edge board scanned.";
+    `).join("") : `<div class="data-box">No matching odds found for today’s games.</div>`;
+  }
+
+  if(boardStatus) boardStatus.textContent = "Real edge board scanned.";
 }
 
 function saveSlip(){
@@ -848,21 +970,34 @@ function removeLeg(index){
   slip.splice(index, 1);
   saveSlip();
   renderSlip();
-const slipCountEl = document.getElementById("slipCount");
-if(slipCountEl) slipCountEl.textContent = slip.length;
+
+  const slipCountEl = document.getElementById("slipCount");
+  if(slipCountEl) slipCountEl.textContent = slip.length;
 }
 
 function renderSlip(){
-updateLiveBar("0.00", "0%", "0%", slip.length);
-  const stake=Number(document.getElementById("slipStake").value)||10;
-  if(!slip.length){slipBox.innerHTML="No picks added yet. Add picks from Board or Game.";return}
+  const slipBox = document.getElementById("slipBox");
+  const betMode = document.getElementById("betMode");
+  const slipStake = document.getElementById("slipStake");
 
-  if(betMode.value==="single"){
-    slipBox.innerHTML=slip.map((p,i)=>{
-      const dec=decimalFromAmerican(p.american);
-      const ret=stake*dec;
-      const profit=ret-stake;
-      return`
+  updateLiveBar("0.00", "0%", "0%", slip.length);
+
+  const stake = Number(slipStake?.value) || 10;
+
+  if(!slipBox) return;
+
+  if(!slip.length){
+    slipBox.innerHTML = "No picks added yet. Add picks from Board or Game.";
+    return;
+  }
+
+  if(betMode && betMode.value === "single"){
+    slipBox.innerHTML = slip.map((p,i)=>{
+      const dec = decimalFromAmerican(p.american);
+      const ret = stake * dec;
+      const profit = ret - stake;
+
+      return `
         <div class="leg">
           <div>
             <strong>${p.pick}</strong><br>
@@ -917,21 +1052,51 @@ updateLiveBar(
 }
 
 calculateOdds();
-document.getElementById("signInBtn").onclick = ()=>{
-  document.getElementById("authModal").style.display = "flex";
-};
 
-function closeAuth(){
-  document.getElementById("authModal").style.display = "none";
+const signInBtn = document.getElementById("signInBtn");
+
+if(signInBtn){
+  signInBtn.onclick = () => {
+    const authModal = document.getElementById("authModal");
+    if(authModal) authModal.style.display = "flex";
+  };
 }
 
-function handleLogin(){
-  const email = document.getElementById("authEmail").value;
-  if(!email) return alert("Enter email");
+function closeAuth(){
+  const authModal = document.getElementById("authModal");
+  if(authModal) authModal.style.display = "none";
+}
 
-  localStorage.setItem("wv_user", email);
-const signInBtn = document.getElementById("signInBtn");
-if(signInBtn) signInBtn.textContent = email.split("@")[0];
+async function handleLogin(){
+  const emailEl = document.getElementById("authEmail");
+  const passwordEl = document.getElementById("authPassword");
+  const authStatus = document.getElementById("authStatus");
+
+  const email = emailEl ? emailEl.value.trim() : "";
+  const password = passwordEl ? passwordEl.value : "";
+
+  if(!email || !password){
+    if(authStatus) authStatus.textContent = "Enter email and password.";
+    return;
+  }
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if(error){
+    if(authStatus) authStatus.textContent = error.message;
+    return;
+  }
+
+  if(data && data.user){
+    localStorage.setItem("wv_user", data.user.email);
+
+    const signInBtn = document.getElementById("signInBtn");
+    if(signInBtn) signInBtn.textContent = data.user.email.split("@")[0];
+  }
+
   closeAuth();
 }
 
@@ -952,12 +1117,18 @@ function getParkFactor(stadium){
   return parks[stadium] || {type:"Neutral", impact:0};
 }
 
-document.getElementById("signInBtn").addEventListener("click", () => {
-  document.getElementById("authModal").style.display = "flex";
-});
+const signInBtn = document.getElementById("signInBtn");
 
-function closeAuth() {
-  document.getElementById("authModal").style.display = "none";
+if(signInBtn){
+  signInBtn.addEventListener("click", () => {
+    const authModal = document.getElementById("authModal");
+    if(authModal) authModal.style.display = "flex";
+  });
+}
+
+function closeAuth(){
+  const authModal = document.getElementById("authModal");
+  if(authModal) authModal.style.display = "none";
 }
 
 async function signUp() {
@@ -982,10 +1153,33 @@ async function signIn() {
   const email = emailInput ? emailInput.value.trim() : "";
   const password = passwordInput ? passwordInput.value : "";
 
+  if(!email || !password){
+    if(status) status.textContent = "Enter email and password.";
+    return;
+  }
+
   const { data, error } = await supabaseClient.auth.signInWithPassword({
     email,
     password
   });
+
+  if(error){
+    if(status) status.textContent = error.message;
+    return;
+  }
+
+  if(data && data.user){
+    localStorage.setItem("wv_user", data.user.email);
+
+    const signInBtn = document.getElementById("signInBtn");
+    if(signInBtn){
+      signInBtn.textContent = data.user.email.split("@")[0];
+    }
+  }
+
+  const authModal = document.getElementById("authModal");
+  if(authModal) authModal.style.display = "none";
+}
 
   if (error) {
     if (status) status.textContent = error.message;
@@ -993,10 +1187,12 @@ async function signIn() {
     return;
   }
 
-  localStorage.setItem("wv_user", email);
+  const userEmail = data?.user?.email || email;
+
+  localStorage.setItem("wv_user", userEmail);
 
   const signInBtn = document.getElementById("signInBtn");
-  if (signInBtn) signInBtn.textContent = email.split("@")[0];
+  if (signInBtn) signInBtn.textContent = userEmail.split("@")[0];
 
   const authModal = document.getElementById("authModal");
   if (authModal) authModal.style.display = "none";
@@ -1015,40 +1211,45 @@ async function signOut() {
     return;
   }
 
-  if (status) status.textContent = "Logged out.";
+if (status) status.textContent = "Logged out.";
 
-  const signInBtn = document.getElementById("signInBtn");
-  if (signInBtn) signInBtn.textContent = "👤 Sign In";
+const signInBtn = document.getElementById("signInBtn");
+if (signInBtn) signInBtn.textContent = "👤 Sign In";
 
-  // clear bet slip from screen
-  slip = [];
-  renderSlip();
+// clear bet slip from memory + storage + UI
+slip = [];
+localStorage.removeItem("wagervision_bet_slip");
+renderSlip();
+
 const slipCountEl = document.getElementById("slipCount");
 if (slipCountEl) slipCountEl.textContent = 0;
 
-  // clear odds cache
-  cachedOddsFeed = null;
-  oddsLoadedForSession = false;
+// clear odds cache
+cachedOddsFeed = null;
+oddsLoadedForSession = false;
 
-  closeAuth();
-  showTab("game", document.querySelector(".tab"));
-}
+// close modal if open
+closeAuth();
+
+// go back to Game tab safely
+const firstTab = document.querySelector(".tab");
+if(firstTab) showTab("game", firstTab);
 
 supabaseClient.auth.getUser().then(({ data }) => {
   const signInBtn = document.getElementById("signInBtn");
 
   if (!signInBtn) return;
 
-  if (data.user) {
-    signInBtn.textContent = `👤 ${data.user.email}`;
+  if (data && data.user) {
+    signInBtn.textContent = `👤 ${data.user.email.split("@")[0]}`;
   } else {
     signInBtn.textContent = "👤 Sign In";
   }
 });
 </script>
 
-<div id="authModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);align-items:center;justify-content:center;z-index:1000;">
-  <div style="background:#0f172a;padding:20px;border-radius:12px;width:280px;text-align:center;position:relative;">
+<div id="authModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);align-items:center;justify-content:center;z-index:1000;" onclick="closeAuth()">
+  <div onclick="event.stopPropagation()" style="background:#0f172a;padding:20px;border-radius:12px;width:280px;text-align:center;position:relative;">
 
     <div style="position:absolute;top:8px;right:10px;cursor:pointer;" onclick="closeAuth()">✕</div>
 
@@ -1060,7 +1261,7 @@ supabaseClient.auth.getUser().then(({ data }) => {
     <input id="authPassword" type="password" placeholder="Password"
       style="width:100%;padding:8px;margin-bottom:10px;border-radius:6px;border:none;">
 
-	<div id="authStatus" style="font-size:12px;margin-bottom:10px;color:#fbbf24;"></div>
+    <div id="authStatus" style="font-size:12px;margin-bottom:10px;color:#fbbf24;"></div>
 
     <button onclick="signIn()" style="width:100%;padding:10px;margin-bottom:8px;border-radius:8px;border:none;cursor:pointer;">
       Sign In
