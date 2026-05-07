@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -224,10 +224,10 @@ function updateLiveBar(payout, edge, confidence, legs){
 
   if(!payoutEl || !edgeEl || !confidenceEl || !legsEl) return;
 
-if(payoutEl) payoutEl.textContent = payout;
-if(edgeEl) edgeEl.textContent = edge;
-if(confidenceEl) confidenceEl.textContent = confidence;
-if(legsEl) legsEl.textContent = legs;
+  payoutEl.textContent = payout;
+  edgeEl.textContent = edge;
+  confidenceEl.textContent = confidence;
+  legsEl.textContent = legs;
 }
 
 // your existing code continues below...
@@ -737,13 +737,9 @@ function calculateOdds(){
   const pick = edge >= 0 ? home : away;
   const american = parseBestHomeAmerican();
 
-const winnerEl = document.getElementById("winner");
-const probabilityEl = document.getElementById("probability");
-const edgeBoxEl = document.getElementById("edgeBox");
-
-if(winnerEl) winnerEl.textContent = result.homeScore >= awayScore ? home : away;
-if(probabilityEl) probabilityEl.textContent = Math.round(result.homeScore) + "%";
-if(edgeBoxEl) edgeBoxEl.textContent = (edge >= 0 ? "+" : "") + edge.toFixed(1) + "%";
+  winner.textContent = result.homeScore >= awayScore ? home : away;
+  probability.textContent = Math.round(result.homeScore) + "%";
+  edgeBox.textContent = (edge >= 0 ? "+" : "") + edge.toFixed(1) + "%";
 
   // Why panel
   whyPanel.innerHTML = result.reasons
@@ -762,8 +758,7 @@ async function scanBoard(){
   let picks=[];
 
   for(const game of loadedGames){
-const boardStatusEl = document.getElementById("boardStatus");
-if(boardStatusEl) boardStatusEl.textContent = `Scanning ${picks.length + 1} of ${loadedGames.length} games...`;
+boardStatus.textContent = `Scanning ${picks.length + 1} of ${loadedGames.length} games...`;   
  try{
       const home=game.teams.home.team,away=game.teams.away.team;
       const [hs,as,hp,ap]=await Promise.all([
@@ -827,8 +822,7 @@ function addPickToSlip(p){
   slip.push(p);
   saveSlip();
   renderSlip();
-  const slipCountEl = document.getElementById("slipCount");
-if(slipCountEl) slipCountEl.textContent = slip.length;
+  slipCount.textContent = slip.length;
   showTab("slip", document.querySelectorAll(".tab")[2]);
 }
 
@@ -848,8 +842,7 @@ function removeLeg(index){
   slip.splice(index, 1);
   saveSlip();
   renderSlip();
-const slipCountEl = document.getElementById("slipCount");
-if(slipCountEl) slipCountEl.textContent = slip.length;
+  slipCount.textContent = slip.length;
 }
 
 function renderSlip(){
@@ -1034,24 +1027,10 @@ if (slipCountEl) slipCountEl.textContent = 0;
 }
 
 supabaseClient.auth.getUser().then(({ data }) => {
-const signInBtn = document.getElementById("signInBtn");
-
-if(signInBtn){
   if (data.user) {
-    signInBtn.textContent = `👤 ${data.user.email}`;
+    document.getElementById("signInBtn").textContent = `👤 ${data.user.email}`;
   } else {
-    signInBtn.textContent = "👤 Sign In";
-  }
-}
-supabaseClient.auth.getUser().then(({ data }) => {
-  const signInBtn = document.getElementById("signInBtn");
-
-  if (!signInBtn) return;
-
-  if (data.user) {
-    signInBtn.textContent = `👤 ${data.user.email}`;
-  } else {
-    signInBtn.textContent = "👤 Sign In";
+    document.getElementById("signInBtn").textContent = "👤 Sign In";
   }
 });
 </script>
