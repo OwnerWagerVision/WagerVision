@@ -322,7 +322,7 @@ function baseValue(){let v=0;if(base1.classList.contains("on"))v+=1;if(base2.cla
 async function fetchJSON(url){const res=await fetch(url);if(!res.ok)throw new Error("network");return await res.json()}
 
 async function saveApiKey() {
-  const { data } = await supabaseClient.auth.getUser();
+const { data: userData } = await supabaseClient.auth.getUser();
 
   if (!data.user) {
     alert("You must be signed in to save an API key.");
@@ -347,7 +347,7 @@ if(apiStatus) apiStatus.textContent = "API key saved.";
 }
 
 async function clearApiKey(){
-  const { data } = await supabaseClient.auth.getUser();
+	const { data: userData } = await supabaseClient.auth.getUser();
 
   if(data.user){
     localStorage.removeItem(`wagervision_odds_key_${data.user.id}`);
@@ -360,7 +360,7 @@ async function clearApiKey(){
 }
 
 (async function(){
-  const { data } = await supabaseClient.auth.getUser();
+const { data: userData } = await supabaseClient.auth.getUser();
 
   if (!data.user) return;
 
@@ -498,27 +498,24 @@ function americanToImplied(price){const p=Number(price);if(p>0)return(100/(p+100
 function noVigTwoWay(a,b){const total=a+b;if(!total)return{a,b};return{a:(a/total)*100,b:(b/total)*100}}
 function displayAmerican(price){const p=Number(price);return p>0?`+${p}`:`${p}`}
 function decimalFromAmerican(price){const p=Number(price);if(p>0)return 1+(p/100);return 1+(100/Math.abs(p))}
-async function getOddsFeed(){
-const { data } = await supabaseClient.auth.getUser();
 
 async function getOddsFeed(){
-  const { data } = await supabaseClient.auth.getUser();
+  const { data: userData } = await supabaseClient.auth.getUser();
 
-  if (!data.user) {
+  if (!userData.user) {
     alert("Please sign in to use live odds.");
-    document.getElementById("authModal").style.display = "flex";
+    const authModal = document.getElementById("authModal");
+    if(authModal) authModal.style.display = "flex";
     throw new Error("User not signed in");
   }
 
-const { data } = await supabaseClient.auth.getUser();
+  const key =
+    text("oddsApiKey") ||
+    localStorage.getItem(`wagervision_odds_key_${userData.user.id}`);
 
-const key =
-  text("oddsApiKey") ||
-  (data.user ? localStorage.getItem(`wagervision_odds_key_${data.user.id}`) : "");
-
-if (!key) {
-  throw new Error("No API key");
-}
+  if (!key) {
+    throw new Error("No API key");
+  }
 
 cachedOddsFeed = await fetchJSON(
   `https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?regions=us&markets=h2h&oddsFormat=american&apiKey=${key}`
