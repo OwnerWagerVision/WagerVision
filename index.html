@@ -1230,6 +1230,7 @@ closeAuth();
 // go back to Game tab safely
 const firstTab = document.querySelector(".tab");
 if(firstTab) showTab("game", firstTab);
+}
 
 supabaseClient.auth.getUser().then(({ data }) => {
   var signInBtn = document.getElementById("signInBtn");
@@ -1269,6 +1270,5 @@ supabaseClient.auth.getUser().then(({ data }) => {
 
   </div>
 </div>
-
 </body>
 </html>
