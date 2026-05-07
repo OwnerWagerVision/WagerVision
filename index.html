@@ -510,33 +510,32 @@ async function getOddsFeed(){
     throw new Error("User not signed in");
   }
 
-  const key = text("oddsApiKey") || localStorage.getItem("wagervision_odds_key");
+const { data } = await supabaseClient.auth.getUser();
 
-  if (!key) {
-    throw new Error("No API key");
-  }
+const key =
+  text("oddsApiKey") ||
+  (data.user ? localStorage.getItem(`wagervision_odds_key_${data.user.id}`) : "");
 
-  cachedOddsFeed = await fetchJSON(
-    `https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?regions=us&markets=h2h&oddsFormat=american&apiKey=${key}`
-  );
-
-  oddsLoadedForSession = true;
-
-  return cachedOddsFeed;
+if (!key) {
+  throw new Error("No API key");
 }
 
-  cachedOddsFeed = await fetchJSON(`https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?regions=us&markets=h2h&oddsFormat=american&apiKey=${key}`);
+cachedOddsFeed = await fetchJSON(
+  `https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?regions=us&markets=h2h&oddsFormat=american&apiKey=${key}`
+);
 
-  oddsLoadedForSession = true;
+oddsLoadedForSession = true;
 
-  return cachedOddsFeed;
+return cachedOddsFeed;
 }
 
 function findOddsGame(oddsFeed,homeName,awayName){
   const h=normalizeTeamName(homeName),a=normalizeTeamName(awayName);
   return oddsFeed.find(g=>{
     const gh=normalizeTeamName(g.home_team),ga=normalizeTeamName(g.away_team);
-    return(gh.includes(h)||h.includes(gh)||ga.includes(a)||a.includes(ga));
+   const homeMatch = gh.includes(h) || h.includes(gh);
+const awayMatch = ga.includes(a) || a.includes(ga);
+return homeMatch && awayMatch;	
   });
 }
 function bestHomeLineFromOddsGame(game){
@@ -560,54 +559,107 @@ function bestHomeLineFromOddsGame(game){
   return{best,bestBook,bestProb,rows};
 }
 async function loadOdds(){
+  const oddsBox = document.getElementById("oddsBox");
+  const loadStatus = document.getElementById("loadStatus");
+
   try{
-    oddsBox.innerHTML=`<div class="data-box">Fetching sportsbook odds...</div>`;
-    const feed=await getOddsFeed();
-    const game=findOddsGame(feed,text("homeTeam"),text("awayTeam"));
-    const info=bestHomeLineFromOddsGame(game);
-    if(!info){oddsBox.innerHTML=`<div class="data-box">No matching odds found.</div>`;return}
-    setVal("bookOdds",info.bestProb.toFixed(1));
-    setVal("bestHomeLine",`${displayAmerican(info.best)} at ${info.bestBook}`);
-    oddsBox.innerHTML=info.rows.map(row=>`
-      <div class="book-row">
-        <strong>${row.book}</strong>
-        <div>Home ${displayAmerican(row.homeLine)}</div>
-        <div>Fair ${row.homeProb.toFixed(1)}%</div>
-      </div>
-    `).join("");
+    if(oddsBox) oddsBox.innerHTML = `<div class="data-box">Fetching sportsbook odds...</div>`;
+
+    const feed = await getOddsFeed();
+    const game = findOddsGame(feed, text("homeTeam"), text("awayTeam"));
+    const info = bestHomeLineFromOddsGame(game);
+
+    if(!info){
+      if(oddsBox) oddsBox.innerHTML = `<div class="data-box">No matching odds found.</div>`;
+      return;
+    }
+
+    setVal("bookOdds", info.bestProb.toFixed(1));
+    setVal("bestHomeLine", `${displayAmerican(info.best)} at ${info.bestBook}`);
+
+    if(oddsBox){
+      oddsBox.innerHTML = info.rows.map(row => `
+        <div class="book-row">
+          <strong>${row.book}</strong>
+          <div>Home ${displayAmerican(row.homeLine)}</div>
+          <div>Fair ${row.homeProb.toFixed(1)}%</div>
+        </div>
+      `).join("");
+    }
+
     calculateOdds();
-    loadStatus.textContent="Sportsbook odds loaded.";
-  }catch{
-    oddsBox.innerHTML=`<div class="data-box">Could not load odds. Check API key or request limit.</div>`;
+
+    if(loadStatus) loadStatus.textContent = "Sportsbook odds loaded.";
+  }catch(error){
+    console.error("loadOdds failed:", error);
+    if(oddsBox) oddsBox.innerHTML = `<div class="data-box">Could not load odds. Check API key or request limit.</div>`;
   }
 }
 
 function modelCalc(input){
-  let s=50,reasons=[];
-  s+=4;reasons.push("Home field advantage added +4.");
-  const avgImpact=(input.homeAvg-input.awayAvg)*130;s+=avgImpact;reasons.push(`Batting average impact: ${avgImpact>=0?"+":""}${avgImpact.toFixed(1)}.`);
-  const opsImpact=(input.homeOps-input.awayOps)*45;s+=opsImpact;reasons.push(`OPS impact: ${opsImpact>=0?"+":""}${opsImpact.toFixed(1)}.`);
-  let pitcherDiff=input.homePitcher-input.awayPitcher;let pitcherImpact=pitcherDiff*1.25;if(Math.abs(pitcherDiff)>=5)pitcherImpact=pitcherDiff>0?6:-6;if(pitcherImpact>6)pitcherImpact=6;if(pitcherImpact<-6)pitcherImpact=-6;s+=pitcherImpact;reasons.push(`Starting pitcher impact: ${pitcherImpact>=0?"+":""}${pitcherImpact.toFixed(1)}.`);
-  const eraImpact=(input.awayEra-input.homeEra)*2.65;s+=eraImpact;reasons.push(`Team ERA impact: ${eraImpact>=0?"+":""}${eraImpact.toFixed(1)}.`);
-  s+=input.homeInjuries;s-=input.awayInjuries;
-  if(input.homeInjuries!==0)reasons.push(`Home injury penalty: ${input.homeInjuries}.`);
-  if(input.awayInjuries!==0)reasons.push(`Away injury penalty benefits home by ${-input.awayInjuries}.`);
-  const mult=input.inning>=8?4.5:input.inning>=7?3.8:input.inning>=5?2.8:2.0;
-  const scoreImpact=input.scoreLead*mult;s+=scoreImpact;reasons.push(`Score per inning factor: ${scoreImpact>=0?"+":""}${scoreImpact.toFixed(1)}.`);
-  const basePressure=input.baseValue*(3-input.outs)*0.85;s+=basePressure;
-  if(input.baseValue>0)reasons.push(`Base runner pressure added +${basePressure.toFixed(1)}.`);
-  if(input.inning>=8&&input.scoreLead>0){s+=4;reasons.push("Late-game lead bonus added +4.")}
-  if(input.inning>=8&&input.scoreLead<0){s-=4;reasons.push("Late-game trailing penalty added -4.")}
-  return{homeScore:clamp(s,2,98),reasons};
-}
-function currentInput(){
-  return{
-    homeAvg:num("homeAvg"),awayAvg:num("awayAvg"),
-    homeOps:num("homeOps"),awayOps:num("awayOps"),
-    homePitcher:num("homePitcher"),awayPitcher:num("awayPitcher"),
-    homeEra:num("homeEra"),awayEra:num("awayEra"),
-    homeInjuries:num("homeInjuries"),awayInjuries:num("awayInjuries"),
-    inning:num("inning"),scoreLead:num("scoreLead"),baseValue:baseValue(),outs:num("outs")
+  let s = 50;
+  let reasons = [];
+
+  s += 4;
+  reasons.push("Home field advantage added +4.");
+
+  const avgImpact = (input.homeAvg - input.awayAvg) * 130;
+  s += avgImpact;
+  reasons.push(`Batting average impact: ${avgImpact >= 0 ? "+" : ""}${avgImpact.toFixed(1)}.`);
+
+  const opsImpact = (input.homeOps - input.awayOps) * 45;
+  s += opsImpact;
+  reasons.push(`OPS impact: ${opsImpact >= 0 ? "+" : ""}${opsImpact.toFixed(1)}.`);
+
+  const pitcherDiff = input.homePitcher - input.awayPitcher;
+  let pitcherImpact = pitcherDiff * 1.25;
+
+  if(Math.abs(pitcherDiff) >= 5){
+    pitcherImpact = pitcherDiff > 0 ? 6 : -6;
+  }
+
+  if(pitcherImpact > 6) pitcherImpact = 6;
+  if(pitcherImpact < -6) pitcherImpact = -6;
+
+  s += pitcherImpact;
+  reasons.push(`Starting pitcher impact: ${pitcherImpact >= 0 ? "+" : ""}${pitcherImpact.toFixed(1)}.`);
+
+  const eraImpact = (input.awayEra - input.homeEra) * 2.65;
+  s += eraImpact;
+  reasons.push(`Team ERA impact: ${eraImpact >= 0 ? "+" : ""}${eraImpact.toFixed(1)}.`);
+
+  s += input.homeInjuries;
+  s -= input.awayInjuries;
+
+  if(input.homeInjuries !== 0) reasons.push(`Home injury adjustment: ${input.homeInjuries}.`);
+  if(input.awayInjuries !== 0) reasons.push(`Away injury adjustment benefits home by ${-input.awayInjuries}.`);
+
+  const mult = input.inning >= 8 ? 4.5 : input.inning >= 7 ? 3.8 : input.inning >= 5 ? 2.8 : 2.0;
+  const scoreImpact = input.scoreLead * mult;
+
+  s += scoreImpact;
+  reasons.push(`Score per inning factor: ${scoreImpact >= 0 ? "+" : ""}${scoreImpact.toFixed(1)}.`);
+
+  const basePressure = input.baseValue * (3 - input.outs) * 0.85;
+  s += basePressure;
+
+  if(input.baseValue > 0){
+    reasons.push(`Base runner pressure added +${basePressure.toFixed(1)}.`);
+  }
+
+  if(input.inning >= 8 && input.scoreLead > 0){
+    s += 4;
+    reasons.push("Late-game lead bonus added +4.");
+  }
+
+  if(input.inning >= 8 && input.scoreLead < 0){
+    s -= 4;
+    reasons.push("Late-game trailing penalty added -4.");
+  }
+
+  return {
+    homeScore: clamp(s, 2, 98),
+    reasons
   };
 }
 function parseBestHomeAmerican(){
@@ -615,100 +667,87 @@ function parseBestHomeAmerican(){
   return match?Number(match[0]):-110;
 }
 function calculateOdds(){
-  const home=text("homeTeam")||"Home Team";
-  const away=text("awayTeam")||"Away Team";
-  const result=modelCalc(currentInput());
+  const home = text("homeTeam") || "Home Team";
+  const away = text("awayTeam") || "Away Team";
 
+  const result = modelCalc(currentInput());
+
+  // Park factor
   const park = getParkFactor(selectedGameData?.venue?.name || "");
   let parkAdjustment = park.impact;
+
   if(parkAdjustment > 2) parkAdjustment = 2;
   if(parkAdjustment < -2) parkAdjustment = -2;
+
   result.homeScore += parkAdjustment;
-  result.homeScore = clamp(result.homeScore,2,98);
-  result.reasons.push(`Park factor impact (${park.type}): ${parkAdjustment>=0?"+":""}${parkAdjustment.toFixed(1)}.`);
+  result.homeScore = clamp(result.homeScore, 2, 98);
 
-  // Starting pitcher why logic
-// Starting pitcher why logic
-const homeStarter =
-  selectedGameData?.teams?.home?.probablePitcher?.fullName || "";
-
-const awayStarter =
-  selectedGameData?.teams?.away?.probablePitcher?.fullName || "";
-// Simple pitcher strength (temporary)
-function getPitcherScore(name) {
-  if (!name) return 0;
-
-  // VERY basic logic (we upgrade later)
-const aceList = [
-  "Skubal", "Skenes", "Wheeler", "Sale", "Burnes",
-  "Cole", "Gausman", "Strider", "Glasnow", "Cease",
-  "Yamamoto", "Fried", "Ragans", "Gilbert", "Kirby",
-  "Webb", "Valdez", "Castillo", "Luzardo", "Peralta",
-  "Rodón", "Ryan", "Imanaga", "Greene", "Flaherty"
-];
-  const weakList = ["Bullpen", "TBD"];
-
-  if (aceList.some(n => name.includes(n))) return 2;
-  if (weakList.some(n => name.includes(n))) return -2;
-
-  return 0;
-}
-
-const homePitcherRating = getPitcherScore(homeStarter);
-const awayPitcherRating = getPitcherScore(awayStarter);
-const pitcherEdge = homePitcherRating - awayPitcherRating;
-console.log("PITCHER DEBUG:", {
-  homeStarter,
-  awayStarter,
-  homePitcherRating,
-  awayPitcherRating,
-  pitcherEdge
-});
-
-result.reasons.push(
-  `Starting pitchers: ${homeStarter} vs ${awayStarter}.`
-);
-
-if (Math.abs(pitcherEdge) >= 1.5) {
   result.reasons.push(
-    `${pitcherEdge > 0 ? home : away} has the stronger starter on paper.`
+    `Park factor impact (${park.type}): ${parkAdjustment >= 0 ? "+" : ""}${parkAdjustment.toFixed(1)}.`
   );
-} else if (Math.abs(pitcherEdge) >= 0.5) {
+
+  // Starting pitchers
+  const homeStarter =
+    selectedGameData?.teams?.home?.probablePitcher?.fullName || "";
+
+  const awayStarter =
+    selectedGameData?.teams?.away?.probablePitcher?.fullName || "";
+
+  function getPitcherScore(name){
+    if (!name) return 0;
+
+    const aceList = [
+      "Skubal","Skenes","Wheeler","Sale","Burnes",
+      "Cole","Gausman","Strider","Glasnow","Cease",
+      "Yamamoto","Fried","Ragans","Gilbert","Kirby",
+      "Webb","Valdez","Castillo","Luzardo","Peralta",
+      "Rodón","Ryan","Imanaga","Greene","Flaherty"
+    ];
+
+    const weakList = ["Bullpen","TBD"];
+
+    if (aceList.some(n => name.includes(n))) return 2;
+    if (weakList.some(n => name.includes(n))) return -2;
+
+    return 0;
+  }
+
+  const homePitcherRating = getPitcherScore(homeStarter);
+  const awayPitcherRating = getPitcherScore(awayStarter);
+  const pitcherEdge = homePitcherRating - awayPitcherRating;
+
+  console.log("PITCHER DEBUG:", {
+    homeStarter,
+    awayStarter,
+    homePitcherRating,
+    awayPitcherRating,
+    pitcherEdge
+  });
+
+  // Apply pitcher edge to model
+  result.homeScore += pitcherEdge;
+  result.homeScore = clamp(result.homeScore, 2, 98);
+
   result.reasons.push(
-    `Small starting pitcher lean toward ${pitcherEdge > 0 ? home : away}.`
+    `Pitcher edge impact: ${pitcherEdge >= 0 ? "+" : ""}${pitcherEdge.toFixed(1)}.`
   );
-}
 
-  const market=num("bookOdds");
-  const edge=result.homeScore-market;
-  const awayScore=100-result.homeScore;
-  const pick=edge>=0?home:away;
-  const american=parseBestHomeAmerican();
+  // Final calc
+  const market = num("bookOdds");
+  const edge = result.homeScore - market;
+  const awayScore = 100 - result.homeScore;
 
-  winner.textContent=result.homeScore>=awayScore?home:away;
-  probability.textContent=Math.round(Math.max(result.homeScore,awayScore))+"%";
-  homeProb.textContent=result.homeScore.toFixed(1)+"%";
-  marketProb.textContent=market.toFixed(1)+"%";
-  edgeValue.textContent=(edge>=0?"+":"")+edge.toFixed(1)+"%";
-  bar.style.width=result.homeScore+"%";
+  const pick = edge >= 0 ? home : away;
+  const american = parseBestHomeAmerican();
 
-  let cls="edge-box",msg="";
-  if(edge>=10){cls+=" green";msg=`STRONG VALUE on ${home}. Model ${result.homeScore.toFixed(1)}%, market ${market.toFixed(1)}%. The price looks wrong.`}
-  else if(edge>=5){cls+=" yellow";msg=`LEAN ${home}. Positive edge, but not a cannon shot.`}
-  else if(edge<=-10){cls+=" red";msg=`FADE ${home}. Market may be overpricing them.`}
-  else if(edge<=-5){cls+=" yellow";msg=`LEAN ${away}. ${home} looks a little expensive.`}
-  else{msg=`NO BET. Model and market are too close.`}
-  edgeText.className=cls;edgeText.textContent=msg;
+  winner.textContent = result.homeScore >= awayScore ? home : away;
+  probability.textContent = Math.round(result.homeScore) + "%";
+  edgeBox.textContent = (edge >= 0 ? "+" : "") + edge.toFixed(1) + "%";
 
-
-whyBox.innerHTML=`
-  <strong>Why Panel</strong><br>
-  Model Home Win: ${result.homeScore.toFixed(1)}%<br>
-  Market Home Win: ${market.toFixed(1)}%<br>
-  Edge: ${edge>=0?"+":""}${edge.toFixed(1)}%<br><br>
-  ${result.reasons.map(r=>"• "+r).join("<br>")}
-`;
-  return{home,away,model:result.homeScore,market,edge,pick,american,book:text("bestHomeLine")};
+  // Why panel
+  whyPanel.innerHTML = result.reasons
+    .map(r => `<div class="reason">${r}</div>`)
+    .join("");
 }
 
 async function scanBoard(){
