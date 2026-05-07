@@ -826,7 +826,6 @@ if(whyBox){
 }
 
 async function scanBoard(){
-  const boardStatus = document.getElementById("boardStatus");
   const gameDate = document.getElementById("gameDate");
 
   if(!loadedGames.length) await loadGames();
@@ -908,8 +907,6 @@ async function scanBoard(){
 
   const topEdge = document.getElementById("topEdge");
   const pickBoard = document.getElementById("pickBoard");
-  const boardStatus = document.getElementById("boardStatus");
-
   if(picks.length && topEdge){
     topEdge.textContent = (picks[0].edge >= 0 ? "+" : "") + picks[0].edge.toFixed(1) + "%";
   }
