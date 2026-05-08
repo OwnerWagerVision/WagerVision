@@ -748,7 +748,7 @@ function modelCalc(input){
   s += avgImpact;
   reasons.push(`Batting average impact: ${avgImpact >= 0 ? "+" : ""}${avgImpact.toFixed(1)}.`);
 
-  const opsImpact = (input.homeOps - input.awayOps) * 175;
+  const opsImpact = (input.homeOps - input.awayOps) * 100;
   s += opsImpact;
   reasons.push(`OPS impact: ${opsImpact >= 0 ? "+" : ""}${opsImpact.toFixed(1)}.`);
 
