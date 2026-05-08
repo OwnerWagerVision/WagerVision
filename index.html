@@ -495,12 +495,9 @@ async function loadSelectedGame(){
 setText("loadStatus", "Game loaded.");
 calculateOdds();
 
-try {
-  await loadOdds();
-} catch (error) {
+loadOdds().catch(error => {
   console.log("Auto odds skipped:", error);
-   }
-}
+});
 
 async function refreshLiveState(showMessage = true){
   if(!selectedGamePk){
