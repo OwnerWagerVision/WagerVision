@@ -762,7 +762,7 @@ function modelCalc(input){
   s += eraImpact;
   reasons.push(`Team ERA impact: ${eraImpact >= 0 ? "+" : ""}${eraImpact.toFixed(1)}.`);
 
-  const whipImpact = (input.awayWhip - input.homeWhip) *22;
+  const whipImpact = (input.awayWhip - input.homeWhip) *24;
   s += whipImpact;
   reasons.push(`Team WHIP impact: ${whipImpact >= 0 ? "+" : ""}${whipImpact.toFixed(1)}.`);  
 
