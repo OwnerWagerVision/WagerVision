@@ -807,8 +807,10 @@ function calculateOdds(){
   const pick = edge >= 0 ? home : away;
   const american = edge >= 0 ? homeLine : awayLine;
 
-  setText("winner", result.homeScore >= awayScore ? home : away);
-  setText("probability", Math.round(result.homeScore) + "%");
+  const displayProb = pick === home ? result.homeScore : 100 - result.homeScore;
+
+  setText("winner", pick);
+  setText("probability", Math.round(displayProb) + "%");
   setText("homeProb", result.homeScore.toFixed(1) + "%");
   setText("marketProb", market.toFixed(1) + "%");
   setText("edgeValue", (edge >= 0 ? "+" : "") + edge.toFixed(1) + "%");
