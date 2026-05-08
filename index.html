@@ -139,6 +139,22 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}
 </head>
 
 <body>
+<div id="landingPage">
+  <div class="landing-inner">
+
+    <img src="logo1.png" alt="WagerVision Logo" class="landing-logo">
+
+    <div class="landing-actions">
+      <button onclick="openAuthModal('signin')">Sign In</button>
+      <button onclick="openAuthModal('signup')">Create Account</button>
+      <button class="secondary" onclick="enterApp()">Continue Without Signing In</button>
+    </div>
+
+  </div>
+</div>
+
+<div id="app" style="display:none;">
+
 <div class="app">
   <div id="liveBar">
     <div>💰 $<span id="livePayout">0.00</span></div>
@@ -1234,7 +1250,13 @@ window.signOut = signOut;
 window.saveApiKey = saveApiKey;
 window.clearApiKey = clearApiKey;
 
+function enterApp() {
+  document.getElementById("landingPage").style.display = "none";
+  document.getElementById("app").style.display = "block";
+}
+
 document.addEventListener("DOMContentLoaded", init);
 </script>
+</div>
 </body>
 </html>
