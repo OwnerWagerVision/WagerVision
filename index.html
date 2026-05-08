@@ -204,9 +204,9 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}
     <img src="logo1.png" alt="WagerVision Logo" class="landing-logo">
 
 <div class="landing-actions">
-  <button onclick="openAuth('signin')">Sign In</button>
-  <button onclick="openAuth('signup')">Create Account</button>
-  <button class="secondary" onclick="document.getElementById('landingPage').style.display='none';document.getElementById('app').style.display='block';">Continue Without Signing In</button>
+  <button onclick="openAuth()">Sign In</button>
+  <button onclick="openAuth()">Create Account</button>
+  <button class="secondary" onclick="startApp()">Continue Without Signing In</button>
 </div>
 
   </div>
@@ -1316,7 +1316,14 @@ function enterApp() {
   document.getElementById("app").style.display = "block";
 }
 
-document.addEventListener("DOMContentLoaded", init);
+document.addEventListener("DOMContentLoaded", () => {
+  window.startApp = function() {
+    document.getElementById("landingPage").style.display = "none";
+    document.getElementById("app").style.display = "block";
+  };
+
+  init();
+});
 </script>
 </div>
 </body>
