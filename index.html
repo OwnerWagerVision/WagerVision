@@ -136,47 +136,54 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}
 @media(max-width:850px){.grid,.form-grid{grid-template-columns:1fr}.quick-grid{grid-template-columns:1fr}.button-row{grid-template-columns:1fr 1fr}.book-row{grid-template-columns:1fr}.hero{padding:13px}}
 @media(max-width:600px){.hero{display:none}.main-readout{padding:10px}.card{padding:10px;margin-bottom:8px}.big{font-size:56px}.tabs{bottom:6px;left:6px;right:6px}.tab{padding:8px 4px}#liveBar{margin-right:100px;font-size:11px}}
 #landingPage{
-  min-height:100vh;
+  position:fixed;
+  inset:0;
+  width:100vw;
+  height:100vh;
   background:#000;
   color:white;
   display:flex;
   align-items:center;
   justify-content:center;
   text-align:center;
-  padding:18px;
+  padding:16px;
   box-sizing:border-box;
   overflow:hidden;
+  z-index:9999;
 }
 
 .landing-inner{
   width:100%;
-  max-width:360px;
+  max-width:420px;
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:14px;
+  justify-content:center;
+  gap:12px;
 }
 
 .landing-logo{
   width:100%;
-  max-width:280px;
-  max-height:45vh;
+  max-width:380px;
+  max-height:62vh;
   object-fit:contain;
 }
 
 .landing-actions{
   width:100%;
+  max-width:260px;
   display:grid;
-  gap:10px;
+  gap:8px;
 }
 
 .landing-actions button{
   width:100%;
-  padding:12px 14px;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,.2);
+  padding:9px 12px;
+  border-radius:11px;
+  border:1px solid rgba(255,255,255,.22);
   background:#1d4ed8;
   color:white;
+  font-size:13px;
   font-weight:800;
   cursor:pointer;
 }
@@ -1296,6 +1303,7 @@ window.closeAuth = closeAuth;
 window.signIn = signIn;
 window.signUp = signUp;
 window.signOut = signOut;
+window.enterApp = enterApp;
 window.saveApiKey = saveApiKey;
 window.clearApiKey = clearApiKey;
 
