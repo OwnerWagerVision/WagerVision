@@ -210,6 +210,8 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}
           <div><label>Away Pitcher</label><select id="awayPitcher"><option value="9">Elite</option><option value="8">Ace</option><option value="6">Good</option><option value="5" selected>Average</option><option value="3">Shaky</option><option value="2">Weak</option></select></div>
           <div><label>Home ERA</label><input id="homeEra" type="number" step="0.01" value="4.10"></div>
           <div><label>Away ERA</label><input id="awayEra" type="number" step="0.01" value="4.20"></div>
+          <div><label>Home WHIP</label><input id="homeWhip" type="number" step="0.01" value="1.30"></div>
+          <div><label>Away WHIP</label><input id="awayWhip" type="number" step="0.01" value="1.30"></div>
           <div><label>Home Injury Impact</label><select id="homeInjuries"><option value="0">None</option><option value="-2">Minor lineup hit</option><option value="-4">Star hitter out</option><option value="-6">Multiple starters out</option><option value="-8">Pitcher scratched</option></select></div>
           <div><label>Away Injury Impact</label><select id="awayInjuries"><option value="0">None</option><option value="-2">Minor lineup hit</option><option value="-4">Star hitter out</option><option value="-6">Multiple starters out</option><option value="-8">Pitcher scratched</option></select></div>
           <div><label>Current Inning</label><select id="inning"><option value="1">1st</option><option value="2">2nd</option><option value="3">3rd</option><option value="4">4th</option><option value="5" selected>5th</option><option value="6">6th</option><option value="7">7th</option><option value="8">8th</option><option value="9">9th+</option></select></div>
@@ -476,6 +478,8 @@ async function loadSelectedGame(){
     setVal("awayOps", as.ops.toFixed(3));
     setVal("homeEra", hs.era.toFixed(2));
     setVal("awayEra", as.era.toFixed(2));
+    setVal("homeWhip", hs.whip.toFixed(2));
+    setVal("awayWhip", as.whip.toFixed(2));
     setVal("homePitcher", ratePitcher(hp));
     setVal("awayPitcher", ratePitcher(ap));
 
@@ -722,6 +726,8 @@ function currentInput(){
     awayPitcher:num("awayPitcher"),
     homeEra:num("homeEra"),
     awayEra:num("awayEra"),
+    homeWhip: num("homeWhip") || 1.30,
+    awayWhip: num("awayWhip") || 1.30,
     homeInjuries:num("homeInjuries"),
     awayInjuries:num("awayInjuries"),
     inning:num("inning"),
@@ -742,7 +748,7 @@ function modelCalc(input){
   s += avgImpact;
   reasons.push(`Batting average impact: ${avgImpact >= 0 ? "+" : ""}${avgImpact.toFixed(1)}.`);
 
-  const opsImpact = (input.homeOps - input.awayOps) * 45;
+  const opsImpact = (input.homeOps - input.awayOps) * 75;
   s += opsImpact;
   reasons.push(`OPS impact: ${opsImpact >= 0 ? "+" : ""}${opsImpact.toFixed(1)}.`);
 
@@ -756,7 +762,11 @@ function modelCalc(input){
   s += eraImpact;
   reasons.push(`Team ERA impact: ${eraImpact >= 0 ? "+" : ""}${eraImpact.toFixed(1)}.`);
 
-  s += input.homeInjuries;
+  const whipImpact = (input.awayWhip - input.homeWhip) * 12;
+  s += whipImpact;
+  reasons.push(`Team WHIP impact: ${whipImpact >= 0 ? "+" : ""}${whipImpact.toFixed(1)}.`);  
+
+s += input.homeInjuries;
   s -= input.awayInjuries;
   if(input.homeInjuries !== 0) reasons.push(`Home injury adjustment: ${input.homeInjuries}.`);
   if(input.awayInjuries !== 0) reasons.push(`Away injury adjustment benefits home by ${-input.awayInjuries}.`);
