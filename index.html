@@ -766,24 +766,24 @@ function modelCalc(input){
   s += whipImpact;
   reasons.push(`Team WHIP impact: ${whipImpact >= 0 ? "+" : ""}${whipImpact.toFixed(1)}.`);  
  
- const homeTriple =
-(input.homeOps > input.awayOps) &&
-(input.homeEra < input.awayEra) &&
-(input.homeWhip < input.awayWhip);
+  const homeTriple =
+  (input.homeOps > input.awayOps) &&
+  (input.homeEra < input.awayEra) &&
+  (input.homeWhip < input.awayWhip);
 
-const awayTriple =
-(input.awayOps > input.homeOps) &&
-(input.awayEra < input.homeEra) &&
-(input.awayWhip < input.homeWhip);
+  const awayTriple =
+  (input.awayOps > input.homeOps) &&
+  (input.awayEra < input.homeEra) &&
+  (input.awayWhip < input.homeWhip);
 
-if (homeTriple) {
-s += 5;
-reasons.push("Triple Edge Bonus: Home leads Ops, Era, and Whip +5.");
+  if (homeTriple) {
+  s += 5;
+ reasons.push("Triple Edge Bonus: Home leads Ops, Era, and Whip +5.");
 }
 
-if (awayTriple) {
-s -= 5;
-reasons.push("Triple Edge Bonus: Away leads Ops, Era, and Whip -5.");
+ if (awayTriple) {
+ s -= 5;
+ reasons.push("Triple Edge Bonus: Away leads Ops, Era, and Whip -5.");
 }
 
 s += input.homeInjuries;
