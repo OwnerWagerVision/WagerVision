@@ -252,7 +252,7 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}
       <div class="summary-card"><strong id="slipCount">0</strong><span>Slip Legs</span></div>
     </div>
     <div class="card">
-      <h2>Best Picks Board</h2>
+      <h2>Best Picks Pregame Board</h2>
       <button onclick="scanBoard()" type="button">Scan Real Edge Board</button>
       <button class="secondary" onclick="loadGames()" type="button">Load MLB Games Only</button>
       <div class="status" id="boardStatus">Save your Odds API key in Settings, then scan the real board.</div>
@@ -893,7 +893,7 @@ async function scanBoard(){
     return;
   }
 
-  setText("boardStatus", "Scanning full board with real sportsbook odds...");
+  setText("boardStatus", "Scanning pregame  sportsbook odds...");
   const season = new Date(text("gameDate") || new Date()).getFullYear();
   const picks = [];
 
