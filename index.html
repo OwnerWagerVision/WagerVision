@@ -627,7 +627,14 @@ function bestHomeLineFromOddsGame(game){
 }
 
 function applyOddsToCurrentGame(feed){
-  const game = findOddsGame(feed, text("homeTeam"), text("awayTeam"));
+const homeName = text("homeTeam").toLowerCase();
+const awayName = text("awayTeam").toLowerCase();
+
+const game = feed.find(g =>
+  (g.home_team.toLowerCase().includes(homeName) || homeName.includes(g.home_team.toLowerCase())) &&
+  (g.away_team.toLowerCase().includes(awayName) || awayName.includes(g.away_team.toLowerCase()))
+);
+console.log("Matching odds game:", game);
   const info = bestHomeLineFromOddsGame(game);
 
   if(!info){
