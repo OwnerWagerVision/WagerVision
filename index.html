@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+]<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -143,7 +143,7 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}
   min-height:100vh !important;
   background:#000 !important;
   color:white !important;
-  display:flex !important;
+  display:flex;
   align-items:center !important;
   justify-content:center !important;
   text-align:center !important;
@@ -204,9 +204,9 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}
     <img src="logo1.png" alt="WagerVision Logo" class="landing-logo">
 
 <div class="landing-actions">
-  <button onclick="openAuth()">Sign In</button>
-  <button onclick="openAuth()">Create Account</button>
-  <button class="secondary" onclick="startApp()">Continue Without Signing In</button>
+  <button id="landingSignIn" type="button">Sign In</button>
+  <button id="landingCreate" type="button">Create Account</button>
+  <button id="landingContinue" class="secondary" type="button" onclick="startApp()">Continue Without Signing In</button>
 </div>
 
   </div>
@@ -1302,28 +1302,18 @@ window.clearSlip = clearSlip;
 window.removeLeg = removeLeg;
 window.renderSlip = renderSlip;
 window.openAuth = openAuth;
-window.enterApp = enterApp;
 window.closeAuth = closeAuth;
 window.signIn = signIn;
 window.signUp = signUp;
 window.signOut = signOut;
-window.enterApp = enterApp;
 window.saveApiKey = saveApiKey;
 window.clearApiKey = clearApiKey;
+window.startApp = startApp;
 
-function enterApp() {
+function startApp() {
   document.getElementById("landingPage").style.display = "none";
   document.getElementById("app").style.display = "block";
 }
-
-document.addEventListener("DOMContentLoaded", () => {
-  window.startApp = function() {
-    document.getElementById("landingPage").style.display = "none";
-    document.getElementById("app").style.display = "block";
-  };
-
-  init();
-});
 </script>
 </div>
 </body>
