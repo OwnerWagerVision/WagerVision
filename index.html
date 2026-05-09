@@ -212,6 +212,19 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}
   </div>
 </div>
 
+<div id="authModal" class="auth-modal" onclick="closeAuth()">
+  <div class="auth-card" onclick="event.stopPropagation()">
+    <div class="auth-close" onclick="closeAuth()">✕</div>
+    <h3>Account</h3>
+    <input id="authEmail" type="email" placeholder="you@email.com" style="margin-bottom:10px">
+    <input id="authPassword" type="password" placeholder="Password" style="margin-bottom:10px">
+    <div id="authStatus" style="font-size:12px;margin-bottom:10px;color:#fbbf24;min-height:18px"></div>
+    <button onclick="signIn()" type="button">Sign In</button>
+    <button onclick="signUp()" type="button">Create Account</button>
+    <button class="secondary" onclick="signOut()" type="button">Sign Out</button>
+  </div>
+</div>
+
 <div id="app" style="display:none;">
 
 <div class="app">
@@ -361,19 +374,6 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}
   </section>
 
   <div class="footer">WagerVision V6.2. Finds bad prices, not guaranteed money.</div>
-</div>
-
-<div id="authModal" class="auth-modal" onclick="closeAuth()">
-  <div class="auth-card" onclick="event.stopPropagation()">
-    <div class="auth-close" onclick="closeAuth()">✕</div>
-    <h3>Account</h3>
-    <input id="authEmail" type="email" placeholder="you@email.com" style="margin-bottom:10px">
-    <input id="authPassword" type="password" placeholder="Password" style="margin-bottom:10px">
-    <div id="authStatus" style="font-size:12px;margin-bottom:10px;color:#fbbf24;min-height:18px"></div>
-    <button onclick="signIn()" type="button">Sign In</button>
-    <button onclick="signUp()" type="button">Create Account</button>
-    <button class="secondary" onclick="signOut()" type="button">Sign Out</button>
-  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
