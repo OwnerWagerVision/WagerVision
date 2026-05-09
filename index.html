@@ -508,9 +508,15 @@ async function loadGames(){
         return `<option value="${i}">${away} @ ${home} · ${ap} vs ${hp}</option>`;
       }).join("");
    
-    el("gameSelect").selectedIndex = 0;
-    await loadSelectedGame();
-    await loadOdds();
+   el("gameSelect").selectedIndex = 0;
+await loadSelectedGame();
+
+const user = await getCurrentUser();
+
+if (user) {
+  await loadOdds();
+} else {
+  setText("loadStatus", "Model odds loaded. Sign in to unlock real-time sportsbook odds.");
 }
 
     setText("loadStatus", `${loadedGames.length} games loaded. Pick one and use game.`);
@@ -658,7 +664,7 @@ async function getCurrentUser(){
 async function getOddsFeed(){
   const user = await getCurrentUser();
   if(!user){
-    openAuth("Please sign in to use live odds.");
+    openAuth("To view real time sportsbook odds please sign in or create an account.");
     throw new Error("Not signed in");
   }
 
@@ -1339,7 +1345,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (user) {
         await loadOdds();
       } else {
-        setText("loadStatus", "Model odds loaded. Sign in to unlock live market odds.");
+        setText("loadStatus", "Model odds loaded. Sign in to unlock real time sportsbook odds.");
       }
     });
   }
