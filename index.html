@@ -827,12 +827,12 @@ function modelCalc(input){
   s += avgImpact;
   reasons.push(`Batting average impact: ${avgImpact >= 0 ? "+" : ""}${avgImpact.toFixed(1)}.`);
 
-  const opsImpact = (input.homeOps - input.awayOps) * 100;
+  const opsImpact = (input.homeOps - input.awayOps) * 70;
   s += opsImpact;
   reasons.push(`OPS impact: ${opsImpact >= 0 ? "+" : ""}${opsImpact.toFixed(1)}.`);
 
   const pitcherDiff = input.homePitcher - input.awayPitcher;
-  let pitcherImpact = pitcherDiff * 1.25;
+  let pitcherImpact = pitcherDiff * 1.45;
   pitcherImpact = clamp(pitcherImpact, -6, 6);
   s += pitcherImpact;
   reasons.push(`Starting pitcher impact: ${pitcherImpact >= 0 ? "+" : ""}${pitcherImpact.toFixed(1)}.`);
