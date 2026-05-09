@@ -507,7 +507,11 @@ async function loadGames(){
         const hp = g.teams.home.probablePitcher?.fullName || "TBD";
         return `<option value="${i}">${away} @ ${home} · ${ap} vs ${hp}</option>`;
       }).join("");
-    }
+   
+    el("gameSelect").selectedIndex = 0;
+    await loadSelectedGame();
+    await loadOdds();
+}
 
     setText("loadStatus", `${loadedGames.length} games loaded. Pick one and use game.`);
     setText("boardStatus", `${loadedGames.length} games loaded.`);
