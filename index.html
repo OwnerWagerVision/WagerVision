@@ -1333,7 +1333,14 @@ document.addEventListener("DOMContentLoaded", function () {
   if (gameSelect) {
     gameSelect.addEventListener("change", async function () {
       await loadSelectedGame();
-      await loadOdds();
+
+      const user = await getCurrentUser();
+
+      if (user) {
+        await loadOdds();
+      } else {
+        setText("loadStatus", "Model odds loaded. Sign in to unlock live market odds.");
+      }
     });
   }
 
