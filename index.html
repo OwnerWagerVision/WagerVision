@@ -987,22 +987,24 @@ async function scanBoard(){
         getPitcherStats(game.teams.away.probablePitcher?.id, season)
       ]);
 
-      const model = modelCalc({
-        homeAvg:hs.avg,
-        awayAvg:as.avg,
-        homeOps:hs.ops,
-        awayOps:as.ops,
-        homePitcher:ratePitcher(hp),
-        awayPitcher:ratePitcher(ap),
-        homeEra:hs.era,
-        awayEra:as.era,
-        homeInjuries:0,
-        awayInjuries:0,
-        inning:1,
-        scoreLead:0,
-        baseValue:0,
-        outs:0
-      });
+     const model = modelCalc({
+  homeAvg:hs.avg,
+  awayAvg:as.avg,
+  homeOps:hs.ops,
+  awayOps:as.ops,
+  homePitcher:ratePitcher(hp),
+  awayPitcher:ratePitcher(ap),
+  homeEra:hs.era,
+  awayEra:as.era,
+  homeWhip:hs.whip,
+  awayWhip:as.whip,
+  homeInjuries:0,
+  awayInjuries:0,
+  inning:num("inning"),
+  scoreLead:num("scoreLead"),
+  baseValue:baseValue(),
+  outs:num("outs")
+  });
 
       const oddsGame = findOddsGame(oddsFeed, home.name, away.name);
       const oddsInfo = bestHomeLineFromOddsGame(oddsGame);
