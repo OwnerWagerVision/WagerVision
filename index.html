@@ -1184,6 +1184,8 @@ async function signUp(){
   }
 
   setText("authStatus", "Signup worked. Check your email if confirmation is enabled.");
+closeAuth();
+startApp();
 }
 
 async function signIn(){
@@ -1207,8 +1209,9 @@ async function signIn(){
     localStorage.setItem("wv_user", data.user.email);
     updateAuthButton(data.user);
     await loadSavedApiKey();
-    setText("authStatus", "Signed in.");
-    closeAuth();
+   setText("authStatus", "Signed in.");
+   closeAuth();
+   startApp();
   }
 }
 
