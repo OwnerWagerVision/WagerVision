@@ -779,7 +779,7 @@ async function loadOdds(){
     setText("loadStatus", "Sportsbook odds loaded.");
   }catch(error){
     console.error(error);
-    if(oddsBox) oddsBox.innerHTML = `<div class="data-box">Could not load odds. Check sign-in, API key, or Odds API request limit.</div>`;
+    if(oddsBox) oddsBox.innerHTML = `<div class="data-box">To load odds, create account or sign in and load api key.</div>`;
     setText("loadStatus", "Could not load odds.");
   }
 }
