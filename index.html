@@ -1324,7 +1324,18 @@ function startApp() {
   document.getElementById("landingPage").style.display = "none";
   document.getElementById("app").style.display = "block";
 }
-init();
+document.addEventListener("DOMContentLoaded", function () {
+  const gameSelect = document.getElementById("gameSelect");
+
+  if (gameSelect) {
+    gameSelect.addEventListener("change", async function () {
+      await loadSelectedGame();
+      await loadOdds();
+    });
+  }
+
+  init();
+});
 </script>
 </div>
 </body>
