@@ -511,8 +511,6 @@ async function loadGames(){
    el("gameSelect").selectedIndex = 0;
 await loadSelectedGame();
 
-const user = await getCurrentUser();
-
 if (user) {
   await loadOdds();
 } else {
