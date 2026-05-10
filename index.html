@@ -886,33 +886,32 @@ function modelCalc(input){
   let s = 50;
   let reasons = [];
 
-  s += 4;
-  reasons.push("Home field advantage added +1.");
+  s += 2.5;
+  reasons.push("Home field advantage added +2.5");
 
-  const avgImpact = (input.homeAvg - input.awayAvg) * 130;
+  const avgImpact = clamp((input.homeAvg - input.awayAvg) * 40, -3, 3);
   s += avgImpact;
-  reasons.push(`Batting average impact: ${avgImpact >= 0 ? "+" : ""}${avgImpact.toFixed(1)}.`);
+  reasons.push(`Batting average support: ${avgImpact >= 0 ? "+" : ""}${avgImpact.toFixed(1)}.`);
 
-  const opsImpact = (input.homeOps - input.awayOps) * 70;
+  const opsImpact = clamp((input.homeOps - input.awayOps) * 35, -12, 12);
   s += opsImpact;
-  reasons.push(`OPS impact: ${opsImpact >= 0 ? "+" : ""}${opsImpact.toFixed(1)}.`);
+  reasons.push(`OPS (offense) impact: ${opsImpact >= 0 ? "+" : ""}${opsImpact.toFixed(1)}.`);
 
   const pitcherDiff = input.homePitcher - input.awayPitcher;
-  let pitcherImpact = pitcherDiff * 1.45;
-  pitcherImpact = clamp(pitcherImpact, -6, 6);
+  const pitcherImpact = clamp(pitcherDiff * 2.4, -11, 11);
   s += pitcherImpact;
-  reasons.push(`Starting pitcher impact: ${pitcherImpact >= 0 ? "+" : ""}${pitcherImpact.toFixed(1)}.`);
+  reasons.push(`Starting pitcher weight: ${pitcherImpact >= 0 ? "+" : ""}${pitcherImpact.toFixed(1)}.`);
 
-  const eraImpact = (input.awayEra - input.homeEra) * 4.65;
+  const eraImpact = clamp((input.awayEra - input.homeEra) * 2.2, -5, 5);
   s += eraImpact;
-  reasons.push(`Team ERA impact: ${eraImpact >= 0 ? "+" : ""}${eraImpact.toFixed(1)}.`);
+  reasons.push(`Team ERA weight: ${eraImpact >= 0 ? "+" : ""}${eraImpact.toFixed(1)}.`);
 
   const homeWhip = Number(input.homeWhip) || 1.30;
   const awayWhip = Number(input.awayWhip) || 1.30;
 
-  const whipImpact = (awayWhip - homeWhip) * 24;
+  const whipImpact = clamp((awayWhip - homeWhip) * 22, -6, 6);
   s += whipImpact;
-  reasons.push(`Team WHIP impact: ${whipImpact >= 0 ? "+" : ""}${whipImpact.toFixed(1)}.`);
+  reasons.push(`Team WHIP weight: ${whipImpact >= 0 ? "+" : ""}${whipImpact.toFixed(1)}.`);
  
   const homeTriple =
   (input.homeOps > input.awayOps) &&
@@ -924,14 +923,14 @@ function modelCalc(input){
   (input.awayEra < input.homeEra) &&
   (awayWhip < homeWhip);
 
-  if (homeTriple) {
-  s += 5;
- reasons.push("Triple Edge Bonus: Home leads Ops, Era, and Whip +5.");
+if (homeTriple) {
+  s += 5.5;
+  reasons.push("Triple Edge Bonus: Home leads OPS, ERA, and WHIP +5.5.");
 }
 
- if (awayTriple) {
- s -= 5;
- reasons.push("Triple Edge Bonus: Away leads Ops, Era, and Whip -5.");
+if (awayTriple) {
+  s -= 5.5;
+  reasons.push("Triple Edge Bonus: Away leads OPS, ERA, and WHIP -5.5.");
 }
 
 s += input.homeInjuries;
@@ -939,7 +938,7 @@ s += input.homeInjuries;
   if(input.homeInjuries !== 0) reasons.push(`Home injury adjustment: ${input.homeInjuries}.`);
   if(input.awayInjuries !== 0) reasons.push(`Away injury adjustment benefits home by ${-input.awayInjuries}.`);
 
-  const mult = input.inning >= 8 ? 4.5 : input.inning >= 7 ? 3.8 : input.inning >= 5 ? 2.8 : 2.0;
+  const mult = input.inning >= 8 ? 3.8 : input.inning >= 7 ? 3.2 : input.inning >= 5 ? 2.4 : 1.6;
   const scoreImpact = input.scoreLead * mult;
   s += scoreImpact;
   reasons.push(`Score per inning factor: ${scoreImpact >= 0 ? "+" : ""}${scoreImpact.toFixed(1)}.`);
@@ -948,16 +947,16 @@ s += input.homeInjuries;
   s += basePressure;
   if(input.baseValue > 0) reasons.push(`Base runner pressure added +${basePressure.toFixed(1)}.`);
 
-  if(input.inning >= 8 && input.scoreLead > 0){
-    s += 4;
-    reasons.push("Late-game lead bonus added +4.");
-  }
-  if(input.inning >= 8 && input.scoreLead < 0){
-    s -= 4;
-    reasons.push("Late-game trailing penalty added -4.");
-  }
+if(input.inning >= 8 && input.scoreLead > 0){
+  s += 2.5;
+  reasons.push("Late-game leverage: protecting lead +2.5.");
+}
+if(input.inning >= 8 && input.scoreLead < 0){
+  s -= 2.5;
+  reasons.push("Late-game leverage: trailing -2.5.");
+}
 
-  return { homeScore:clamp(s,2,98), reasons };
+    return { homeScore:clamp(s,3,97), reasons };
 }
 
 function parseBestHomeAmerican(){
