@@ -1468,11 +1468,25 @@ function renderGameTicker() {
 
     const isLive = g.status?.detailedState?.includes("In Progress");
 
-    if (awayScore !== "" && homeScore !== "") {
-      return `${away} ${awayScore} - ${homeScore} ${home}${isLive ? " 🔴" : ""}`;
-    }
+  const status = g.status?.detailedState || "";
 
-    return `${away} @ ${home}`;
+let label = "";
+
+if (status.includes("In Progress")) {
+  label = g.linescore?.currentInning
+    ? ` (Inning ${g.linescore.currentInning})`
+    : " (Live)";
+} else if (status.includes("Final")) {
+  label = " (Final)";
+} else {
+  label = " (Pregame)";
+}
+
+if (awayScore !== "" && homeScore !== "") {
+  return `${away} ${awayScore} - ${homeScore} ${home}${label}`;
+}
+
+return `${away} @ ${home}${label}`;
   });
     ticker.textContent = items.concat(items).join("   ⚾   ");
 }
