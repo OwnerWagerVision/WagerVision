@@ -1476,14 +1476,19 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function renderGameTicker() {
   const ticker = document.getElementById("gameTicker");
-  if (!ticker || !loadedGames.length) return;
+  if (!ticker) return;
+
+  if (!loadedGames.length) {
+    ticker.textContent = "Loading today's MLB games...";
+    return;
+  }
 
   const items = loadedGames.map(g => {
-    const away = g.teams.away.team.name;
-    const home = g.teams.home.team.name;
+    const away = g.teams?.away?.team?.name || "Away";
+    const home = g.teams?.home?.team?.name || "Home";
 
-    const awayScore = g.teams.away.score;
-    const homeScore = g.teams.home.score;
+    const awayScore = g.teams?.away?.score;
+    const homeScore = g.teams?.home?.score;
 
     const state = g.status?.abstractGameState || "";
     const detailed = g.status?.detailedState || "";
@@ -1493,18 +1498,13 @@ function renderGameTicker() {
     if (state === "Live") {
       const inning = g.linescore?.currentInning;
       const half = g.linescore?.inningHalf;
-
-      if (inning && half) {
-        label = ` (${half} ${inning})`;
-      } else {
-        label = " (Live)";
-      }
+      label = inning && half ? ` (${half} ${inning})` : " (Live)";
     } else if (state === "Final") {
       label = " (Final)";
     } else if (state === "Preview") {
       label = " (Pregame)";
     } else {
-      label = ` (${detailed})`;
+      label = detailed ? ` (${detailed})` : "";
     }
 
     if (awayScore !== undefined && homeScore !== undefined) {
@@ -1512,10 +1512,19 @@ function renderGameTicker() {
     }
 
     return `${away} @ ${home}${label}`;
-  });
+  }).filter(Boolean);
+
+  if (!items.length) {
+    ticker.textContent = "MLB scoreboard loading...";
+    return;
+  }
 
   ticker.textContent = items.concat(items).join("   ⚾   ");
 }
+
+window.addEventListener("load", () => {
+  loadGames();
+});
 </script>
 </div>
 </body>
