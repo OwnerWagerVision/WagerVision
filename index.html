@@ -135,6 +135,29 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}
 .auth-close{position:absolute;top:8px;right:10px;cursor:pointer;color:#cbd5e1;font-weight:900}
 @media(max-width:850px){.grid,.form-grid{grid-template-columns:1fr}.quick-grid{grid-template-columns:1fr}.button-row{grid-template-columns:1fr 1fr}.book-row{grid-template-columns:1fr}.hero{padding:13px}}
 @media(max-width:600px){.hero{display:none}.main-readout{padding:10px}.card{padding:10px;margin-bottom:8px}.big{font-size:56px}.tabs{bottom:6px;left:6px;right:6px}.tab{padding:8px 4px}#liveBar{margin-right:100px;font-size:11px}}
+.game-ticker {
+  width: 100%;
+  overflow: hidden;
+  background: rgba(0,0,0,0.6);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  height: 30px;
+  display: flex;
+  align-items: center;
+}
+
+.ticker-track {
+  display: inline-block;
+  white-space: nowrap;
+  padding-left: 100%;
+  animation: tickerScroll 35s linear infinite;
+  font-size: 14px;
+  color: #e5e7eb;
+}
+
+@keyframes tickerScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
+}
 #landingPage{
   position:fixed !important;
   inset:0 !important;
@@ -241,6 +264,12 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}
   </div>
 
   <header>
+
+<div class="game-ticker">
+  <div class="ticker-track" id="gameTicker">
+    Loading today’s games...
+  </div>
+</div>
     <div class="logo">Wager<span>Vision</span></div>
     <div class="tag">V6.2 · Clean Mobile</div>
     <button id="signInBtn" class="signin-btn" type="button" onclick="openAuth()">👤 Sign In</button>
@@ -537,7 +566,8 @@ async function loadGames(){
   try{
     const data = await fetchJSON(`https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${date}&hydrate=probablePitcher`);
     loadedGames = data.dates?.[0]?.games || [];
-    setText("gamesLoaded", loadedGames.length);
+   renderGameTicker(); 
+   setText("gamesLoaded", loadedGames.length);
 
     if(!loadedGames.length){
       if(el("gameSelect")) el("gameSelect").innerHTML = "<option value=''>No games found</option>";
@@ -1424,6 +1454,28 @@ document.addEventListener("DOMContentLoaded", function () {
 
   init();
 });
+
+function renderGameTicker() {
+  const ticker = document.getElementById("gameTicker");
+  if (!ticker || !loadedGames.length) return;
+
+  const items = loadedGames.map(g => {
+    const away = g.teams.away.team.name;
+    const home = g.teams.home.team.name;
+
+    const awayScore = g.teams.away.score ?? "";
+    const homeScore = g.teams.home.score ?? "";
+
+    const isLive = g.status?.detailedState?.includes("In Progress");
+
+    if (awayScore !== "" && homeScore !== "") {
+      return `${away} ${awayScore} - ${homeScore} ${home}${isLive ? " 🔴" : ""}`;
+    }
+
+    return `${away} @ ${home}`;
+  });
+    ticker.textContent = items.concat(items).join("   •   ");
+}
 </script>
 </div>
 </body>
