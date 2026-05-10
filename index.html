@@ -267,7 +267,7 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}
       </div>
       <div class="button-row">
         <button onclick="loadGames()" type="button">Load Games</button>
-        <button class="secondary" onclick="loadOdds()" type="button">Load Odds</button>
+        <button class="secondary" onclick="loadOdds()" type="button">Unlock Market Odds</button>
       </div>
       <button class="secondary" onclick="refreshLiveState()" type="button">Refresh Live State</button>
       <div class="status" id="loadStatus">Start here: load games, pick a matchup, then load odds.</div>
@@ -589,6 +589,13 @@ async function loadSelectedGame(){
 
 setText("loadStatus", "Game loaded.");
 calculateOdds();
+
+const user = await getCurrentUser();
+
+if (!user) {
+  setText("marketOdds", "🔒 Sign in to unlock real-time sportsbook odds and edge comparison.");
+  setText("edgeBox", "—");
+}
 
 console.log("cachedOddsFeed:", cachedOddsFeed);
 if (oddsLoadedForSession && cachedOddsFeed) {
