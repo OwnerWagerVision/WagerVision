@@ -516,7 +516,7 @@ const user = await getCurrentUser();
 if (user) {
   await loadOdds();
 } else {
-  setText("loadStatus", "Model odds loaded. Sign in to unlock real-time sportsbook odds.");
+  setText("loadStatus", "Model odds loaded. Sign in to unlock real-time vegas odds.");
 }
 
 }
@@ -592,7 +592,10 @@ calculateOdds();
 
 const user = await getCurrentUser();
 
-if (!user) {
+if (user) {
+  setText("marketOdds", `${market}%`);
+  setText("edgeBox", (edge >= 0 ? "+" : "") + edge.toFixed(1) + "%");
+} else {
   setText("marketOdds", "🔒 Sign in/create account to see live market odds");
   setText("edgeBox", "🔒 Sign in to see edge");
 }
@@ -931,14 +934,17 @@ function calculateOdds(){
 
   const user = await getCurrentUser();
 
-if (!user) {
-  setText("bookOdds", "🔒");
-  setText("edgeBox", "🔒 Sign in to see edge");
-  return;
-}
+  let market;
+  let edge;
 
-  const market = num("bookOdds") || 50;
-  const edge = result.homeScore - market;
+  if (user) {
+    market = num("bookOdds") || 50;
+    edge = result.homeScore - market;
+  } else {
+    market = "🔒";
+    edge = null;
+  }
+
   const awayScore = 100 - result.homeScore;
   const homeLine = parseBestHomeAmerican();
   const awayLine = -110;
