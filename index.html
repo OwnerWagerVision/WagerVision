@@ -588,7 +588,7 @@ async function loadSelectedGame(){
 setText("loadStatus", "Game loaded.");
 calculateOdds();
 
-if (user) {
+if (user && user.id) {
   setText("marketOdds", `${market}%`);
   setText("edgeBox", (edge >= 0 ? "+" : "") + edge.toFixed(1) + "%");
 } else {
@@ -938,7 +938,7 @@ async function calculateOdds(){
     market = num("bookOdds") || 50;
     edge = result.homeScore - market;
   } else {
-    market = "null";
+    market = null;
     edge = null;
   }
 
