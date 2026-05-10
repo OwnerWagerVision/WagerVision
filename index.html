@@ -590,7 +590,7 @@ calculateOdds();
 
 if (user && user.id) {
   setText("marketOdds", `${market}%`);
-  setText("edgeBox", (edge >= 0 ? "+" : "") + edge.toFixed(1) + "%");
+  setText("edgeBox", edge !== null ? (edge >= 0 ? "+" : "") + edge.toFixed(1) + "%" : "🔒 Sign in to see the edge");
 } else {
   setText("marketOdds", "🔒 Sign in/create account to see live market odds");
   setText("edgeBox", "🔒 Sign in to see the edge");
