@@ -946,10 +946,10 @@ async function calculateOdds(){
   const homeLine = parseBestHomeAmerican();
   const awayLine = -110;
 
-  const pick = edge >= 0 ? home : away;
+  const pick = result.homeScore >= 50 ? home : away;
   const american = edge >= 0 ? homeLine : awayLine;
 
-  const displayProb = pick === home ? result.homeScore : 100 - result.homeScore;
+  const displayProb = result.homeScore >= 50 ? result.homeScore : awayScore;
 
   setText("winner", pick);
   setText("probability", Math.round(displayProb) + "%");
