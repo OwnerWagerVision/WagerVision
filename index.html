@@ -1,4 +1,4 @@
-]<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -588,8 +588,6 @@ async function loadSelectedGame(){
 setText("loadStatus", "Game loaded.");
 calculateOdds();
 
-const user = await getCurrentUser();
-
 if (user) {
   setText("marketOdds", `${market}%`);
   setText("edgeBox", (edge >= 0 ? "+" : "") + edge.toFixed(1) + "%");
@@ -919,7 +917,7 @@ function parseBestHomeAmerican(){
   return match ? Number(match[0]) : -110;
 }
 
-function calculateOdds(){
+async function calculateOdds(){
   const home = text("homeTeam") || "Home Team";
   const away = text("awayTeam") || "Away Team";
 
