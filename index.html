@@ -953,7 +953,7 @@ async function calculateOdds(){
 
   setText("winner", pick);
   setText("probability", Math.round(displayProb) + "%");
-  setText("homeProb", result.homeScore.toFixed(1) + "%");
+  setText("homeProb", result.homeScore !== null ? result.homeScore.toFixed(1) + "%" : "--");
   setText("marketProb", market !== null ? market.toFixed(1) + "%" : "🔒");
   setText("edgeValue", edge !== null ? (edge >= 0 ? "+" : "") + edge.toFixed(1) + "%" : "🔒");
 
@@ -962,15 +962,17 @@ async function calculateOdds(){
 
   const edgeText = el("edgeText");
   if(edgeText){
-    const css = edge >= 5 ? "edge-box green" : edge >= 2 ? "edge-box yellow" : "edge-box red";
+    const css = edge !== null
+  ? (edge >= 5 ? "edge-box green" : edge >= 2 ? "edge-box yellow" : "edge-box red")
+  : "edge-box";
     edgeText.className = css;
-    edgeText.innerHTML = `
-      <strong>${edge >= 0 ? "Value on home side" : "No home value / check away side"}</strong><br>
-      Our home win probability: ${result.homeScore.toFixed(1)}%<br>
-      Market home probability: ${market.toFixed(1)}%<br>
-      Edge: ${(edge >= 0 ? "+" : "") + edge.toFixed(1)}%
-    `;
-  }
+  edgeText.innerHTML = `
+  <strong>${edge !== null && edge >= 0 ? "Value on home side" : "No home value / check away side"}</strong><br>
+  Our home win probability: ${result.homeScore !== null ? result.homeScore.toFixed(1) : "--"}%<br>
+  Market home probability: ${market !== null ? market.toFixed(1) : "🔒"}%<br>
+  Edge: ${edge !== null ? (edge >= 0 ? "+" : "") + edge.toFixed(1) : "🔒"}
+`;
+}
 
   const whyBox = el("whyBox");
   if(whyBox){
