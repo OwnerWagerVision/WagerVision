@@ -1052,7 +1052,11 @@ async function scanBoard(){
         away:away.name,
         pick:edge >= 0 ? home.name : away.name,
         model:model.homeScore,
-        market:oddsInfo.bestProb,
+        market: oddsInfo.best !== null
+  ? (oddsInfo.best > 0
+      ? 100 / (oddsInfo.best + 100) * 100
+      : Math.abs(oddsInfo.best) / (Math.abs(oddsInfo.best) + 100) * 100)
+  : null,
         edge,
         american:edge >= 0 ? oddsInfo.best : -110,
         book:oddsInfo.bestBook
