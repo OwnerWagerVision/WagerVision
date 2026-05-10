@@ -954,8 +954,8 @@ async function calculateOdds(){
   setText("winner", pick);
   setText("probability", Math.round(displayProb) + "%");
   setText("homeProb", result.homeScore.toFixed(1) + "%");
-  setText("marketProb", market.toFixed(1) + "%");
-  setText("edgeValue", (edge >= 0 ? "+" : "") + edge.toFixed(1) + "%");
+  setText("marketProb", market !== null ? market.toFixed(1) + "%" : "🔒");
+  setText("edgeValue", edge !== null ? (edge >= 0 ? "+" : "") + edge.toFixed(1) + "%" : "🔒");
 
   const bar = el("bar");
   if(bar) bar.style.width = result.homeScore + "%";
