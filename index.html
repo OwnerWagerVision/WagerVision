@@ -703,7 +703,8 @@ function bestHomeLineFromOddsGame(game){
   if(!game) return null;
 
   (game.bookmakers || []).forEach(book => {
-    const market = book.markets?.find(m => m.key === "h2h");
+   
+const market = book.markets?.find(m => m.key === "h2h");
     if(!market) return;
 
     const homeOutcome = market.outcomes.find(o => normalizeTeamName(o.name) === normalizeTeamName(game.home_team));
@@ -937,7 +938,7 @@ async function calculateOdds(){
     market = num("bookOdds") || 50;
     edge = result.homeScore - market;
   } else {
-    market = "🔒";
+    market = "null";
     edge = null;
   }
 
