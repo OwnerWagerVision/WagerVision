@@ -593,8 +593,8 @@ calculateOdds();
 const user = await getCurrentUser();
 
 if (!user) {
-  setText("marketOdds", "🔒 Sign in to unlock real-time sportsbook odds and edge comparison.");
-  setText("edgeBox", "—");
+  setText("marketOdds", "🔒 Sign in/create account to see live market odds");
+  setText("edgeBox", "🔒 Sign in to see edge");
 }
 
 console.log("cachedOddsFeed:", cachedOddsFeed);
@@ -928,6 +928,14 @@ function calculateOdds(){
   let parkAdjustment = clamp(park.impact, -2, 2);
   result.homeScore = clamp(result.homeScore + parkAdjustment, 2, 98);
   result.reasons.push(`Park factor impact (${park.type}): ${parkAdjustment >= 0 ? "+" : ""}${parkAdjustment.toFixed(1)}.`);
+
+  const user = await getCurrentUser();
+
+if (!user) {
+  setText("bookOdds", "🔒");
+  setText("edgeBox", "🔒 Sign in to see edge");
+  return;
+}
 
   const market = num("bookOdds") || 50;
   const edge = result.homeScore - market;
