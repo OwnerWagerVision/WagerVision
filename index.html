@@ -564,7 +564,7 @@ async function loadGames(){
   if(el("gameSelect")) el("gameSelect").innerHTML = "<option value=''>Loading...</option>";
 
   try{
-    const data = await fetchJSON(`https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${date}&hydrate=probablePitcher`);
+   const data = await fetchJSON(`https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${date}&hydrate=probablePitcher,linescore`);
     loadedGames = data.dates?.[0]?.games || [];
    renderGameTicker(); 
    setText("gamesLoaded", loadedGames.length);
@@ -1463,32 +1463,39 @@ function renderGameTicker() {
     const away = g.teams.away.team.name;
     const home = g.teams.home.team.name;
 
-    const awayScore = g.teams.away.score ?? "";
-    const homeScore = g.teams.home.score ?? "";
+    const awayScore = g.teams.away.score;
+    const homeScore = g.teams.home.score;
 
-    const isLive = g.status?.detailedState?.includes("In Progress");
+    const state = g.status?.abstractGameState || "";
+    const detailed = g.status?.detailedState || "";
 
-  const status = g.status?.detailedState || "";
+    let label = "";
 
-let label = "";
+    if (state === "Live") {
+      const inning = g.linescore?.currentInning;
+      const half = g.linescore?.inningHalf;
 
-if (status.includes("In Progress")) {
-  label = g.linescore?.currentInning
-    ? ` (Inning ${g.linescore.currentInning})`
-    : " (Live)";
-} else if (status.includes("Final")) {
-  label = " (Final)";
-} else {
-  label = " (Pregame)";
-}
+      if (inning && half) {
+        label = ` (${half} ${inning})`;
+      } else {
+        label = " (Live)";
+      }
+    } else if (state === "Final") {
+      label = " (Final)";
+    } else if (state === "Preview") {
+      label = " (Pregame)";
+    } else {
+      label = ` (${detailed})`;
+    }
 
-if (awayScore !== "" && homeScore !== "") {
-  return `${away} ${awayScore} - ${homeScore} ${home}${label}`;
-}
+    if (awayScore !== undefined && homeScore !== undefined) {
+      return `${away} ${awayScore} - ${homeScore} ${home}${label}`;
+    }
 
-return `${away} @ ${home}${label}`;
+    return `${away} @ ${home}${label}`;
   });
-    ticker.textContent = items.concat(items).join("   ⚾   ");
+
+  ticker.textContent = items.concat(items).join("   ⚾   ");
 }
 </script>
 </div>
