@@ -1024,10 +1024,17 @@ function currentInput(){
     awayOps:num("awayOps"),
     homePitcher:num("homePitcher"),
     awayPitcher:num("awayPitcher"),
+
     homeStarterEra: num("homeStarterEra") || 4.20,
     awayStarterEra: num("awayStarterEra") || 4.20,
     homeStarterWhip: num("homeStarterWhip") || 1.30,
     awayStarterWhip: num("awayStarterWhip") || 1.30,
+
+    homeEra: num("homeEra") || 4.20,
+    awayEra: num("awayEra") || 4.20,
+    homeWhip: num("homeWhip") || 1.30,
+    awayWhip: num("awayWhip") || 1.30,
+
     homeInjuries:num("homeInjuries"),
     awayInjuries:num("awayInjuries"),
     inning:num("inning"),
@@ -1092,21 +1099,21 @@ if (
 const homeTriple =
   (input.homeOps > input.awayOps) &&
   (input.homeEra < input.awayEra) &&
-  (homeWhip < awayWhip);
+  (input.homeWhip < input.awayWhip);
 
 const awayTriple =
   (input.awayOps > input.homeOps) &&
   (input.awayEra < input.homeEra) &&
-  (awayWhip < homeWhip);
+  (input.awayWhip < input.homeWhip);
 
 if (homeTriple) {
-  s += 5.5;
-  reasons.push("Triple Edge Bonus: Home leads OPS, ERA, and WHIP +5.5.");
+  s += 4;
+  reasons.push("Home triple edge: OPS + ERA + WHIP advantage +4");
 }
 
 if (awayTriple) {
-  s -= 5.5;
-  reasons.push("Triple Edge Bonus: Away leads OPS, ERA, and WHIP -5.5.");
+  s -= 4;
+  reasons.push("Away triple edge: OPS + ERA + WHIP advantage -4");
 }
 
 s += input.homeInjuries;
