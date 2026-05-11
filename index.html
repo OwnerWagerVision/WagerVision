@@ -1056,20 +1056,20 @@ function modelCalc(input){
   s += avgImpact;
   reasons.push(`Batting average support: ${avgImpact >= 0 ? "+" : ""}${avgImpact.toFixed(1)}.`);
 
-  const opsImpact = clamp((input.homeOps - input.awayOps) * 35, -12, 12);
+  const opsImpact = clamp((input.homeOps - input.awayOps) * 28, -10, 10);
   s += opsImpact;
   reasons.push(`OPS (offense) impact: ${opsImpact >= 0 ? "+" : ""}${opsImpact.toFixed(1)}.`);
 
   const pitcherDiff = input.homePitcher - input.awayPitcher;
-  const pitcherImpact = clamp(pitcherDiff * 2.4, -11, 11);
+  const pitcherImpact = clamp(pitcherDiff * 1.8, -7, 7);
   s += pitcherImpact;
   reasons.push(`Starting pitcher weight: ${pitcherImpact >= 0 ? "+" : ""}${pitcherImpact.toFixed(1)}.`);
 
-  const starterEraImpact = clamp((input.awayStarterEra - input.homeStarterEra) * 2.6, -6, 6);
+  const starterEraImpact = clamp((input.awayStarterEra - input.homeStarterEra) * 1.7, -4, 4);
 s += starterEraImpact;
 reasons.push(`Starter ERA impact: ${starterEraImpact >= 0 ? "+" : ""}${starterEraImpact.toFixed(1)}.`);
 
-const starterWhipImpact = clamp((input.awayStarterWhip - input.homeStarterWhip) * 22, -6, 6);
+const starterWhipImpact = clamp((input.awayStarterWhip - input.homeStarterWhip) * 18, -5, 5);
 s += starterWhipImpact;
 reasons.push(`Starter WHIP impact: ${starterWhipImpact >= 0 ? "+" : ""}${starterWhipImpact.toFixed(1)}.`);
 
@@ -1077,7 +1077,7 @@ if (
   input.homeStarterEra < input.awayStarterEra &&
   input.homeStarterWhip < input.awayStarterWhip
 ) {
-  s += 5;
+  s += 2.5;
   reasons.push("Home starter dominates (ERA + WHIP edge) +5");
 }
 
@@ -1085,7 +1085,7 @@ if (
   input.awayStarterEra < input.homeStarterEra &&
   input.awayStarterWhip < input.homeStarterWhip
 ) {
-  s -= 5;
+  s -= 2.5;
   reasons.push("Away starter dominates (ERA + WHIP edge) -5");
 }
  
@@ -1100,12 +1100,12 @@ const awayTriple =
   (input.awayStarterWhip < input.homeStarterWhip);
 
 if (homeTriple) {
-  s += 4;
+  s += 2.5;
   reasons.push("Home triple edge: OPS + ERA + WHIP advantage +4");
 }
 
 if (awayTriple) {
-  s -= 4;
+  s -= 2.5;
   reasons.push("Away triple edge: OPS + ERA + WHIP advantage -4");
 }
 
