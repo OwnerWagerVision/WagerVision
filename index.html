@@ -60,15 +60,40 @@ header {
   color:#60a5fa;border-radius:999px;cursor:pointer;font-weight:800;white-space:nowrap;z-index:2000!important;
 }
 .hero{
-  background:rgba(15,23,42,.45);backdrop-filter:blur(14px);
-  border:1px solid rgba(255,255,255,.12);border-radius:18px;
-  padding:14px;margin-bottom:10px;
+  position: relative;
+  background: linear-gradient(180deg, rgba(15,23,42,.92), rgba(15,23,42,.75));
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:20px;
+  padding:18px 14px 16px;
+  margin-bottom:12px;
+  text-align:center;
+  box-shadow:0 12px 38px rgba(0,0,0,.35);
+  backdrop-filter:blur(14px);
 }
+
+.hero-kicker{
+  font-size:11px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  color:#94a3b8;
+  margin-bottom:6px;
+}
+
 .hero h1{
-  font-size:clamp(28px,7vw,56px);line-height:.95;letter-spacing:-2px;margin-bottom:6px;
-  text-shadow:0 0 20px rgba(96,165,250,.25);
+  font-size:clamp(24px,6vw,42px);
+  line-height:1;
+  letter-spacing:-1.2px;
+  margin-bottom:6px;
+  text-shadow:0 0 20px rgba(96,165,250,.22);
 }
-.hero p{color:#cbd5e1;line-height:1.45;font-size:13px;max-width:820px}
+
+.hero p{
+  color:#cbd5e1;
+  line-height:1.45;
+  font-size:13px;
+  max-width:820px;
+  margin:0 auto;
+}
 .tabs{
   display:grid;grid-template-columns:repeat(4,1fr);gap:6px;position:fixed;bottom:10px;left:10px;right:10px;z-index:20;
   background:rgba(2,6,23,.92);padding:7px;border-radius:16px;backdrop-filter:blur(15px);border:1px solid rgba(255,255,255,.08)
@@ -157,8 +182,13 @@ button.danger, .remove {
 .status,.small{margin-top:7px;color:#94a3b8;font-size:12px;line-height:1.4}
 .main-readout{
   position: relative;
-  background:rgba(15,23,42,.8);border:1px solid rgba(255,255,255,.1);border-radius:18px;
-  padding:14px;margin-bottom:10px
+  background: linear-gradient(180deg, rgba(15,23,42,.92), rgba(15,23,42,.72));
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:20px;
+  padding:18px 14px 16px;
+  margin-bottom:12px;
+  box-shadow: 0 12px 38px rgba(0,0,0,.38);
+  backdrop-filter: blur(14px);
 }
 .team-name{text-align:center;color:#93c5fd;font-size:20px;font-weight:950;margin-top:2px}
 .big{text-align:center;font-size:clamp(48px,13vw,74px);font-weight:950;letter-spacing:-4px;line-height:1}
@@ -366,10 +396,14 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}
   </header>
 
   <section class="hero">
-    <h1>Vegas sets the line, we correct it.</h1>
-    <button id="signInBtn" class="signin-btn" type="button" onclick="openAuth()">👤 Sign In</button>
-    <p>Live MLB data, sportsbook odds, real edge ranking and approx  bet slip payouts.</p>
-  </section>
+  <button id="signInBtn" class="signin-btn" type="button" onclick="openAuth()">👤 Sign In</button>
+
+  <div class="hero-kicker">Live MLB probability engine</div>
+
+  <h1>Vegas sets the line. We correct it.</h1>
+
+  <p>Real MLB data, live game state, sportsbook odds, edge ranking, and estimated bet slip payouts.</p>
+</section>
 
   <div class="tabs">
     <button class="tab active" onclick="showTab('game',this)" type="button">Game</button>
