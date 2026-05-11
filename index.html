@@ -402,20 +402,34 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}
 
   <h1>Vegas sets the line. We correct it.</h1>
 
-<div style="margin-top:14px;">
-  <button onclick="openAuth()" style="
-    width:100%;
-    padding:12px;
-    border-radius:10px;
-    border:none;
-    background:#22c55e;
-    color:white;
-    font-weight:700;
-    font-size:15px;
-    cursor:pointer;
-  ">
-    🔒 Unlock Live Odds
-  </button>
+<button id="appAuthBtn" onclick="openAuth()" style="
+  width:100%;
+  margin:10px 0;
+  padding:12px;
+  border-radius:10px;
+  border:none;
+  background:#22c55e;
+  color:white;
+  font-weight:700;
+  font-size:15px;
+">
+  🔒 Sign In / Unlock Live Odds
+</button>
+
+<button onclick="openAuth()" style="
+  width:100%;
+  margin:8px 0;
+  padding:8px 10px;
+  border-radius:8px;
+  border:none;
+  background:#22c55e;
+  color:white;
+  font-weight:600;
+  font-size:13px;
+  cursor:pointer;
+">
+  🔒 Unlock Odds
+</button>
 </div>
 
   <p>Real MLB data, live game state, sportsbook odds, edge ranking, and estimated bet slip payouts.</p>
