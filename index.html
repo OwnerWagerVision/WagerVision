@@ -1078,7 +1078,7 @@ if (
   input.homeStarterWhip < input.awayStarterWhip
 ) {
   s += 2.5;
-  reasons.push("Home starter dominates (ERA + WHIP edge) +5");
+  reasons.push("Home starter dominates (ERA + WHIP edge) +2.5");
 }
 
 if (
@@ -1086,7 +1086,7 @@ if (
   input.awayStarterWhip < input.homeStarterWhip
 ) {
   s -= 2.5;
-  reasons.push("Away starter dominates (ERA + WHIP edge) -5");
+  reasons.push("Away starter dominates (ERA + WHIP edge) -2.5");
 }
  
 const homeTriple =
@@ -1101,12 +1101,12 @@ const awayTriple =
 
 if (homeTriple) {
   s += 2.5;
-  reasons.push("Home triple edge: OPS + ERA + WHIP advantage +4");
+  reasons.push("Home triple edge: OPS + ERA + WHIP advantage +2.5");
 }
 
 if (awayTriple) {
   s -= 2.5;
-  reasons.push("Away triple edge: OPS + ERA + WHIP advantage -4");
+  reasons.push("Away triple edge: OPS + ERA + WHIP advantage -2.5");
 }
 
 s += input.homeInjuries;
