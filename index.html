@@ -1197,6 +1197,8 @@ const awayScore = 100 - result.homeScore;
 const homeLine = parseBestHomeAmerican();
 const awayLine = -110;
 
+console.log("LINE ALERT TEST:", { currentGame, homeLine, awayLine });
+
 if(currentGame && currentGame.teams){
   const homeTeam = currentGame.teams?.home?.team?.name;
   const awayTeam = currentGame.teams?.away?.team?.name;
