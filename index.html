@@ -1192,13 +1192,21 @@ async function calculateOdds(){
     edge = null;
   }
 
-  const awayScore = 100 - result.homeScore;
-  const homeLine = parseBestHomeAmerican();
-  const awayLine = -110;
+const awayScore = 100 - result.homeScore;
+const homeLine = parseBestHomeAmerican();
+const awayLine = -110;
 
-if(currentGame){
-  handleLineMove(currentGame.gamePk, currentGame.teams.home.team.name, homeLine);
-  handleLineMove(currentGame.gamePk, currentGame.teams.away.team.name, awayLine);
+if(currentGame && currentGame.teams){
+  const homeTeam = currentGame.teams?.home?.team?.name;
+  const awayTeam = currentGame.teams?.away?.team?.name;
+
+  if(homeTeam){
+    handleLineMove(currentGame.gamePk, homeTeam, homeLine);
+  }
+
+  if(awayTeam){
+    handleLineMove(currentGame.gamePk, awayTeam, awayLine);
+  }
 }
 
   const pick = result.homeScore >= 50 ? home : away;
