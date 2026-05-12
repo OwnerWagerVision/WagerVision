@@ -595,6 +595,34 @@ let selectedGameData = null;
 let cachedOddsFeed = null;
 let slip = JSON.parse(localStorage.getItem("wagervision_bet_slip") || "[]");
 
+let loadedGames = [];
+let currentGame = null;
+
+const LINE_MOVE_ALERT_THRESHOLD = 1;
+
+function checkLineMoveAlert(gameId, teamName, oldLine, newLine){
+  if(oldLine == null || newLine == null) return;
+
+  const move = Math.abs(newLine - oldLine);
+
+  if(move >= LINE_MOVE_ALERT_THRESHOLD){
+    alert(`🚨 ${teamName} line moved from ${oldLine} to ${newLine}`);
+  }
+}
+
+function handleLineMove(gameId, teamName, newLine){
+  if(newLine == null) return;
+
+  const key = `wagervision_line_${gameId}_${teamName}`;
+  const oldLine = localStorage.getItem(key);
+
+  if(oldLine !== null){
+    checkLineMoveAlert(gameId, teamName, Number(oldLine), Number(newLine));
+  }
+
+  localStorage.setItem(key, newLine);
+}
+
 function el(id){ return document.getElementById(id); }
 function text(id){ const x = el(id); return x ? String(x.value || "").trim() : ""; }
 function num(id){ const x = el(id); return x ? Number(x.value || 0) : 0; }
@@ -1167,6 +1195,11 @@ async function calculateOdds(){
   const awayScore = 100 - result.homeScore;
   const homeLine = parseBestHomeAmerican();
   const awayLine = -110;
+
+if(currentGame){
+  handleLineMove(currentGame.gamePk, currentGame.teams.home.team.name, homeLine);
+  handleLineMove(currentGame.gamePk, currentGame.teams.away.team.name, awayLine);
+}
 
   const pick = result.homeScore >= 50 ? home : away;
   const american = edge >= 0 ? homeLine : awayLine;
