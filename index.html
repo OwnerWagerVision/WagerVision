@@ -1762,7 +1762,6 @@ async function signUp(){
 setText("authStatus", "Signup worked. Check your email if confirmation is enabled.");
 closeAuth();
 startApp();
-await loadGames();
 
 async function signIn(){
   const email = text("authEmail");
@@ -1788,7 +1787,6 @@ async function signIn(){
    setText("authStatus", "Signed in.");
    closeAuth();
 startApp();
-await loadGames();
   }
 }
 
