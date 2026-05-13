@@ -1023,11 +1023,12 @@ function convertSharpToGames(data){
     if(!gamesMap[key].bookmakers[book]){
       gamesMap[key].bookmakers[book] = {
         title: book,
-        markets: [
-          {
-            outcomes: []
-          }
-        ]
+    markets: [
+  {
+    key: "h2h",
+    outcomes: []
+  }
+]
       };
     }
 
