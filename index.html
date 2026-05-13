@@ -353,10 +353,42 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}
 
     <img src="logo1.png" alt="WagerVision Logo" class="landing-logo">
 
+<div id="ageGate" style="margin-bottom:12px;">
+  <div style="font-size:13px; margin-bottom:8px;">
+    You must be of legal betting age in your jurisdiction to continue.<br>
+    WagerVision provides analysis, not betting services.
+  </div>
+  <button onclick="acceptAge()" style="margin-bottom:6px;">I’m of legal age — Continue</button>
+  <button class="secondary" onclick="exitAge()">Exit</button>
+</div>
+
 <div class="landing-actions">
-  <button id="landingSignIn" type="button" onclick="openAuth()">Sign In</button>
-  <button id="landingCreate" type="button" onclick="openAuth()">Create Account</button>
-  <button id="landingContinue" class="secondary" type="button" onclick="startApp()">Continue Without Signing In</button>
+
+  <button 
+    id="landingSignIn" 
+    type="button" 
+    onclick="openAuth()" 
+    disabled>
+    Sign In
+  </button>
+
+  <button 
+    id="landingCreate" 
+    type="button" 
+    onclick="openAuth()" 
+    disabled>
+    Create Account
+  </button>
+
+  <button 
+    id="landingContinue" 
+    class="secondary" 
+    type="button" 
+    onclick="startApp()" 
+    disabled>
+    Continue Without Signing In
+  </button>
+
 </div>
 
   </div>
@@ -597,6 +629,8 @@ const SUPABASE_URL = "https://zejuncnaujnofzzreaoo.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InplanVuY25hdWpub2Z6enJlYW9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5OTM0MDgsImV4cCI6MjA5MzU2OTQwOH0.1JM5SWGZ2gpQhEm04gADhbLYnl-n86EXsAqn_hQMETM";
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+document.addEventListener("DOMContentLoaded", checkAgeGate);
+
 let loadedGames = [];
 let selectedGamePk = null;
 let selectedGameData = null;
@@ -650,6 +684,32 @@ function showTab(id, tab){
   const section = el(id);
   if(section) section.classList.add("active");
   if(tab) tab.classList.add("active");
+}
+
+function acceptAge(){
+  localStorage.setItem("wagervision_age_ok", "true");
+
+  el("ageGate").style.display = "none";
+
+  el("landingSignIn").disabled = false;
+  el("landingCreate").disabled = false;
+  el("landingContinue").disabled = false;
+}
+
+function exitAge(){
+  document.body.innerHTML = "<h2 style='color:white;text-align:center;margin-top:40vh;'>You must be of legal age to use this app.</h2>";
+}
+
+function checkAgeGate(){
+  const ok = localStorage.getItem("wagervision_age_ok");
+
+  if(ok === "true"){
+    el("ageGate").style.display = "none";
+
+    el("landingSignIn").disabled = false;
+    el("landingCreate").disabled = false;
+    el("landingContinue").disabled = false;
+  }
 }
 
 function toggleInputs(){
