@@ -579,7 +579,8 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}
       <input id="sharpApiKey" placeholder="Paste your SharpAPI key here">
       <button onclick="saveApiKey()" type="button">Save API Key</button>
       <button class="secondary" onclick="clearApiKey()" type="button">Clear Saved Key</button>
-      <div class="status" id="apiStatus">No key loaded yet.</div>
+      <button class="secondary" onclick="testSharpApi()" type="button">Test SharpAPI</button>
+     <div class="status" id="apiStatus">No key loaded yet.</div>
       <hr>
       <div class="small">Save API for real-time odds and live market data. You must be signed in first.</div>
     </div>
@@ -929,6 +930,37 @@ if(sharpKey){
 
   cachedOddsFeed = await fetchJSON(`https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?regions=us&markets=h2h&oddsFormat=american&apiKey=${encodeURIComponent(key)}`);
   return cachedOddsFeed;
+}
+
+async function getSharpOddsFeed(){
+  const user = await getCurrentUser();
+  if(!user) throw new Error("Not signed in");
+
+  const key = text("sharpApiKey") || localStorage.getItem(`wagervision_sharp_key_${user.id}`);
+  if(!key) throw new Error("No SharpAPI key");
+
+  const response = await fetch("https://api.sharpapi.io/api/v1/odds?sport=baseball&league=MLB", {
+    headers: {
+      "X-API-Key": key
+    }
+  });
+
+  if(!response.ok) throw new Error("SharpAPI request failed");
+
+  return await response.json();
+}
+
+async function testSharpApi(){
+  setText("apiStatus", "Testing SharpAPI...");
+
+  try{
+    const data = await getSharpOddsFeed();
+    console.log("SharpAPI test response:", data);
+    setText("apiStatus", "SharpAPI connected. Check console for response.");
+  }catch(error){
+    console.error("SharpAPI test failed:", error);
+    setText("apiStatus", "SharpAPI test failed. Check console.");
+  }
 }
 
 function findOddsGame(oddsFeed,homeName,awayName){
