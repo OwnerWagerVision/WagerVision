@@ -529,7 +529,10 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}
 
     <div class="grid">
      <div class="card soft">
-  <h2>Model Insight</h2>
+    <h2>Model Insight</h2>
+<div class="small" style="margin-bottom:8px;">
+  A simplified read of what the model is seeing.
+</div>
   <div class="data-box" id="insightBox">Run a calculation to see insight.</div>
 </div>
       <div class="card soft">
@@ -1231,6 +1234,16 @@ if(currentGame && currentGame.teams){
 if(insightBox){
   let insights = [];
 
+let confidenceLabel = "Low confidence";
+
+if(result.homeScore >= 60 || result.homeScore <= 40){
+  confidenceLabel = "High confidence";
+} else if(result.homeScore >= 55 || result.homeScore <= 45){
+  confidenceLabel = "Moderate confidence";
+}
+
+insights.push(`Confidence level: ${confidenceLabel}`);
+
   if(result.homeScore >= 60){
     insights.push("Strong model lean detected.");
   } else if(result.homeScore >= 54){
@@ -1246,14 +1259,18 @@ if(insightBox){
   }
 
   if(input.homeStarterWhip < input.awayStarterWhip){
-    insights.push("Pitching control advantage detected.");
-  }
+  insights.push("Home pitching control advantage detected.");
+} else if(input.awayStarterWhip < input.homeStarterWhip){
+  insights.push("Away pitching control advantage detected.");
+}
 
-  if(input.homeOps > input.awayOps){
-    insights.push("Offensive efficiency edge detected.");
-  }
+if(input.homeOps > input.awayOps){
+  insights.push("Home offensive efficiency edge detected.");
+} else if(input.awayOps > input.homeOps){
+  insights.push("Away offensive efficiency edge detected.");
+}
 
-  insightBox.innerHTML = insights.map(i => `<div>${i}</div>`).join("");
+  insightBox.innerHTML = insights.map(i => `<div style="margin-bottom:6px;">• ${i}</div>`).join("");
 }
 
   const edgeText = el("edgeText");
