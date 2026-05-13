@@ -1134,10 +1134,21 @@ async function loadOdds(){
   setText("loadStatus", "Fetching sportsbook odds...");
   if(oddsBox) oddsBox.innerHTML = `<div class="data-box">Fetching sportsbook odds...</div>`;
 
-  try{
+   try{
     let rawSharp = await getSharpOddsFeed();
     let feed = convertSharpToGames(rawSharp.data || rawSharp);
+
+    console.log("Sharp raw:", rawSharp);
+    console.log("Converted Sharp feed:", feed);
+    console.log("Trying to match:", {
+      home: text("homeTeam"),
+      away: text("awayTeam")
+    });
+
     const game = findOddsGame(feed, text("homeTeam"), text("awayTeam"));
+
+    console.log("Matched Sharp game:", game);
+
     const info = bestHomeLineFromOddsGame(game);
 
     if(!info){
