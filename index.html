@@ -1031,17 +1031,18 @@ function convertSharpToGames(data){
       };
     }
 
-const outcomeName =
-  item.selection_type === "home"
-    ? item.home_team
-    : item.selection_type === "away"
-      ? item.away_team
-      : item.selection;
+    const outcomeName =
+      item.selection_type === "home"
+        ? item.home_team
+        : item.selection_type === "away"
+          ? item.away_team
+          : item.selection;
 
-gamesMap[key].bookmakers[book].markets[0].outcomes.push({
-  name: outcomeName,
-  price: Number(item.odds_american)
-});
+    gamesMap[key].bookmakers[book].markets[0].outcomes.push({
+      name: outcomeName,
+      price: Number(item.odds_american)
+    });
+  });
 
   return Object.values(gamesMap).map(game => ({
     ...game,
