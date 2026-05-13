@@ -718,6 +718,7 @@ function ratePitcher(stats){
 }
 
 async function loadGames(){
+  const user = await getCurrentUser();
   const date = text("gameDate") || new Date().toISOString().split("T")[0];
   setText("loadStatus", "Loading MLB games...");
   setText("boardStatus", "Loading MLB games...");
@@ -766,6 +767,7 @@ if (user) {
 }
 
 async function loadSelectedGame(){
+  const user = await getCurrentUser();
   const index = text("gameSelect");
   if(index === ""){
     setText("loadStatus", "Pick a game first.");
@@ -991,7 +993,7 @@ async function getSharpOddsFeed(){
   const key = text("sharpApiKey") || localStorage.getItem(`wagervision_sharp_key_${user.id}`);
   if(!key) throw new Error("No SharpAPI key");
 
-  const response = await fetch("https://api.sharpapi.io/api/v1/odds?sport=baseball&league=MLB", {
+  const response = await fetch("https://api.sharpapi.io/api/v1/odds?league=mlb&market=moneyline", {
     headers: {
       "X-API-Key": key
     }
