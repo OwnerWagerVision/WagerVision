@@ -528,10 +528,10 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}
 </div>
 
     <div class="grid">
-      <div class="card soft">
-        <h2>Why Panel</h2>
-        <div class="data-box" id="whyBox">No calculation yet.</div>
-      </div>
+     <div class="card soft">
+  <h2>Model Insight</h2>
+  <div class="data-box" id="insightBox">Run a calculation to see insight.</div>
+</div>
       <div class="card soft">
         <h2>Live + Market</h2>
         <div id="dataBox" class="data-box">No game loaded yet.</div>
@@ -1174,6 +1174,7 @@ async function calculateOdds(){
   const away = text("awayTeam") || "Away Team";
 
   const result = modelCalc(currentInput());
+  const input = currentInput();
 
   const park = getParkFactor(selectedGameData?.venue?.name || "");
   let parkAdjustment = clamp(park.impact, -2, 2);
@@ -1226,6 +1227,35 @@ if(currentGame && currentGame.teams){
   const bar = el("bar");
   if(bar) bar.style.width = result.homeScore + "%";
 
+  const insightBox = el("insightBox");
+if(insightBox){
+  let insights = [];
+
+  if(result.homeScore >= 60){
+    insights.push("Strong model lean detected.");
+  } else if(result.homeScore >= 54){
+    insights.push("Moderate model lean detected.");
+  } else if(result.homeScore <= 46){
+    insights.push("Moderate lean toward the away side.");
+  } else {
+    insights.push("Tight matchup with low separation.");
+  }
+
+  if(Math.abs(result.homeScore - 50) <= 3){
+    insights.push("High volatility game. Small edges matter.");
+  }
+
+  if(input.homeStarterWhip < input.awayStarterWhip){
+    insights.push("Pitching control advantage detected.");
+  }
+
+  if(input.homeOps > input.awayOps){
+    insights.push("Offensive efficiency edge detected.");
+  }
+
+  insightBox.innerHTML = insights.map(i => `<div>${i}</div>`).join("");
+}
+
   const edgeText = el("edgeText");
   if(edgeText){
     const css = edge !== null
@@ -1239,11 +1269,6 @@ if(currentGame && currentGame.teams){
   Edge: ${edge !== null ? (edge >= 0 ? "+" : "") + edge.toFixed(1) : "🔒"}
 `;
 }
-
-  const whyBox = el("whyBox");
-  if(whyBox){
-    whyBox.innerHTML = result.reasons.map(r => `<div>${r}</div>`).join("");
-  }
 
   return {
     home,
