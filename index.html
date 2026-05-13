@@ -1759,10 +1759,10 @@ async function signUp(){
     return;
   }
 
-  setText("authStatus", "Signup worked. Check your email if confirmation is enabled.");
+setText("authStatus", "Signup worked. Check your email if confirmation is enabled.");
 closeAuth();
 startApp();
-}
+await loadGames();
 
 async function signIn(){
   const email = text("authEmail");
@@ -1787,7 +1787,8 @@ async function signIn(){
     await loadSavedApiKey();
    setText("authStatus", "Signed in.");
    closeAuth();
-   startApp();
+startApp();
+await loadGames();
   }
 }
 
