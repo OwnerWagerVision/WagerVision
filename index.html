@@ -993,7 +993,7 @@ async function getSharpOddsFeed(){
   const key = text("sharpApiKey") || localStorage.getItem(`wagervision_sharp_key_${user.id}`);
   if(!key) throw new Error("No SharpAPI key");
 
-  const response = await fetch("https://api.sharpapi.io/api/v1/odds?league=mlb&market=moneyline", {
+   const response = await fetch("https://api.sharpapi.io/api/v1/odds?league=mlb&market=moneyline&limit=250", {
     headers: {
       "X-API-Key": key
     }
@@ -1031,11 +1031,17 @@ function convertSharpToGames(data){
       };
     }
 
-    gamesMap[key].bookmakers[book].markets[0].outcomes.push({
-      name: item.selection,
-      price: item.odds_american
-    });
-  });
+const outcomeName =
+  item.selection_type === "home"
+    ? item.home_team
+    : item.selection_type === "away"
+      ? item.away_team
+      : item.selection;
+
+gamesMap[key].bookmakers[book].markets[0].outcomes.push({
+  name: outcomeName,
+  price: Number(item.odds_american)
+});
 
   return Object.values(gamesMap).map(game => ({
     ...game,
