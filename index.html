@@ -1459,14 +1459,15 @@ async function scanBoard(){
   if(!loadedGames.length) await loadGames();
   if(!loadedGames.length) return;
 
-  let oddsFeed = [];
-  try{
-    oddsFeed = await getOddsFeed();
-  }catch(error){
-    console.error(error);
-    setText("boardStatus", "Need sign-in and saved Odds API key to scan real edge.");
-    return;
-  }
+let oddsFeed = [];
+try{
+  const rawSharp = await getSharpOddsFeed();
+  oddsFeed = convertSharpToGames(rawSharp.data || rawSharp);
+}catch(error){
+  console.error(error);
+  setText("boardStatus", "Need sign-in and saved SharpAPI key to scan real edge.");
+  return;
+}
 
   setText("boardStatus", "Scanning pregame  sportsbook odds...");
   const season = new Date(text("gameDate") || new Date()).getFullYear();
