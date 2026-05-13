@@ -874,8 +874,60 @@ async function refreshLiveState(showMessage = true){
 }
 
 function normalizeTeamName(name){
-  return String(name || "").toLowerCase().replace(/[^a-z0-9 ]/g,"").replace(/\s+/g," ").trim()
-    .replace("st louis","saint louis");
+  let n = String(name || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9 ]/g,"")
+    .replace(/\s+/g," ")
+    .trim();
+
+  const aliases = {
+    "la dodgers": "los angeles dodgers",
+    "los angeles dodgers": "los angeles dodgers",
+
+    "la angels": "los angeles angels",
+    "los angeles angels": "los angeles angels",
+    "los angeles angels of anaheim": "los angeles angels",
+
+    "sf giants": "san francisco giants",
+    "san francisco giants": "san francisco giants",
+
+    "ny yankees": "new york yankees",
+    "new york yankees": "new york yankees",
+
+    "ny mets": "new york mets",
+    "new york mets": "new york mets",
+
+    "st louis cardinals": "saint louis cardinals",
+    "saint louis cardinals": "saint louis cardinals",
+
+    "cleveland guardians": "cleveland guardians",
+    "cincinnati reds": "cincinnati reds",
+    "chicago cubs": "chicago cubs",
+    "chicago white sox": "chicago white sox",
+    "toronto blue jays": "toronto blue jays",
+    "tampa bay rays": "tampa bay rays",
+    "arizona diamondbacks": "arizona diamondbacks",
+    "texas rangers": "texas rangers",
+    "boston red sox": "boston red sox",
+    "detroit tigers": "detroit tigers",
+    "houston astros": "houston astros",
+    "kansas city royals": "kansas city royals",
+    "minnesota twins": "minnesota twins",
+    "seattle mariners": "seattle mariners",
+    "oakland athletics": "athletics",
+    "athletics": "athletics",
+    "philadelphia phillies": "philadelphia phillies",
+    "pittsburgh pirates": "pittsburgh pirates",
+    "washington nationals": "washington nationals",
+    "miami marlins": "miami marlins",
+    "atlanta braves": "atlanta braves",
+    "milwaukee brewers": "milwaukee brewers",
+    "colorado rockies": "colorado rockies",
+    "san diego padres": "san diego padres",
+    "baltimore orioles": "baltimore orioles"
+  };
+
+  return aliases[n] || n;
 }
 
 function americanToImplied(price){
