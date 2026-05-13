@@ -950,6 +950,45 @@ async function getSharpOddsFeed(){
   return await response.json();
 }
 
+function convertSharpToGames(data){
+  const gamesMap = {};
+
+  data.forEach(item => {
+    const key = item.event_id;
+
+    if(!gamesMap[key]){
+      gamesMap[key] = {
+        home_team: item.home_team,
+        away_team: item.away_team,
+        bookmakers: {}
+      };
+    }
+
+    const book = item.sportsbook;
+
+    if(!gamesMap[key].bookmakers[book]){
+      gamesMap[key].bookmakers[book] = {
+        title: book,
+        markets: [
+          {
+            outcomes: []
+          }
+        ]
+      };
+    }
+
+    gamesMap[key].bookmakers[book].markets[0].outcomes.push({
+      name: item.selection,
+      price: item.odds_american
+    });
+  });
+
+  return Object.values(gamesMap).map(game => ({
+    ...game,
+    bookmakers: Object.values(game.bookmakers)
+  }));
+}
+
 async function testSharpApi(){
   setText("apiStatus", "Testing SharpAPI...");
 
@@ -1044,7 +1083,8 @@ async function loadOdds(){
   if(oddsBox) oddsBox.innerHTML = `<div class="data-box">Fetching sportsbook odds...</div>`;
 
   try{
-    const feed = await getOddsFeed();
+    let rawSharp = await getSharpOddsFeed();
+    let feed = convertSharpToGames(rawSharp.data || rawSharp);
     const game = findOddsGame(feed, text("homeTeam"), text("awayTeam"));
     const info = bestHomeLineFromOddsGame(game);
 
