@@ -575,6 +575,8 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}
       <h2>Settings</h2>
       <label>The Odds API Key</label>
       <input id="oddsApiKey" placeholder="Paste your Odds API key here">
+      <label>SharpAPI Key</label>
+      <input id="sharpApiKey" placeholder="Paste your SharpAPI key here">
       <button onclick="saveApiKey()" type="button">Save API Key</button>
       <button class="secondary" onclick="clearApiKey()" type="button">Clear Saved Key</button>
       <div class="status" id="apiStatus">No key loaded yet.</div>
@@ -915,6 +917,15 @@ async function getOddsFeed(){
     setText("apiStatus", "Paste and save your Odds API key first.");
     throw new Error("No Odds API key");
   }
+
+const sharpKey = text("sharpApiKey");
+if(sharpKey){
+  localStorage.setItem(`wagervision_sharp_key_${user.id}`, sharpKey);
+}
+
+if(sharpKey){
+  setText("apiStatus", "SharpAPI key saved.");
+}
 
   cachedOddsFeed = await fetchJSON(`https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?regions=us&markets=h2h&oddsFormat=american&apiKey=${encodeURIComponent(key)}`);
   return cachedOddsFeed;
