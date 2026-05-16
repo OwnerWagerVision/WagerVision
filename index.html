@@ -1842,17 +1842,45 @@ async function signIn(){
 }
 
 async function signOut(){
-  const { error } = await supabaseClient.auth.signOut();
-  if(error){
-    setText("authStatus", error.message);
-    return;
+  await supabaseClient.auth.signOut();
+
+  // Clear user/session storage
+  localStorage.removeItem("wv_user");
+  localStorage.removeItem("wagervision_bet_slip");
+
+  // Reset memory
+  slip = [];
+  cachedOddsFeed = null;
+  selectedGamePk = null;
+  selectedGameData = null;
+  currentGame = null;
+
+  // Reset UI
+  renderSlip();
+  updateLiveBar("0.00", "0%", "0%", "0");
+  setText("winner", "Home Team");
+  setText("probability", "50%");
+  setText("homeProb", "50%");
+  setText("marketProb", "🔒");
+  setText("edgeValue", "🔒");
+  setText("edgeText", "Load a game, pull odds, calculate.");
+  setText("loadStatus", "Signed out. Sign in to unlock live sportsbook odds.");
+  setText("apiStatus", "Signed out.");
+
+  const oddsBox = document.getElementById("oddsBox");
+  if (oddsBox) {
+    oddsBox.innerHTML = `<div class="data-box">No odds loaded yet.</div>`;
   }
 
-  localStorage.removeItem("wv_user");
-  cachedOddsFeed = null;
-  updateAuthButton(null);
-  setText("apiStatus", "Signed out.");
+  const lineAlertBox = document.getElementById("lineAlertBox");
+  if (lineAlertBox) {
+    lineAlertBox.style.display = "none";
+    lineAlertBox.innerHTML = "";
+  }
+
   closeAuth();
+  updateAuthButton(null);
+  showTab("game", document.querySelector(".tab"));
 }
 
 function updateAuthButton(user){
