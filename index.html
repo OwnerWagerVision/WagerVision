@@ -1298,16 +1298,16 @@ async function loadOdds(){
 }
 
 function logPrediction(game){
-  if(!game || !currentGame) return;
+  if(!game) return;
 
   const entry = {
     time: new Date().toISOString(),
     home: game.home_team,
     away: game.away_team,
-    modelProb: currentGame.probability,
-    marketProb: currentGame.market,
-    edge: currentGame.edge,
-    line: currentGame.line,
+    modelProb: text("homeProb"),
+    marketProb: text("marketProb"),
+    edge: text("edgeValue"),
+    line: text("bestHomeLine"),
     result: null
   };
 
