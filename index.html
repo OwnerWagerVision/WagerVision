@@ -1208,6 +1208,8 @@ async function loadOdds(){
 
     const info = bestHomeLineFromOddsGame(game);
 
+    console.log("Odds info:", info);
+
     if(!info){
       if(oddsBox) oddsBox.innerHTML = `<div class="data-box">No matching odds found for this game.</div>`;
       setText("loadStatus", "No matching odds found.");
