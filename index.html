@@ -585,7 +585,7 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}
       <h2>Best Picks Pregame Board</h2>
       <button onclick="scanBoard()" type="button">Scan Real Edge Board</button>
       <button class="secondary" onclick="loadGames()" type="button">Load MLB Games Only</button>
-      <div class="status" id="boardStatus">Save your Odds API key in Settings, then scan the real board.</div>
+      <div class="status" id="boardStatus">Sign in to automatically load odds.</div>
       <div id="pickBoard" class="data-box">No picks scanned yet.</div>
     </div>
   </section>
@@ -602,21 +602,20 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}
     </div>
   </section>
 
-  <section id="settings" class="section">
-    <div class="card">
-      <h2>Settings</h2>
-      <label>The Odds API Key</label>
-      <input id="oddsApiKey" placeholder="Paste your Odds API key here">
-      <label>SharpAPI Key</label>
-      <input id="sharpApiKey" placeholder="Paste your SharpAPI key here">
-      <button onclick="saveApiKey()" type="button">Save API Key</button>
-      <button class="secondary" onclick="clearApiKey()" type="button">Clear Saved Key</button>
-      <button class="secondary" onclick="testSharpApi()" type="button">Test SharpAPI</button>
-     <div class="status" id="apiStatus">No key loaded yet.</div>
-      <hr>
-      <div class="small">Save API for real-time odds and live market data. You must be signed in first.</div>
+   <section id="settings" class="section">
+  <div class="card">
+    <h2>Settings</h2>
+
+    <div class="data-box">
+      <strong>Live Odds</strong><br>
+      WagerVision automatically loads real-time sportsbook odds after you sign in and select a game.
+      No setup required.
     </div>
-  </section>
+
+    <div class="status" id="apiStatus">Live odds connected.</div>
+
+  </div>
+</section>
 
   <div class="footer">WagerVision V6.2. Finds bad prices, not guaranteed money.</div>
 </div>
