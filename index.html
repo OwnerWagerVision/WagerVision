@@ -1287,9 +1287,13 @@ async function loadOdds(){
       `).join("");
     }
 
-   calculateOdds();
+  calculateOdds();
+
+setTimeout(() => {
   logPrediction(game);
-  setText("loadStatus", "Sportsbook odds loaded.");
+}, 50);
+
+setText("loadStatus", "Sportsbook odds loaded.");
   }catch(error){
     console.error(error);
     if(oddsBox) oddsBox.innerHTML = `<div class="data-box">Could not load sportsbook odds. Make sure you are signed in, then try again.</div>`;
