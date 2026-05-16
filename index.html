@@ -459,7 +459,8 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}
       </div>
       <button class="secondary" onclick="refreshLiveState()" type="button">Refresh Live Stats</button>
       <div class="status" id="loadStatus">Start here: load games, pick a matchup, then load odds.</div>
-    </div>
+      <div id="lineAlertBox" class="data-box" style="display:none;"></div>  
+  </div>
 
     <div class="main-readout">
       <h2>Readout</h2>
@@ -671,7 +672,12 @@ function checkLineMoveAlert(gameId, teamName, oldLine, newLine){
   const move = Math.abs(newLine - oldLine);
 
   if(move >= LINE_MOVE_ALERT_THRESHOLD){
-    alert(`🚨 ${teamName} line moved from ${oldLine} to ${newLine}`);
+    const box = document.getElementById("lineAlertBox");
+
+    if(box){
+      box.style.display = "block";
+      box.innerHTML = `🚨 <strong>${teamName}</strong> line moved from ${oldLine} to ${newLine}`;
+    }
   }
 }
 
