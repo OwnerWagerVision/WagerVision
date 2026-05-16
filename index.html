@@ -887,11 +887,6 @@ async function loadSelectedGame(){
 setText("loadStatus", "Game loaded.");
 calculateOdds();
 
-console.log("cachedOddsFeed:", cachedOddsFeed);
-if (oddsLoadedForSession && cachedOddsFeed) {
-  applyOddsToCurrentGame(cachedOddsFeed);
-}
-
 } catch(error){
   console.error(error);
   setText("loadStatus", "Game Loaded.");
