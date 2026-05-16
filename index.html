@@ -658,6 +658,8 @@ let selectedGamePk = null;
 let selectedGameData = null;
 let cachedOddsFeed = null;
 let slip = JSON.parse(localStorage.getItem("wagervision_bet_slip") || "[]");
+let lastLineSnapshot = JSON.parse(localStorage.getItem("wv_line_snapshot") || "{}");
+let lineAlertTimer = null;
 
 let currentGame = null;
 
@@ -671,6 +673,32 @@ function checkLineMoveAlert(gameId, teamName, oldLine, newLine){
   if(move >= LINE_MOVE_ALERT_THRESHOLD){
     alert(`🚨 ${teamName} line moved from ${oldLine} to ${newLine}`);
   }
+}
+
+function checkAllGamesForLineMoves(feed){
+  if(!feed || !feed.length) return;
+
+  feed.forEach(game => {
+    const gameId = game.id || `${game.home_team}_${game.away_team}`;
+
+    const oddsInfo = bestHomeLineFromOddsGame(game);
+    if(!oddsInfo) return;
+
+    const newLine = oddsInfo.price;
+    const teamName = game.home_team;
+
+    const oldLine = lastLineSnapshot[gameId];
+
+    if(oldLine !== undefined){
+      checkLineMoveAlert(gameId, teamName, oldLine, newLine);
+    }
+
+    // save new line
+    lastLineSnapshot[gameId] = newLine;
+  });
+
+  // persist snapshot
+  localStorage.setItem("wv_line_snapshot", JSON.stringify(lastLineSnapshot));
 }
 
 function handleLineMove(gameId, teamName, newLine){
@@ -1216,6 +1244,8 @@ async function loadOdds(){
     let rawSharp = await getSharpOddsFeed();
     let feed = convertSharpToGames(rawSharp.data || rawSharp);
 
+    checkAllGamesForLineMoves(feed);
+    
     console.log("Sharp raw:", rawSharp);
     console.log("Converted Sharp feed:", feed);
     console.log("Trying to match:", {
