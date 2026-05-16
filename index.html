@@ -614,6 +614,29 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}
 
     <div class="status" id="apiStatus">Live odds connected.</div>
 
+   <hr>
+
+<div class="data-box">
+  <strong>Behavior</strong><br><br>
+
+  <label>
+    <input type="checkbox" id="autoOddsToggle" checked>
+    Auto-load odds when selecting a game
+  </label><br><br>
+
+  <label>
+    <input type="checkbox" id="lineAlertToggle">
+    Enable line movement alerts
+  </label><br><br>
+
+  <label>Alert Threshold:</label><br>
+  <select id="alertThreshold">
+    <option value="3">3%</option>
+    <option value="5" selected>5%</option>
+    <option value="10">10%</option>
+  </select>
+</div>
+
   </div>
 </section>
 
@@ -1892,10 +1915,12 @@ document.addEventListener("DOMContentLoaded", function () {
       await loadSelectedGame();
 
       const user = await getCurrentUser();
+      const autoOdds = document.getElementById("autoOddsToggle")?.checked;
 
-      if (user) {
-        await loadOdds();
-      } else {
+     if (user && autoOdds) {
+    await loadOdds();
+   } else if (!user) {
+    
         setText("loadStatus", "Model odds loaded. Sign in to unlock real time sportsbook odds.");
       }
     });
