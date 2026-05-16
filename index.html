@@ -661,6 +661,7 @@ let cachedOddsFeed = null;
 let slip = JSON.parse(localStorage.getItem("wagervision_bet_slip") || "[]");
 let lastLineSnapshot = JSON.parse(localStorage.getItem("wv_line_snapshot") || "{}");
 let lineAlertTimer = null;
+let predictionLog = JSON.parse(localStorage.getItem("wv_prediction_log") || "[]");
 
 let currentGame = null;
 
@@ -1286,13 +1287,33 @@ async function loadOdds(){
       `).join("");
     }
 
-    calculateOdds();
-    setText("loadStatus", "Sportsbook odds loaded.");
+   calculateOdds();
+  logPrediction(game);
+  setText("loadStatus", "Sportsbook odds loaded.");
   }catch(error){
     console.error(error);
     if(oddsBox) oddsBox.innerHTML = `<div class="data-box">Could not load sportsbook odds. Make sure you are signed in, then try again.</div>`;
     setText("loadStatus", "Could not load odds.");
   }
+}
+
+function logPrediction(game){
+  if(!game || !currentGame) return;
+
+  const entry = {
+    time: new Date().toISOString(),
+    home: game.home_team,
+    away: game.away_team,
+    modelProb: currentGame.probability,
+    marketProb: currentGame.market,
+    edge: currentGame.edge,
+    line: currentGame.line,
+    result: null
+  };
+
+  predictionLog.push(entry);
+
+  localStorage.setItem("wv_prediction_log", JSON.stringify(predictionLog));
 }
 
 function getParkFactor(stadium){
