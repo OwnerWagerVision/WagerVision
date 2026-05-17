@@ -1301,8 +1301,15 @@ setText("loadStatus", "Sportsbook odds loaded.");
   }
 }
 
-function logPrediction(game){
+  function logPrediction(game){
   if(!game) return;
+
+  const exists = predictionLog.some(entry =>
+    entry.home === game.home_team &&
+    entry.away === game.away_team
+  );
+
+  if (exists) return;
 
   const entry = {
     time: new Date().toISOString(),
