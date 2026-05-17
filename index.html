@@ -1308,9 +1308,9 @@ function logPrediction(game){
     time: new Date().toISOString(),
     home: game.home_team,
     away: game.away_team,
-    modelProb: text("probability"),
-    marketProb: text("marketProb"),
-    edge: text("edge"),
+    modelProb: document.getElementById("homeProb")?.textContent || "",
+    marketProb: document.getElementById("marketProb")?.textContent || "",
+    edge: document.getElementById("edgeValue")?.textContent || "",
     line: text("bestHomeLine"),
     result: null
   };
