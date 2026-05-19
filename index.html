@@ -1342,7 +1342,7 @@ console.log("Matching odds game:", game);
         <strong>${row.book}</strong>
         <div>Home ${displayAmerican(row.homeLine)}</div>
         <div>Sportsbook Odds ${row.homeProb.toFixed(1)}% (No Vig)</div>
-        <div>WagerVision ${displayAmerican(probabilityToAmerican(Number((document.getElementById("homeProb")?.textContent || "").replace("%",""))))}</div>
+       <div>WagerVision line loading after calculation...</div>
       </div>
     `).join("");
   }
@@ -1391,7 +1391,7 @@ async function loadOdds(){
           <strong>${row.book}</strong>
           <div>Home ${displayAmerican(row.homeLine)}</div>
           <div>True Prob ${row.homeProb.toFixed(1)}% (No Vig)</div>
-         <div>WagerVision ${displayAmerican(probabilityToAmerican(result.homeScore))}</div>
+         <div>WagerVision ${displayAmerican(probabilityToAmerican(Number((el("homeProb")?.textContent || "").replace("%",""))))}</div>
         </div>
       `).join("");
     }
