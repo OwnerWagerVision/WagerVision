@@ -1276,6 +1276,35 @@ const market = book.markets?.find(m => m.key === "h2h");
   return {best,bestBook,bestProb,rows};
 }
 
+function bestAwayLineFromOddsGame(game){
+  let best = null, bestBook = "", bestProb = 50, rows = [];
+  if(!game) return null;
+
+  (game.bookmakers || []).forEach(book => {
+    const market = book.markets?.find(m => m.key === "h2h");
+    if(!market) return;
+
+    const homeOutcome = market.outcomes.find(o => normalizeTeamName(o.name) === normalizeTeamName(game.home_team));
+    const awayOutcome = market.outcomes.find(o => normalizeTeamName(o.name) === normalizeTeamName(game.away_team));
+    if(!homeOutcome || !awayOutcome) return;
+
+    const rawHome = americanToImplied(homeOutcome.price);
+    const rawAway = americanToImplied(awayOutcome.price);
+    const fair = noVigTwoWay(rawHome, rawAway);
+
+    if(best === null || Number(awayOutcome.price) > Number(best)){
+      best = awayOutcome.price;
+      bestBook = book.title;
+      bestProb = fair.b;
+    }
+
+    rows.push({book:book.title, homeLine:homeOutcome.price, awayLine:awayOutcome.price, awayProb:fair.b});
+  });
+
+  if(best === null) return null;
+  return {best, bestBook, bestProb, rows};
+}
+
 function applyOddsToCurrentGame(feed){
 const homeName = text("homeTeam").toLowerCase();
 const awayName = text("awayTeam").toLowerCase();
@@ -1719,10 +1748,18 @@ try{
 });
 
       const oddsGame = findOddsGame(oddsFeed, home.name, away.name);
-      const oddsInfo = bestHomeLineFromOddsGame(oddsGame);
-      if(!oddsInfo) continue;
+      const homeOddsInfo = bestHomeLineFromOddsGame(oddsGame);
+     const awayOddsInfo = bestAwayLineFromOddsGame(oddsGame);
+     if(!homeOddsInfo || !awayOddsInfo) continue;
 
-      const edge = model.homeScore - oddsInfo.bestProb;
+    const homeEdge = model.homeScore - homeOddsInfo.bestProb;
+    const awayModel = 100 - model.homeScore;
+    const awayEdge = awayModel - awayOddsInfo.bestProb;
+
+    const pickHome = homeEdge >= awayEdge;
+    const oddsInfo = pickHome ? homeOddsInfo : awayOddsInfo;
+    const edge = pickHome ? homeEdge : awayEdge;
+
       
      let confidence = "Low";
 
@@ -1732,14 +1769,14 @@ try{
    picks.push({
   home: home.name,
   away: away.name,
-  pick: edge >= 0 ? home.name : away.name,
-  model: model.homeScore,
-  fadeTeam: edge >= 0 ? away.name : home.name,
-  fadeLine: -110,
+  pick: pickHome ? home.name : away.name,
+  model: pickHome ? model.homeScore : awayModel,
+  fadeTeam: pickHome ? away.name : home.name,
+  fadeLine: pickHome ? awayOddsInfo.best : homeOddsInfo.best,
   market: oddsInfo.bestProb,
   edge,
   confidence,
-  american: edge >= 0 ? oddsInfo.best : -110,
+  american: oddsInfo.best,
   book: oddsInfo.bestBook
 });
 
