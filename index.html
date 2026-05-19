@@ -757,17 +757,17 @@ function checkAllGamesForLineMoves(feed){
     const oddsInfo = bestHomeLineFromOddsGame(game);
     if(!oddsInfo) return;
 
-    const newLine = oddsInfo.price;
+    const newLine = oddsInfo.best;
     const teamName = game.home_team;
 
-    const oldLine = lastLineSnapshot[gameId];
+     const oldLine = previousOddsMap[gameId];
 
     if(oldLine !== undefined){
       checkLineMoveAlert(gameId, teamName, oldLine, newLine);
     }
 
     // save new line
-    lastLineSnapshot[gameId] = newLine;
+   previousOddsMap[gameId] = newLine;
   });
 
   // persist snapshot
