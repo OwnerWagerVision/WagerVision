@@ -726,6 +726,7 @@ let slip = JSON.parse(localStorage.getItem("wagervision_bet_slip") || "[]");
 let lastLineSnapshot = JSON.parse(localStorage.getItem("wv_line_snapshot") || "{}");
 let lineAlertTimer = null;
 let predictionLog = JSON.parse(localStorage.getItem("wv_prediction_log") || "[]");
+let lastBoardPicks = [];
 
 let currentGame = null;
 
@@ -1746,6 +1747,7 @@ try{
 }
 
   picks.sort((a,b) => b.edge - a.edge);
+  lastBoardPicks = picks;
 
   setText("topEdge", picks.length ? `${picks[0].edge >= 0 ? "+" : ""}${picks[0].edge.toFixed(1)}%` : "—");
 
@@ -1773,9 +1775,9 @@ try{
     ⭐ ${p.pick} ${displayAmerican(p.american)}
   </button>
 
-  <button class="secondary compact-btn" type="button">
-    ${p.fadeTeam} ${displayAmerican(p.fadeLine)}
-  </button>
+  <button class="secondary compact-btn" onclick="addOtherBoardPick(${i})" type="button">
+  ${p.fadeTeam} ${displayAmerican(p.fadeLine)}
+</button>
 </div>
       </div>
     `).join("") : `<div class="data-box">No matching odds found for today’s games.</div>`;
@@ -1786,6 +1788,29 @@ try{
 
 function saveSlip(){
   localStorage.setItem("wagervision_bet_slip", JSON.stringify(slip));
+}
+
+function addBoardPick(index){
+  const p = lastBoardPicks[index];
+  if(!p) return;
+
+  addPickToSlip(p);
+}
+
+function addOtherBoardPick(index){
+  const p = lastBoardPicks[index];
+  if(!p) return;
+
+  addPickToSlip({
+    home: p.home,
+    away: p.away,
+    pick: p.fadeTeam,
+    model: 100 - p.model,
+    market: 100 - p.market,
+    edge: -p.edge,
+    american: p.fadeLine,
+    book: p.book
+  });
 }
 
 function addPickToSlip(p){
@@ -2070,6 +2095,8 @@ window.signOut = signOut;
 window.saveApiKey = saveApiKey;
 window.clearApiKey = clearApiKey;
 window.startApp = startApp;
+window.addBoardPick = addBoardPick;
+window.addOtherBoardPick = addOtherBoardPick;
 
 function startApp() {
   document.getElementById("landingPage").style.display = "none";
