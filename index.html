@@ -1731,7 +1731,9 @@ try{
         away:away.name,
         pick:edge >= 0 ? home.name : away.name,
         model:model.homeScore,
-	market: oddsInfo.bestProb,
+       fadeTeam: pickTeam === home ? away : home,
+       fadeLine: pickTeam === home ? awayLine : homeLine,	
+       market: oddsInfo.bestProb,
         edge,
        confidence, 
        american:edge >= 0 ? oddsInfo.best : -110,
@@ -1765,7 +1767,15 @@ try{
           <span class="pill">${p.edge >= 8 ? "Strong Value" : p.edge >= 4 ? "Lean" : p.edge <= -4 ? "Fade/Check Away" : "Pass"}</span>
           <span class="pill">Real market edge</span>
         </div>
-        <button class="gold" onclick='addPickToSlip(${JSON.stringify(p).replace(/'/g,"&#39;")})' type="button">⭐ Add to Bet Slip</button>
+	<div class="pick-actions">
+  <button class="gold compact-btn" onclick="addBoardPick(${i})" type="button">
+    ⭐ ${pick.pick} ${displayAmerican(pick.line)}
+  </button>
+
+  <button class="secondary compact-btn" type="button">
+    ${pick.fadeTeam} ${displayAmerican(pick.fadeLine)}
+  </button>
+</div>
       </div>
     `).join("") : `<div class="data-box">No matching odds found for today’s games.</div>`;
   }
