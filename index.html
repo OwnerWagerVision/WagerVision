@@ -1390,7 +1390,8 @@ async function loadOdds(){
         <div class="book-row">
           <strong>${row.book}</strong>
           <div>Home ${displayAmerican(row.homeLine)}</div>
-	<div>True Prob ${row.homeProb.toFixed(1)}% (No Vig)</div>
+          <div>True Prob ${row.homeProb.toFixed(1)}% (No Vig)</div>
+       <div>WagerVision ${displayAmerican(probabilityToAmerican(num("homeProb")))}</div>
         </div>
       `).join("");
     }
