@@ -228,6 +228,52 @@ button.danger, .remove {
 .summary-card{padding:10px;border-radius:13px;background:rgba(15,23,42,.65);border:1px solid rgba(255,255,255,.08);text-align:center}
 .summary-card strong{display:block;font-size:16px}
 .summary-card span{font-size:10px;color:#cbd5e1}
+ .board-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:12px;
+}
+
+.board-header button{
+  width:auto;
+  min-width:120px;
+  margin-top:0;
+}
+
+.board-list{
+  display:grid;
+  gap:10px;
+  margin-top:12px;
+}
+
+.pick-card{
+  background:linear-gradient(180deg, rgba(15,23,42,.88), rgba(15,23,42,.66));
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:18px;
+  padding:14px;
+  box-shadow:0 10px 28px rgba(0,0,0,.24);
+}
+
+.pick-title{
+  font-size:15px;
+  font-weight:950;
+  letter-spacing:-.2px;
+}
+
+.pick-edge{
+  font-size:15px;
+  font-weight:950;
+  color:#86efac;
+}
+
+.pick-meta{
+  margin-top:8px;
+  font-size:12px;
+  color:#cbd5e1;
+  line-height:1.5;
+}
 .collapsed{display:none}
 .quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
 hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}
@@ -577,19 +623,37 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}
   </section>
 
   <section id="board" class="section">
-    <div class="summary-strip">
-      <div class="summary-card"><strong id="topEdge">—</strong><span>Top Edge</span></div>
-      <div class="summary-card"><strong id="gamesLoaded">0</strong><span>Games</span></div>
-      <div class="summary-card"><strong id="slipCount">0</strong><span>Slip Legs</span></div>
+  <div class="summary-strip">
+    <div class="summary-card">
+      <span>Top Edge</span>
+      <strong id="topEdge">—</strong>
     </div>
-    <div class="card">
-      <h2>Best Picks Pregame Board</h2>
-      <button onclick="scanBoard()" type="button">Scan Real Edge Board</button>
-      <button class="secondary" onclick="loadGames()" type="button">Load MLB Games Only</button>
-      <div class="status" id="boardStatus">Sign in to automatically load odds.</div>
-      <div id="pickBoard" class="data-box">No picks scanned yet.</div>
+    <div class="summary-card">
+      <span>Games Scanned</span>
+      <strong id="gamesLoaded">0</strong>
     </div>
-  </section>
+    <div class="summary-card">
+      <span>Slip Legs</span>
+      <strong id="slipCount">0</strong>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="board-header">
+      <div>
+        <h2>Edge Board</h2>
+        <div class="small">The strongest mispriced MLB moneylines WagerVision sees today.</div>
+      </div>
+      <button onclick="scanBoard()" type="button">Scan Board</button>
+    </div>
+
+    <div class="status" id="boardStatus">Load games, then scan the board for live edges.</div>
+
+    <div id="pickBoard" class="board-list">
+      <div class="data-box">No picks scanned yet.</div>
+    </div>
+  </div>
+</section>
 
   <section id="slip" class="section">
     <div class="card">
