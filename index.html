@@ -1726,23 +1726,19 @@ try{
     if (Math.abs(edge) >= 8) confidence = "High"; 
     else if (Math.abs(edge) >= 4) confidence = "Medium";     
  
-     picks.push({
-        home:home.name,
-        away:away.name,
-        pick:edge >= 0 ? home.name : away.name,
-        model:model.homeScore,
-       fadeTeam: pickTeam === home ? away : home,
-       fadeLine: pickTeam === home ? awayLine : homeLine,	
-       market: oddsInfo.bestProb,
-        edge,
-       confidence, 
-       american:edge >= 0 ? oddsInfo.best : -110,
-        book:oddsInfo.bestBook
-      });
-    }catch(error){
-      console.error("scanBoard game failed:", error);
-    }
-  }
+   picks.push({
+  home: home.name,
+  away: away.name,
+  pick: edge >= 0 ? home.name : away.name,
+  model: model.homeScore,
+  fadeTeam: edge >= 0 ? away.name : home.name,
+  fadeLine: -110,
+  market: oddsInfo.bestProb,
+  edge,
+  confidence,
+  american: edge >= 0 ? oddsInfo.best : -110,
+  book: oddsInfo.bestBook
+});
 
   picks.sort((a,b) => b.edge - a.edge);
 
