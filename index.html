@@ -722,6 +722,7 @@ let loadedGames = [];
 let selectedGamePk = null;
 let selectedGameData = null;
 let cachedOddsFeed = null;
+let previousOddsMap = {};
 let slip = JSON.parse(localStorage.getItem("wagervision_bet_slip") || "[]");
 let lastLineSnapshot = JSON.parse(localStorage.getItem("wv_line_snapshot") || "{}");
 let lineAlertTimer = null;
@@ -1152,6 +1153,7 @@ if(sharpKey){
 }
 
   cachedOddsFeed = await fetchJSON(`https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?regions=us&markets=h2h&oddsFormat=american&apiKey=${encodeURIComponent(key)}`);
+  detectLineMoves(cachedOddsFeed);
   return cachedOddsFeed;
 }
 
