@@ -1108,6 +1108,17 @@ function americanToImplied(price){
   return p > 0 ? (100 / (p + 100)) * 100 : ((-p) / ((-p) + 100)) * 100;
 }
 
+function probabilityToAmerican(prob){
+  prob = Number(prob);
+  if(!Number.isFinite(prob) || prob <= 0 || prob >= 100) return "—";
+
+  if(prob >= 50){
+    return Math.round(-(prob / (100 - prob)) * 100);
+  }
+
+  return Math.round(((100 - prob) / prob) * 100);
+}
+
 function noVigTwoWay(a,b){
   const total = a + b;
   if(!total) return {a,b};
@@ -1673,7 +1684,8 @@ if(input.homeOps > input.awayOps){
   <strong>${edge !== null && edge >= 0 ? "Value on home side" : "No home value / check away side"}</strong><br>
   Our home win probability: ${result.homeScore !== null ? result.homeScore.toFixed(1) : "--"}%<br>
   Market home probability: ${market !== null ? market.toFixed(1) : "🔒"}%<br>
-  Edge: ${edge !== null ? (edge >= 0 ? "+" : "") + edge.toFixed(1) : "🔒"}
+    Edge: ${edge !== null ? (edge >= 0 ? "+" : "") + edge.toFixed(1) : "🔒"}<br>
+  WagerVision line: ${result.homeScore !== null ? displayAmerican(probabilityToAmerican(result.homeScore)) : "--"}
 `;
 }
 
