@@ -754,24 +754,24 @@ function checkAllGamesForLineMoves(feed){
   feed.forEach(game => {
     const gameId = game.id || `${game.home_team}_${game.away_team}`;
 
-    const oddsInfo = bestHomeLineFromOddsGame(game);
-    if(!oddsInfo) return;
+    (game.bookmakers || []).forEach(book => {
+      const market = book.markets?.find(m => m.key === "h2h");
+      if(!market) return;
 
-    const newLine = oddsInfo.best;
-    const teamName = game.home_team;
+      const homeOutcome = market.outcomes.find(o => normalizeTeamName(o.name) === normalizeTeamName(game.home_team));
+      if(!homeOutcome) return;
 
-     const oldLine = previousOddsMap[gameId];
+      const key = `${gameId}_${book.title}_${game.home_team}`;
+      const newLine = Number(homeOutcome.price);
+      const oldLine = previousOddsMap[key];
 
-    if(oldLine !== undefined){
-      checkLineMoveAlert(gameId, teamName, oldLine, newLine);
-    }
+      if(oldLine !== undefined){
+        checkLineMoveAlert(gameId, `${game.home_team} at ${book.title}`, oldLine, newLine);
+      }
 
-    // save new line
-   previousOddsMap[gameId] = newLine;
+      previousOddsMap[key] = newLine;
+    });
   });
-
-  // persist snapshot
-  localStorage.setItem("wv_line_snapshot", JSON.stringify(lastLineSnapshot));
 }
 
 function handleLineMove(gameId, teamName, newLine){
