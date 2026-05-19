@@ -1740,6 +1740,10 @@ try{
   book: oddsInfo.bestBook
 });
 
+    }catch(error){
+      console.error("scanBoard game failed:", error);
+    }
+
   picks.sort((a,b) => b.edge - a.edge);
 
   setText("topEdge", picks.length ? `${picks[0].edge >= 0 ? "+" : ""}${picks[0].edge.toFixed(1)}%` : "—");
