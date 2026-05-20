@@ -775,16 +775,8 @@ function checkAllGamesForLineMoves(feed){
 }
 
 function handleLineMove(gameId, teamName, newLine){
-  if(newLine == null) return;
-
-  const key = `wagervision_line_${gameId}_${teamName}`;
-  const oldLine = localStorage.getItem(key);
-
-  if(oldLine !== null){
-    checkLineMoveAlert(gameId, teamName, Number(oldLine), Number(newLine));
-  }
-
-  localStorage.setItem(key, newLine);
+  // Disabled old line movement logic.
+  return;
 }
 
 function el(id){ return document.getElementById(id); }
