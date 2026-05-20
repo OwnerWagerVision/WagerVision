@@ -2052,6 +2052,9 @@ async function signOut(){
     lineAlertBox.innerHTML = "";
   }
 
+previousOddsMap = {};
+localStorage.clear();
+
   closeAuth();
   updateAuthButton(null);
   showTab("game", document.querySelector(".tab"));
