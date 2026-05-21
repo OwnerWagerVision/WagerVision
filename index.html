@@ -1798,6 +1798,16 @@ if(input.homeOps > input.awayOps){
   insights.push("Away offensive efficiency edge detected.");
 }
 
+const premiumModelReasons = result.reasons.filter(r =>
+  r.includes("Bullpen advantage") ||
+  r.includes("Command edge") ||
+  r.includes("Recent form")
+);
+
+premiumModelReasons.forEach(r => {
+  insights.push(r.replace(".", ""));
+});
+
   insightBox.innerHTML = insights.map(i => `<div style="margin-bottom:6px;">• ${i}</div>`).join("");
 }
 
