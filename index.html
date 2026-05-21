@@ -1670,7 +1670,7 @@ async function calculateOdds(){
     const bullpenImpact = clamp((awayPitching.era - homePitching.era) * 1.2, -3, 3);
     result.homeScore = clamp(result.homeScore + bullpenImpact, 2, 98);
 
-    if (Math.abs(bullpenImpact) >= 0.75) {
+    if (Math.abs(bullpenImpact) >= 0.1) {
       result.reasons.push(
         bullpenImpact > 0
           ? "Bullpen advantage favors home team."
@@ -1681,7 +1681,7 @@ async function calculateOdds(){
     const kbbImpact = clamp((homeKBB - awayKBB) * 1.4, -2.5, 2.5);
     result.homeScore = clamp(result.homeScore + kbbImpact, 2, 98);
 
-    if (Math.abs(kbbImpact) >= 0.6) {
+    if (Math.abs(kbbImpact) >= 0.1) {
       result.reasons.push(
         kbbImpact > 0
           ? "Command edge favors home pitching."
@@ -1698,7 +1698,7 @@ async function calculateOdds(){
 
     result.homeScore = clamp(result.homeScore + recentFormImpact, 2, 98);
 
-    if (Math.abs(recentFormImpact) >= 0.75) {
+    if (Math.abs(recentFormImpact) >= 0.1) {
       result.reasons.push(
         recentFormImpact > 0
           ? "Recent form favors home team."
