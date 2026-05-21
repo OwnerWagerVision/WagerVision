@@ -1149,6 +1149,40 @@ function getKBB(stats) {
   return strikeouts / walks;
 }
 
+async function getRecentTeamForm(teamId, season = 2026, limit = 5) {
+  const scheduleUrl = `https://statsapi.mlb.com/api/v1/schedule?sportId=1&season=${season}&teamId=${teamId}&gameTypes=R&hydrate=linescore&fields=dates,games,gamePk,gameDate,teams,team,score,id,status,detailedState`;
+
+  const res = await fetch(scheduleUrl);
+  const data = await res.json();
+
+  const games = (data?.dates || [])
+    .flatMap(d => d.games || [])
+    .filter(g => g?.status?.detailedState === "Final")
+    .sort((a, b) => new Date(b.gameDate) - new Date(a.gameDate))
+    .slice(0, limit);
+
+  if (!games.length) {
+    return { winPct: 0.5, runDiffPerGame: 0 };
+  }
+
+  let wins = 0;
+  let runDiff = 0;
+
+  games.forEach(g => {
+    const isHome = g.teams?.home?.team?.id === teamId;
+    const teamScore = isHome ? g.teams?.home?.score : g.teams?.away?.score;
+    const oppScore = isHome ? g.teams?.away?.score : g.teams?.home?.score;
+
+    if (teamScore > oppScore) wins++;
+    runDiff += safeNum(teamScore) - safeNum(oppScore);
+  });
+
+  return {
+    winPct: wins / games.length,
+    runDiffPerGame: runDiff / games.length
+  };
+}
+
 function displayAmerican(price){
   const p = Number(price);
   return p > 0 ? `+${p}` : `${p}`;
@@ -1613,6 +1647,9 @@ async function calculateOdds(){
     const homeKBB = getKBB(homePitching);
     const awayKBB = getKBB(awayPitching);
 
+    const homeForm = await getRecentTeamForm(currentGame.teams.home.team.id);
+    const awayForm = await getRecentTeamForm(currentGame.teams.away.team.id);
+
     const bullpenImpact = clamp((awayPitching.era - homePitching.era) * 1.2, -3, 3);
     result.homeScore = clamp(result.homeScore + bullpenImpact, 2, 98);
 
@@ -1632,6 +1669,23 @@ async function calculateOdds(){
         kbbImpact > 0
           ? "Command edge favors home pitching."
           : "Command edge favors away pitching."
+      );
+    }
+
+    const recentFormImpact = clamp(
+      ((homeForm.winPct - awayForm.winPct) * 4) +
+      ((homeForm.runDiffPerGame - awayForm.runDiffPerGame) * 0.35),
+      -3,
+      3
+    );
+
+    result.homeScore = clamp(result.homeScore + recentFormImpact, 2, 98);
+
+    if (Math.abs(recentFormImpact) >= 0.75) {
+      result.reasons.push(
+        recentFormImpact > 0
+          ? "Recent form favors home team."
+          : "Recent form favors away team."
       );
     }
   }
