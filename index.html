@@ -786,6 +786,11 @@ function setVal(id, value){ const x = el(id); if(x) x.value = value; }
 function setText(id, value){ const x = el(id); if(x) x.textContent = value; }
 function clamp(value,min,max){ return Math.max(min, Math.min(max, Number(value))); }
 
+function safeNum(v, fallback = 0) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : fallback;
+}
+
 function updateLiveBar(payout, edge, confidence, legs){
   setText("livePayout", payout);
   setText("liveEdge", edge);
@@ -1115,6 +1120,33 @@ function noVigTwoWay(a,b){
   const total = a + b;
   if(!total) return {a,b};
   return {a:(a/total)*100,b:(b/total)*100};
+}
+
+async function getTeamPitchingStats(teamId, season = 2026) {
+  const url = `https://statsapi.mlb.com/api/v1/teams/${teamId}/stats?stats=season&group=pitching&season=${season}`;
+
+  const res = await fetch(url);
+  const data = await res.json();
+
+  const splits = data?.stats?.[0]?.splits;
+  const stat = splits?.[0]?.stat || {};
+
+  return {
+    era: safeNum(stat.era),
+    whip: safeNum(stat.whip),
+    strikeOuts: safeNum(stat.strikeOuts),
+    baseOnBalls: safeNum(stat.baseOnBalls),
+    inningsPitched: safeNum(stat.inningsPitched)
+  };
+}
+
+function getKBB(stats) {
+  const walks = safeNum(stats.baseOnBalls, 1);
+  const strikeouts = safeNum(stats.strikeOuts, 0);
+
+  if (walks <= 0) return strikeouts;
+
+  return strikeouts / walks;
 }
 
 function displayAmerican(price){
@@ -1573,6 +1605,36 @@ async function calculateOdds(){
 
   const result = modelCalc(currentInput());
   const input = currentInput();
+
+  if (currentGame?.teams?.home?.team?.id && currentGame?.teams?.away?.team?.id) {
+    const homePitching = await getTeamPitchingStats(currentGame.teams.home.team.id);
+    const awayPitching = await getTeamPitchingStats(currentGame.teams.away.team.id);
+
+    const homeKBB = getKBB(homePitching);
+    const awayKBB = getKBB(awayPitching);
+
+    const bullpenImpact = clamp((awayPitching.era - homePitching.era) * 1.2, -3, 3);
+    result.homeScore = clamp(result.homeScore + bullpenImpact, 2, 98);
+
+    if (Math.abs(bullpenImpact) >= 0.75) {
+      result.reasons.push(
+        bullpenImpact > 0
+          ? "Bullpen advantage favors home team."
+          : "Bullpen advantage favors away team."
+      );
+    }
+
+    const kbbImpact = clamp((homeKBB - awayKBB) * 1.4, -2.5, 2.5);
+    result.homeScore = clamp(result.homeScore + kbbImpact, 2, 98);
+
+    if (Math.abs(kbbImpact) >= 0.6) {
+      result.reasons.push(
+        kbbImpact > 0
+          ? "Command edge favors home pitching."
+          : "Command edge favors away pitching."
+      );
+    }
+  }
 
   const park = getParkFactor(selectedGameData?.venue?.name || "");
   let parkAdjustment = clamp(park.impact, -2, 2);
