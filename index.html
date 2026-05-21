@@ -775,8 +775,25 @@ function checkAllGamesForLineMoves(feed){
 }
 
 function handleLineMove(gameId, teamName, newLine){
-  // Disabled old line movement logic.
-  return;
+  if (newLine == null || Number.isNaN(Number(newLine))) return;
+
+  const key = `${gameId}_${teamName}`;
+  const oldLine = lastLineSnapshot[key];
+
+  if (oldLine !== undefined) {
+    const move = Math.abs(Number(newLine) - Number(oldLine));
+
+    if (move >= LINE_MOVE_ALERT_THRESHOLD) {
+      const box = document.getElementById("lineAlertBox");
+      if (box) {
+        box.style.display = "block";
+        box.innerHTML = `🚨 <strong>${teamName}</strong> line moved from ${oldLine} to ${newLine}`;
+      }
+    }
+  }
+
+  lastLineSnapshot[key] = Number(newLine);
+  localStorage.setItem("wv_line_snapshot", JSON.stringify(lastLineSnapshot));
 }
 
 function el(id){ return document.getElementById(id); }
@@ -2169,7 +2186,6 @@ async function signOut(){
   }
 
 previousOddsMap = {};
-localStorage.clear();
 
   closeAuth();
   updateAuthButton(null);
