@@ -1798,20 +1798,44 @@ if(input.homeOps > input.awayOps){
   insights.push("Away offensive efficiency edge detected.");
 }
 
-const premiumModelReasons = result.reasons.filter(r =>
+const isSignedIn = !!localStorage.getItem("wv_user");
+
+const publicModelReasons = result.reasons.filter(r =>
   r.includes("Bullpen advantage") ||
-  r.includes("Command edge") ||
   r.includes("Recent form") ||
-  r.includes("Starter ERA impact") ||
-  r.includes("Starter WHIP impact") ||
-  r.includes("starter dominates") ||
-  r.includes("triple edge") ||
   r.includes("Park factor impact")
 );
 
-premiumModelReasons.forEach(r => {
-  insights.push(r.replace(".", ""));
+const lockedModelReasons = result.reasons.filter(r =>
+  r.includes("Command edge") ||
+  r.includes("Starter ERA impact") ||
+  r.includes("Starter WHIP impact") ||
+  r.includes("starter dominates") ||
+  r.includes("triple edge")
+);
+
+function cleanInsightText(text){
+  return text
+    .replace(/[+-]\d+(\.\d+)?/g, "")       // removes +2.5, -1.5, +0.7
+    .replace(/\s+\./g, ".")               // cleans space before period
+    .replace(/\s+/g, " ")                 // cleans double spaces
+    .replace(" impact:", " impact detected")
+    .replace(" weight:", " advantage detected")
+    .trim()
+    .replace(/\.$/, "");
+}
+
+publicModelReasons.forEach(r => {
+  insights.push(cleanInsightText(r));
 });
+
+if(isSignedIn){
+  lockedModelReasons.forEach(r => {
+    insights.push(cleanInsightText(r));
+  });
+} else if(lockedModelReasons.length){
+  insights.push("🔒 Create a free account to unlock advanced model signals");
+}
 
 premiumModelReasons.forEach(r => {
   insights.push(r.replace(".", ""));
