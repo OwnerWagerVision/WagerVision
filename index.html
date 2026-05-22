@@ -1799,14 +1799,15 @@ if(input.homeOps > input.awayOps){
 }
 
 const isSignedIn = !!localStorage.getItem("wv_user");
+const modelReasons = Array.isArray(result?.reasons) ? result.reasons : [];
 
-const publicModelReasons = result.reasons.filter(r =>
+const publicModelReasons = modelReasons.filter(r =>
   r.includes("Bullpen advantage") ||
   r.includes("Recent form") ||
   r.includes("Park factor impact")
 );
 
-const lockedModelReasons = result.reasons.filter(r =>
+const lockedModelReasons = modelReasons.filter(r =>
   r.includes("Command edge") ||
   r.includes("Starter ERA impact") ||
   r.includes("Starter WHIP impact") ||
@@ -1836,10 +1837,6 @@ if(isSignedIn){
 } else if(lockedModelReasons.length){
   insights.push("🔒 Create a free account to unlock advanced model signals");
 }
-
-premiumModelReasons.forEach(r => {
-  insights.push(r.replace(".", ""));
-});
 
   insightBox.innerHTML = insights.map(i => `<div style="margin-bottom:6px;">• ${i}</div>`).join("");
 }
