@@ -1801,8 +1801,17 @@ if(input.homeOps > input.awayOps){
 const premiumModelReasons = result.reasons.filter(r =>
   r.includes("Bullpen advantage") ||
   r.includes("Command edge") ||
-  r.includes("Recent form")
+  r.includes("Recent form") ||
+  r.includes("Starter ERA impact") ||
+  r.includes("Starter WHIP impact") ||
+  r.includes("starter dominates") ||
+  r.includes("triple edge") ||
+  r.includes("Park factor impact")
 );
+
+premiumModelReasons.forEach(r => {
+  insights.push(r.replace(".", ""));
+});
 
 premiumModelReasons.forEach(r => {
   insights.push(r.replace(".", ""));
