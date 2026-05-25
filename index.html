@@ -2020,13 +2020,6 @@ function addCurrentToSlip(){
   addPickToSlip(currentSlipPick);
 }
 
-  slip.push(currentSlipPick);
-  localStorage.setItem("wagervision_bet_slip", JSON.stringify(slip));
-  renderSlip();
-
-  alert("Pick added to bet slip.");
-}
-
 function addBoardPick(index){
   const p = lastBoardPicks[index];
   if(!p) return;
