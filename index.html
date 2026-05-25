@@ -2017,6 +2017,9 @@ function addCurrentToSlip(){
     return;
   }
 
+  addPickToSlip(currentSlipPick);
+}
+
   slip.push(currentSlipPick);
   localStorage.setItem("wagervision_bet_slip", JSON.stringify(slip));
   renderSlip();
@@ -2057,10 +2060,6 @@ function addPickToSlip(p){
   renderSlip();
   setText("slipCount", slip.length);
   showTab("slip", document.querySelectorAll(".tab")[2]);
-}
-
-function addCurrentToSlip(){
-  addPickToSlip(calculateOdds());
 }
 
 function clearSlip(){
