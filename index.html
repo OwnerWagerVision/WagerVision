@@ -724,6 +724,7 @@ let selectedGameData = null;
 let cachedOddsFeed = null;
 let previousOddsMap = {};
 let slip = JSON.parse(localStorage.getItem("wagervision_bet_slip") || "[]");
+let currentSlipPick = null;
 let lastLineSnapshot = JSON.parse(localStorage.getItem("wv_line_snapshot") || "{}");
 let lineAlertTimer = null;
 let predictionLog = JSON.parse(localStorage.getItem("wv_prediction_log") || "[]");
@@ -1856,17 +1857,18 @@ if(isSignedIn){
 `;
 }
 
-  return {
-    home,
-    away,
-    pick,
-    model:result.homeScore,
-    market,
-    edge,
-    american,
-    book:text("bestHomeLine") || "Manual"
-  };
-}
+currentSlipPick = {
+  home,
+  away,
+  pick,
+  model: result.homeScore,
+  market,
+  edge,
+  american,
+  book: text("bestHomeLine") || "Manual"
+};
+
+return currentSlipPick;
 
 async function scanBoard(){
   if(!loadedGames.length) await loadGames();
@@ -2006,6 +2008,19 @@ try{
 
 function saveSlip(){
   localStorage.setItem("wagervision_bet_slip", JSON.stringify(slip));
+}
+
+function addCurrentToSlip(){
+  if(!currentSlipPick){
+    alert("Run a calculation first.");
+    return;
+  }
+
+  slip.push(currentSlipPick);
+  localStorage.setItem("wagervision_bet_slip", JSON.stringify(slip));
+  renderSlip();
+
+  alert("Pick added to bet slip.");
 }
 
 function addBoardPick(index){
