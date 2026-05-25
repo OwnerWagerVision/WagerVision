@@ -1848,7 +1848,7 @@ if(isSignedIn){
   : "edge-box";
     edgeText.className = css;
   edgeText.innerHTML = `
-  <strong>${edge !== null && edge >= 0 ? "Value on home side" : "No home value / check away side"}</strong><br>
+  <strong>${edge !== null && edge >= 0 ? "Home side shows value" : "Home side overpriced. Check away value."}</strong><br>
   Our home win probability: ${result.homeScore !== null ? result.homeScore.toFixed(1) : "--"}%<br>
   Market home probability: ${market !== null ? market.toFixed(1) : "🔒"}%<br>
     Edge: ${edge !== null ? (edge >= 0 ? "+" : "") + edge.toFixed(1) : "🔒"}<br>
