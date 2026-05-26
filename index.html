@@ -2307,6 +2307,9 @@ async function signOut(){
   localStorage.removeItem("wv_user");
   localStorage.removeItem("wagervision_bet_slip");
 
+  // Reset visible settings only. Saved account settings remain in localStorage.
+  resetUserSettingsToDefaults();
+
   // Reset memory
   slip = [];
   cachedOddsFeed = null;
