@@ -732,20 +732,40 @@ let lastBoardPicks = [];
 
 let currentGame = null;
 
-const LINE_MOVE_ALERT_THRESHOLD = 1;
+function lineAlertsEnabled(){
+  return el("lineAlertToggle")?.checked === true;
+}
+
+function getLineAlertThreshold(){
+  const threshold = Number(el("alertThreshold")?.value || 5);
+  return Number.isFinite(threshold) ? threshold : 5;
+}
+
+function impliedLineMove(oldLine, newLine){
+  return Math.abs(americanToImplied(Number(newLine)) - americanToImplied(Number(oldLine)));
+}
+
+function showLineAlert(teamName, oldLine, newLine, move){
+  const box = el("lineAlertBox");
+  if(!box) return;
+
+  box.style.display = "block";
+  box.innerHTML = `
+    🚨 <strong>${teamName}</strong> meaningful line move detected<br>
+    ${displayAmerican(oldLine)} → ${displayAmerican(newLine)} 
+    <span style="color:#94a3b8;">(${move.toFixed(1)}% implied probability shift)</span>
+  `;
+}
 
 function checkLineMoveAlert(gameId, teamName, oldLine, newLine){
+  if(!lineAlertsEnabled()) return;
   if(oldLine == null || newLine == null) return;
 
-  const move = Math.abs(newLine - oldLine);
+  const move = impliedLineMove(oldLine, newLine);
+  const threshold = getLineAlertThreshold();
 
-  if(move >= LINE_MOVE_ALERT_THRESHOLD){
-    const box = document.getElementById("lineAlertBox");
-
-    if(box){
-      box.style.display = "block";
-      box.innerHTML = `🚨 <strong>${teamName}</strong> line moved from ${oldLine} to ${newLine}`;
-    }
+  if(move >= threshold){
+    showLineAlert(teamName, oldLine, newLine, move);
   }
 }
 
@@ -782,15 +802,7 @@ function handleLineMove(gameId, teamName, newLine){
   const oldLine = lastLineSnapshot[key];
 
   if (oldLine !== undefined) {
-    const move = Math.abs(Number(newLine) - Number(oldLine));
-
-    if (move >= LINE_MOVE_ALERT_THRESHOLD) {
-      const box = document.getElementById("lineAlertBox");
-      if (box) {
-        box.style.display = "block";
-        box.innerHTML = `🚨 <strong>${teamName}</strong> line moved from ${oldLine} to ${newLine}`;
-      }
-    }
+    checkLineMoveAlert(gameId, teamName, oldLine, Number(newLine));
   }
 
   lastLineSnapshot[key] = Number(newLine);
