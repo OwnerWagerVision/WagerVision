@@ -199,6 +199,33 @@ button.danger, .remove {
   transform:translateY(-1px);
   box-shadow:0 10px 26px rgba(22,163,74,.36);
 }
+
+.sportsbook-buttons{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:10px;
+}
+
+.sportsbook-buttons .sportsbook-link{
+  margin-top:0;
+}
+
+.sportsbook-link-dk{
+  background:linear-gradient(135deg,#f97316,#ea580c);
+  box-shadow:0 8px 22px rgba(249,115,22,.25);
+  border:1px solid rgba(254,215,170,.24);
+}
+
+.sportsbook-link-dk:hover{
+  box-shadow:0 10px 26px rgba(249,115,22,.34);
+}
+
+@media(max-width:600px){
+  .sportsbook-buttons{
+    grid-template-columns:1fr;
+  }
+}
 .button-row{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
 .button-row button{margin-top:7px}
 .status,.small{margin-top:7px;color:#94a3b8;font-size:12px;line-height:1.4}
@@ -723,13 +750,23 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}
       </div>
       <div id="slipBox" class="data-box">No picks added yet. Add picks from Board or Game.</div>
 
-      <a 
-        class="sportsbook-link" 
-        href="https://www.bet365.com/" 
-        target="_blank" 
-        rel="noopener noreferrer">
-        Open Bet365
-      </a>
+      <div class="sportsbook-buttons">
+        <a 
+          class="sportsbook-link" 
+          href="https://www.bet365.com/" 
+          target="_blank" 
+          rel="noopener noreferrer">
+          Open Bet365
+        </a>
+
+        <a 
+          class="sportsbook-link sportsbook-link-dk" 
+          href="https://sportsbook.draftkings.com/" 
+          target="_blank" 
+          rel="noopener noreferrer">
+          Open DraftKings
+        </a>
+      </div>
 
       <div class="small">
         WagerVision provides analysis only. Place bets only where legal in your jurisdiction.
