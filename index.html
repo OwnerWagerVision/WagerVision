@@ -1229,31 +1229,10 @@ async function getCurrentUser(){
   return data?.user || null;
 }
 
-async function getOddsFeed(){
-  const user = await getCurrentUser();
-  if(!user){
-    openAuth("To view real time sportsbook odds please sign in or create an account.");
-    throw new Error("Not signed in");
-  }
-
-  const key = text("oddsApiKey") || localStorage.getItem(`wagervision_odds_key_${user.id}`);
-  if(!key){
-    setText("apiStatus", "Paste and save your Odds API key first.");
-    throw new Error("No Odds API key");
-  }
-
-const sharpKey = text("sharpApiKey");
-if(sharpKey){
-  localStorage.setItem(`wagervision_sharp_key_${user.id}`, sharpKey);
-}
-
-if(sharpKey){
-  setText("apiStatus", "SharpAPI key saved.");
-}
-
-  cachedOddsFeed = await fetchJSON(`https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?regions=us&markets=h2h&oddsFormat=american&apiKey=${encodeURIComponent(key)}`);
-  detectLineMoves(cachedOddsFeed);
-  return cachedOddsFeed;
+// Legacy Odds API path kept for reference only.
+// Active odds now come from getSharpOddsFeed() through the Supabase get-odds function.
+async function getLegacyOddsFeed(){
+  throw new Error("Legacy Odds API flow is disabled. Use getSharpOddsFeed() instead.");
 }
 
 async function getSharpOddsFeed(){
