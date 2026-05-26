@@ -177,6 +177,28 @@ button.danger, .remove {
   color: #fff;
   box-shadow: 0 6px 18px rgba(239,68,68,0.35);
 }
+
+.sportsbook-link{
+  display:block;
+  width:100%;
+  margin-top:10px;
+  padding:11px 12px;
+  text-align:center;
+  text-decoration:none;
+  border-radius:12px;
+  background:linear-gradient(135deg,#16a34a,#15803d);
+  color:white;
+  font-weight:900;
+  font-size:13px;
+  letter-spacing:.2px;
+  box-shadow:0 8px 22px rgba(22,163,74,.28);
+  border:1px solid rgba(187,247,208,.22);
+}
+
+.sportsbook-link:hover{
+  transform:translateY(-1px);
+  box-shadow:0 10px 26px rgba(22,163,74,.36);
+}
 .button-row{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
 .button-row button{margin-top:7px}
 .status,.small{margin-top:7px;color:#94a3b8;font-size:12px;line-height:1.4}
@@ -700,6 +722,19 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}
         <div><label>Bet Type</label><select id="betMode" onchange="renderSlip()"><option value="parlay">Parlay</option><option value="single">Singles</option></select></div>
       </div>
       <div id="slipBox" class="data-box">No picks added yet. Add picks from Board or Game.</div>
+
+      <a 
+        class="sportsbook-link" 
+        href="https://www.bet365.com/" 
+        target="_blank" 
+        rel="noopener noreferrer">
+        Open Bet365
+      </a>
+
+      <div class="small">
+        WagerVision provides analysis only. Place bets only where legal in your jurisdiction.
+      </div>
+
       <button class="secondary" onclick="clearSlip()" type="button">Clear Slip</button>
     </div>
   </section>
