@@ -1519,6 +1519,57 @@ async function getSharpOddsFeed(){
   }
 }
 
+function findSharpTotalForGame(rawItems, homeName, awayName){
+  const h = normalizeTeamName(homeName);
+  const a = normalizeTeamName(awayName);
+
+  const items = Array.isArray(rawItems) ? rawItems : [];
+
+  const gameItems = items.filter(item => {
+    const itemHome = normalizeTeamName(item.home_team);
+    const itemAway = normalizeTeamName(item.away_team);
+
+    const homeMatch = itemHome.includes(h) || h.includes(itemHome);
+    const awayMatch = itemAway.includes(a) || a.includes(itemAway);
+
+    return homeMatch && awayMatch;
+  });
+
+  const totalItem = gameItems.find(item => {
+    const market = String(item.market_type || item.market || item.key || "").toLowerCase();
+    const selection = String(item.selection || item.selection_type || "").toLowerCase();
+
+    return (
+      market.includes("total") ||
+      market.includes("over_under") ||
+      selection === "over" ||
+      selection === "under"
+    );
+  });
+
+  if(!totalItem) return null;
+
+  const possibleValues = [
+    totalItem.line,
+    totalItem.point,
+    totalItem.total,
+    totalItem.handicap,
+    totalItem.value
+  ];
+
+  for(const v of possibleValues){
+    const n = Number(v);
+    if(Number.isFinite(n) && n > 0){
+      return {
+        total: n,
+        sportsbook: totalItem.sportsbook || totalItem.bookmaker || "Sportsbook"
+      };
+    }
+  }
+
+  return null;
+}
+
 function convertSharpToGames(data){
   const gamesMap = {};
 
@@ -1718,7 +1769,14 @@ async function loadOdds(){
 
    try{
     let rawSharp = await getSharpOddsFeed();
-    let feed = convertSharpToGames(rawSharp.data || rawSharp);
+    const rawSharpItems = rawSharp.data || rawSharp;
+    let feed = convertSharpToGames(rawSharpItems);
+
+    const totalInfo = findSharpTotalForGame(rawSharpItems, text("homeTeam"), text("awayTeam"));
+    if(totalInfo){
+      setVal("marketTotal", totalInfo.total.toFixed(1));
+      updateOverUnderReadout();
+    }
 
     checkAllGamesForLineMoves(feed);
     
