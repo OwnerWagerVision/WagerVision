@@ -1398,16 +1398,35 @@ async function testSharpApi(){
   }
 }
 
-function findOddsGame(oddsFeed,homeName,awayName){
+function findOddsGame(oddsFeed, homeName, awayName){
   const h = normalizeTeamName(homeName);
   const a = normalizeTeamName(awayName);
-  return (oddsFeed || []).find(g => {
+
+  const match = (oddsFeed || []).find(g => {
     const gh = normalizeTeamName(g.home_team);
     const ga = normalizeTeamName(g.away_team);
     const homeMatch = gh.includes(h) || h.includes(gh);
     const awayMatch = ga.includes(a) || a.includes(ga);
     return homeMatch && awayMatch;
   });
+
+  if(!match){
+    console.warn("No odds match found for:", {
+      selectedHome: homeName,
+      selectedAway: awayName,
+      normalizedHome: h,
+      normalizedAway: a
+    });
+
+    console.table((oddsFeed || []).map(g => ({
+      oddsHome: g.home_team,
+      oddsAway: g.away_team,
+      normalizedOddsHome: normalizeTeamName(g.home_team),
+      normalizedOddsAway: normalizeTeamName(g.away_team)
+    })));
+  }
+
+  return match;
 }
 
 function bestHomeLineFromOddsGame(game){
