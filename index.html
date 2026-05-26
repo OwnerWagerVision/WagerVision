@@ -1215,6 +1215,7 @@ async function loadSelectedGame(){
 
 setText("loadStatus", "Game loaded.");
 calculateOdds();
+updateOverUnderReadout();
 
 } catch(error){
   console.error(error);
@@ -1245,6 +1246,7 @@ async function refreshLiveState(showMessage = true){
 
     if(showMessage) setText("loadStatus", `Live state updated: ${awayRuns}-${homeRuns}.`);
     calculateOdds();
+    updateOverUnderReadout();
   }catch(error){
     console.error(error);
     if(showMessage) setText("loadStatus", "Could not refresh live state.");
