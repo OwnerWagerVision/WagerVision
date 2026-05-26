@@ -2365,12 +2365,31 @@ async function saveUserSettings(){
   setText("apiStatus", "Settings saved.");
 }
 
+function resetUserSettingsToDefaults(){
+  if(el("autoOddsToggle")) {
+    el("autoOddsToggle").checked = true;
+  }
+
+  if(el("lineAlertToggle")) {
+    el("lineAlertToggle").checked = false;
+  }
+
+  if(el("alertThreshold")) {
+    el("alertThreshold").value = "5";
+  }
+}
+
 async function loadUserSettings(){
+  resetUserSettingsToDefaults();
+
   const user = await getCurrentUser();
   if(!user) return;
 
   const raw = localStorage.getItem(`wagervision_settings_${user.id}`);
-  if(!raw) return;
+  if(!raw) {
+    setText("apiStatus", "Default settings loaded.");
+    return;
+  }
 
   try{
     const settings = JSON.parse(raw);
@@ -2390,6 +2409,7 @@ async function loadUserSettings(){
     setText("apiStatus", "Settings loaded.");
   }catch(error){
     console.warn("Could not load saved settings:", error);
+    resetUserSettingsToDefaults();
   }
 }
 
