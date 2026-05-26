@@ -2293,6 +2293,7 @@ async function signIn(){
     localStorage.setItem("wv_user", data.user.email);
     updateAuthButton(data.user);
     await loadSavedApiKey();
+    await loadUserSettings();
    setText("authStatus", "Signed in.");
    closeAuth();
    startApp();
@@ -2350,6 +2351,57 @@ function updateAuthButton(user){
   btn.textContent = user?.email ? `👤 ${user.email.split("@")[0]}` : "👤 Sign In";
 }
 
+async function saveUserSettings(){
+  const user = await getCurrentUser();
+  if(!user) return;
+
+  const settings = {
+    autoOdds: el("autoOddsToggle")?.checked === true,
+    lineAlerts: el("lineAlertToggle")?.checked === true,
+    alertThreshold: el("alertThreshold")?.value || "5"
+  };
+
+  localStorage.setItem(`wagervision_settings_${user.id}`, JSON.stringify(settings));
+  setText("apiStatus", "Settings saved.");
+}
+
+async function loadUserSettings(){
+  const user = await getCurrentUser();
+  if(!user) return;
+
+  const raw = localStorage.getItem(`wagervision_settings_${user.id}`);
+  if(!raw) return;
+
+  try{
+    const settings = JSON.parse(raw);
+
+    if(el("autoOddsToggle")) {
+      el("autoOddsToggle").checked = settings.autoOdds !== false;
+    }
+
+    if(el("lineAlertToggle")) {
+      el("lineAlertToggle").checked = settings.lineAlerts === true;
+    }
+
+    if(el("alertThreshold") && settings.alertThreshold) {
+      el("alertThreshold").value = String(settings.alertThreshold);
+    }
+
+    setText("apiStatus", "Settings loaded.");
+  }catch(error){
+    console.warn("Could not load saved settings:", error);
+  }
+}
+
+function wireSettingsAutosave(){
+  ["autoOddsToggle", "lineAlertToggle", "alertThreshold"].forEach(id => {
+    const control = el(id);
+    if(control){
+      control.addEventListener("change", saveUserSettings);
+    }
+  });
+}
+
 async function saveApiKey(){
   const user = await getCurrentUser();
   if(!user){
@@ -2389,6 +2441,7 @@ async function initAuth(){
   const { data } = await supabaseClient.auth.getUser();
   updateAuthButton(data?.user || null);
   await loadSavedApiKey();
+  await loadUserSettings();
 }
 
 function init(){
@@ -2400,6 +2453,7 @@ function init(){
 
   renderSlip();
   calculateOdds();
+  wireSettingsAutosave();
   initAuth();
 
   console.log("WagerVision loaded clean.");
