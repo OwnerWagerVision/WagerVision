@@ -251,6 +251,55 @@ button.danger, .remove {
   margin-top:10px;padding:12px;border-radius:14px;font-size:13px;line-height:1.4;
   background:rgba(148,163,184,.1);border:1px solid rgba(148,163,184,.18);color:#e2e8f0
 }
+
+.total-box{
+  margin-top:10px;
+  padding:12px;
+  border-radius:14px;
+  background:rgba(15,23,42,.62);
+  border:1px solid rgba(96,165,250,.20);
+}
+
+.total-title{
+  font-size:12px;
+  font-weight:900;
+  color:#bfdbfe;
+  margin-bottom:8px;
+  text-transform:uppercase;
+  letter-spacing:.5px;
+}
+
+.total-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:7px;
+  margin-bottom:8px;
+}
+
+.total-grid div{
+  background:rgba(255,255,255,.055);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:12px;
+  padding:9px;
+  text-align:center;
+}
+
+.total-grid strong{
+  display:block;
+  font-size:18px;
+  color:#93c5fd;
+}
+
+.total-grid span{
+  font-size:10px;
+  color:#cbd5e1;
+}
+
+@media(max-width:600px){
+  .total-grid{
+    grid-template-columns:1fr;
+  }
+}
 .green{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.28);color:#dcfce7}
 .yellow{background:rgba(234,179,8,.12);border-color:rgba(234,179,8,.28);color:#fef9c3}
 .red{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.28);color:#fee2e2}
@@ -605,6 +654,26 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}
         <div class="mini"><strong id="edgeValue">0%</strong><span>Edge</span></div>
       </div>
       <div class="edge-box" id="edgeText">Load a game, pull odds, calculate.</div>
+
+      <div class="total-box">
+        <div class="total-title">Over / Under Readout</div>
+        <div class="total-grid">
+          <div>
+            <strong id="projectedTotal">—</strong>
+            <span>Projected Runs</span>
+          </div>
+          <div>
+            <strong id="marketTotalDisplay">—</strong>
+            <span>Market Total</span>
+          </div>
+          <div>
+            <strong id="ouLean">—</strong>
+            <span>Total Lean</span>
+          </div>
+        </div>
+        <div class="small" id="ouReason">Load a game to estimate total runs.</div>
+      </div>
+
       <button class="gold" onclick="addCurrentToSlip()" type="button">⭐ Add Current Pick</button>
     </div>
 
@@ -686,6 +755,7 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}
       <div><label>Market Home Win %</label><input id="bookOdds" type="number" value="50"></div>
 
       <div class="full"><label>Best Home Moneyline</label><input id="bestHomeLine" value="Manual / not loaded"></div>
+      <div class="full"><label>Market Total Runs</label><input id="marketTotal" type="number" step="0.5" value="" placeholder="Example: 8.5" oninput="updateOverUnderReadout()"></div>
     </div>
 
     <button onclick="calculateOdds()" type="button">Calculate Odds</button>
@@ -1857,6 +1927,51 @@ if(input.inning >= 8 && input.scoreLead < 0){
 }
 
     return { homeScore:clamp(s,3,97), reasons };
+}
+
+function updateOverUnderReadout(){
+  const input = currentInput();
+
+  const combinedOps = input.homeOps + input.awayOps;
+  const avgStarterEra = (input.homeStarterEra + input.awayStarterEra) / 2;
+  const avgStarterWhip = (input.homeStarterWhip + input.awayStarterWhip) / 2;
+
+  const opsImpact = clamp((combinedOps - 1.400) * 10, -1.5, 1.5);
+  const eraImpact = clamp((avgStarterEra - 4.20) * 0.7, -1.5, 1.5);
+  const whipImpact = clamp((avgStarterWhip - 1.30) * 4, -1.2, 1.2);
+
+  const venueName = selectedGameData?.venue?.name || "";
+  const park = getParkFactor(venueName);
+  const parkImpact = clamp((park?.impact || 0) * 0.4, -0.8, 0.8);
+
+  const projected = clamp(8.5 + opsImpact + eraImpact + whipImpact + parkImpact, 5, 14);
+  const market = Number(el("marketTotal")?.value || 0);
+
+  setText("projectedTotal", projected.toFixed(1));
+  setText("marketTotalDisplay", market ? market.toFixed(1) : "—");
+
+  let lean = "No Line";
+  let reason = `Projected total based on OPS, starter ERA, starter WHIP, and park factor.`;
+
+  if(market){
+    const diff = projected - market;
+
+    if(diff >= 0.75){
+      lean = "Over";
+      reason = `Model total is ${diff.toFixed(1)} runs above the market.`;
+    } else if(diff <= -0.75){
+      lean = "Under";
+      reason = `Model total is ${Math.abs(diff).toFixed(1)} runs below the market.`;
+    } else {
+      lean = "Pass";
+      reason = "Projected total is close to the market. No strong total edge.";
+    }
+  } else {
+    reason = "Enter the sportsbook total line to compare Over/Under value.";
+  }
+
+  setText("ouLean", lean);
+  setText("ouReason", reason);
 }
 
 function parseBestHomeAmerican(){
