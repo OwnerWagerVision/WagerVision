@@ -1440,7 +1440,15 @@ console.log("Matching odds game:", game);
 
 async function loadOdds(){
   const oddsBox = el("oddsBox");
+  const lineAlertBox = el("lineAlertBox");
+
   setText("loadStatus", "Fetching sportsbook odds...");
+
+  if(lineAlertBox){
+    lineAlertBox.style.display = "none";
+    lineAlertBox.innerHTML = "";
+  }
+
   if(oddsBox) oddsBox.innerHTML = `<div class="data-box">Fetching sportsbook odds...</div>`;
 
    try{
