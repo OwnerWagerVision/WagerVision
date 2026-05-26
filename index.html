@@ -1080,50 +1080,136 @@ function normalizeTeamName(name){
     .trim();
 
   const aliases = {
-    "la dodgers": "los angeles dodgers",
-    "los angeles dodgers": "los angeles dodgers",
+    "ari diamondbacks": "arizona diamondbacks",
+    "arizona dbacks": "arizona diamondbacks",
+    "arizona diamondbacks": "arizona diamondbacks",
+    "diamondbacks": "arizona diamondbacks",
+
+    "atl braves": "atlanta braves",
+    "atlanta braves": "atlanta braves",
+    "braves": "atlanta braves",
+
+    "bal orioles": "baltimore orioles",
+    "baltimore orioles": "baltimore orioles",
+    "orioles": "baltimore orioles",
+
+    "bos red sox": "boston red sox",
+    "boston red sox": "boston red sox",
+    "red sox": "boston red sox",
+
+    "chc cubs": "chicago cubs",
+    "chi cubs": "chicago cubs",
+    "chicago cubs": "chicago cubs",
+    "cubs": "chicago cubs",
+
+    "chw white sox": "chicago white sox",
+    "cws white sox": "chicago white sox",
+    "chi white sox": "chicago white sox",
+    "chicago white sox": "chicago white sox",
+    "white sox": "chicago white sox",
+
+    "cin reds": "cincinnati reds",
+    "cincinnati reds": "cincinnati reds",
+    "reds": "cincinnati reds",
+
+    "cle guardians": "cleveland guardians",
+    "cleveland guardians": "cleveland guardians",
+    "guardians": "cleveland guardians",
+
+    "col rockies": "colorado rockies",
+    "colorado rockies": "colorado rockies",
+    "rockies": "colorado rockies",
+
+    "det tigers": "detroit tigers",
+    "detroit tigers": "detroit tigers",
+    "tigers": "detroit tigers",
+
+    "hou astros": "houston astros",
+    "houston astros": "houston astros",
+    "astros": "houston astros",
+
+    "kc royals": "kansas city royals",
+    "kansas city royals": "kansas city royals",
+    "royals": "kansas city royals",
 
     "la angels": "los angeles angels",
     "los angeles angels": "los angeles angels",
     "los angeles angels of anaheim": "los angeles angels",
+    "angels": "los angeles angels",
+
+    "la dodgers": "los angeles dodgers",
+    "lad dodgers": "los angeles dodgers",
+    "los angeles dodgers": "los angeles dodgers",
+    "dodgers": "los angeles dodgers",
+
+    "mia marlins": "miami marlins",
+    "miami marlins": "miami marlins",
+    "marlins": "miami marlins",
+
+    "mil brewers": "milwaukee brewers",
+    "milwaukee brewers": "milwaukee brewers",
+    "brewers": "milwaukee brewers",
+
+    "min twins": "minnesota twins",
+    "minnesota twins": "minnesota twins",
+    "twins": "minnesota twins",
+
+    "ny mets": "new york mets",
+    "nym mets": "new york mets",
+    "new york mets": "new york mets",
+    "mets": "new york mets",
+
+    "ny yankees": "new york yankees",
+    "nyy yankees": "new york yankees",
+    "new york yankees": "new york yankees",
+    "yankees": "new york yankees",
+
+    "oakland athletics": "athletics",
+    "oak athletics": "athletics",
+    "athletics": "athletics",
+    "as": "athletics",
+
+    "phi phillies": "philadelphia phillies",
+    "philadelphia phillies": "philadelphia phillies",
+    "phillies": "philadelphia phillies",
+
+    "pit pirates": "pittsburgh pirates",
+    "pittsburgh pirates": "pittsburgh pirates",
+    "pirates": "pittsburgh pirates",
+
+    "sd padres": "san diego padres",
+    "san diego padres": "san diego padres",
+    "padres": "san diego padres",
 
     "sf giants": "san francisco giants",
     "san francisco giants": "san francisco giants",
+    "giants": "san francisco giants",
 
-    "ny yankees": "new york yankees",
-    "new york yankees": "new york yankees",
-
-    "ny mets": "new york mets",
-    "new york mets": "new york mets",
+    "sea mariners": "seattle mariners",
+    "seattle mariners": "seattle mariners",
+    "mariners": "seattle mariners",
 
     "st louis cardinals": "saint louis cardinals",
+    "stl cardinals": "saint louis cardinals",
     "saint louis cardinals": "saint louis cardinals",
+    "cardinals": "saint louis cardinals",
 
-    "cleveland guardians": "cleveland guardians",
-    "cincinnati reds": "cincinnati reds",
-    "chicago cubs": "chicago cubs",
-    "chicago white sox": "chicago white sox",
-    "toronto blue jays": "toronto blue jays",
+    "tb rays": "tampa bay rays",
     "tampa bay rays": "tampa bay rays",
-    "arizona diamondbacks": "arizona diamondbacks",
+    "rays": "tampa bay rays",
+
+    "tex rangers": "texas rangers",
     "texas rangers": "texas rangers",
-    "boston red sox": "boston red sox",
-    "detroit tigers": "detroit tigers",
-    "houston astros": "houston astros",
-    "kansas city royals": "kansas city royals",
-    "minnesota twins": "minnesota twins",
-    "seattle mariners": "seattle mariners",
-    "oakland athletics": "athletics",
-    "athletics": "athletics",
-    "philadelphia phillies": "philadelphia phillies",
-    "pittsburgh pirates": "pittsburgh pirates",
+    "rangers": "texas rangers",
+
+    "tor blue jays": "toronto blue jays",
+    "toronto blue jays": "toronto blue jays",
+    "blue jays": "toronto blue jays",
+
+    "wsh nationals": "washington nationals",
+    "was nationals": "washington nationals",
     "washington nationals": "washington nationals",
-    "miami marlins": "miami marlins",
-    "atlanta braves": "atlanta braves",
-    "milwaukee brewers": "milwaukee brewers",
-    "colorado rockies": "colorado rockies",
-    "san diego padres": "san diego padres",
-    "baltimore orioles": "baltimore orioles"
+    "nationals": "washington nationals"
   };
 
   return aliases[n] || n;
