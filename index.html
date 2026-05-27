@@ -2184,7 +2184,10 @@ if(currentGame && currentGame.teams){
 }
 
   const pick = result.homeScore >= 50 ? home : away;
-  const american = edge >= 0 ? homeLine : awayLine;
+
+  // Bet slip payouts must use the actual sportsbook line for the picked team.
+  // WagerVision model odds find value; sportsbook odds calculate payout.
+  const american = pick === home ? homeLine : awayLine;
 
   const displayProb = result.homeScore >= 50 ? result.homeScore : awayScore;
 
