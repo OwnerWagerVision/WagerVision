@@ -2243,18 +2243,25 @@ if(input.homeOps > input.awayOps){
 const isSignedIn = !!localStorage.getItem("wv_user");
 const modelReasons = Array.isArray(result?.reasons) ? result.reasons : [];
 
-const publicModelReasons = modelReasons.filter(r =>
-  r.includes("Bullpen advantage") ||
-  r.includes("Recent form") ||
-  r.includes("Park factor impact")
-);
+const lockedKeywords = [
+  "Command edge",
+  "Starter ERA impact",
+  "Starter WHIP impact",
+  "starter dominates",
+  "triple edge",
+  "Triple edge",
+  "dominates",
+  "Late-game leverage",
+  "Base runner pressure",
+  "Score per inning factor"
+];
 
 const lockedModelReasons = modelReasons.filter(r =>
-  r.includes("Command edge") ||
-  r.includes("Starter ERA impact") ||
-  r.includes("Starter WHIP impact") ||
-  r.includes("starter dominates") ||
-  r.includes("triple edge")
+  lockedKeywords.some(keyword => r.includes(keyword))
+);
+
+const publicModelReasons = modelReasons.filter(r =>
+  !lockedKeywords.some(keyword => r.includes(keyword))
 );
 
 function cleanInsightText(text){
