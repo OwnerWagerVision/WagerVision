@@ -656,6 +656,42 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0}
 .signin-btn {
   margin-top: 4px;
 }
+
+/* MOBILE SIGNIN OVERLAP FIX V2 */
+@media(max-width:600px){
+  .hero{
+    position:relative !important;
+    padding:42px 14px 16px !important;
+  }
+
+  .hero-top{
+    position:absolute !important;
+    top:8px !important;
+    right:10px !important;
+    left:auto !important;
+    display:block !important;
+    margin:0 !important;
+    z-index:5 !important;
+  }
+
+  .hero .signin-btn{
+    position:static !important;
+    max-width:118px !important;
+    padding:5px 8px !important;
+    font-size:10px !important;
+    line-height:1.1 !important;
+    border-radius:999px !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+    white-space:nowrap !important;
+  }
+
+  .hero-kicker{
+    margin-top:0 !important;
+    padding-top:0 !important;
+  }
+}
+
 </style>
 </head>
 
