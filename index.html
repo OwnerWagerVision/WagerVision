@@ -1152,6 +1152,85 @@ dialog{
   }
 }
 
+
+/* ================================
+   WAGERVISION AUTH BUTTON FIX V1
+   Keeps sign-in top-left without overlap
+   ================================ */
+
+#signInBtn,
+#signinBtn,
+#authBtn,
+#userBtn,
+.signin-btn,
+.sign-in-btn,
+.auth-button,
+.user-button{
+  position:fixed !important;
+  top:14px !important;
+  left:14px !important;
+  right:auto !important;
+  z-index:9999 !important;
+
+  min-height:40px !important;
+  padding:9px 16px !important;
+  border-radius:999px !important;
+
+  background:linear-gradient(135deg, #2563eb, #06b6d4) !important;
+  color:#ffffff !important;
+  border:1px solid rgba(255,255,255,.18) !important;
+  box-shadow:0 12px 30px rgba(0,0,0,.42) !important;
+
+  font-size:.88rem !important;
+  font-weight:900 !important;
+  letter-spacing:.02em !important;
+  white-space:nowrap !important;
+}
+
+/* Give top content room so fixed sign-in never covers tabs/cards */
+body{
+  padding-top:62px !important;
+}
+
+/* If your app header is sticky/fixed, keep it below the auth button */
+header,
+.topbar,
+.navbar,
+.app-header{
+  padding-top:8px !important;
+}
+
+/* Keep tab row from climbing under the sign-in button */
+.tabs,
+.tab-row{
+  margin-top:8px !important;
+}
+
+/* Mobile version */
+@media(max-width:700px){
+  #signInBtn,
+  #signinBtn,
+  #authBtn,
+  #userBtn,
+  .signin-btn,
+  .sign-in-btn,
+  .auth-button,
+  .user-button{
+    top:10px !important;
+    left:10px !important;
+    min-height:36px !important;
+    padding:8px 13px !important;
+    font-size:.78rem !important;
+    max-width:150px !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+  }
+
+  body{
+    padding-top:58px !important;
+  }
+}
+
 </style>
 </head>
 
