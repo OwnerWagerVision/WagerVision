@@ -3597,5 +3597,40 @@ window.addEventListener("load", () => {
 </div>
 
 
+
+<script>
+/* HARD FIX: remove the accidental giant top Sign In bar */
+function killBadTopSignInBar(){
+  const items = [...document.querySelectorAll("button, a, div")];
+
+  items.forEach(el => {
+    const text = (el.textContent || "").trim().toLowerCase();
+    if (text !== "sign in") return;
+
+    const r = el.getBoundingClientRect();
+    const style = window.getComputedStyle(el);
+
+    const isTop = r.top >= 0 && r.top < 170;
+    const isHuge = r.width > window.innerWidth * 0.55;
+    const isFixedOrAbs = style.position === "fixed" || style.position === "absolute" || style.position === "sticky";
+
+    // Only kill the stupid full-width/top bar, not the real landing-page buttons.
+    if (isTop && isHuge) {
+      el.style.display = "none";
+      el.style.visibility = "hidden";
+      el.style.pointerEvents = "none";
+    }
+
+    if (isTop && isFixedOrAbs && isHuge) {
+      el.remove();
+    }
+  });
+}
+
+document.addEventListener("DOMContentLoaded", killBadTopSignInBar);
+window.addEventListener("load", killBadTopSignInBar);
+setInterval(killBadTopSignInBar, 500);
+</script>
+
 </body>
 </html>
