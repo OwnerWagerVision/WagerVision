@@ -1200,10 +1200,37 @@ dialog{
   }
 }
 
+
+/* FIX: hide app sign-in button on landing page */
+body.landing-mode .top-signin,
+body.landing-mode #topSignInBtn,
+body.landing-mode .app-signin,
+body.landing-mode #appSignInBtn,
+body.landing-mode .floating-signin {
+  display: none !important;
+}
+
+/* App screen sign-in placement */
+.top-signin,
+#topSignInBtn,
+.app-signin,
+#appSignInBtn,
+.floating-signin {
+  position: fixed !important;
+  top: 14px !important;
+  right: 18px !important;
+  left: auto !important;
+  width: auto !important;
+  max-width: 150px !important;
+  padding: 8px 16px !important;
+  border-radius: 999px !important;
+  z-index: 9999 !important;
+}
+
 </style>
 </head>
 
-<body>
+<body class="landing-mode">
 
 <button id="globalSignInBtn" class="global-signin-btn" onclick="openAuthModal()">
   Sign In
@@ -3282,6 +3309,7 @@ async function signIn(){
 }
 
 async function signOut(){
+  document.body.classList.add('landing-mode');
   await supabaseClient.auth.signOut();
 
   // Clear user/session storage
