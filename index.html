@@ -1793,54 +1793,6 @@ body.landing-mode .floating-signin {
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
-/* WAGERVISION LOCAL CHAT DEMO */
-function renderChatMessages(){
-  const box = el("chatMessages");
-  if(!box) return;
-
-  const saved = JSON.parse(localStorage.getItem("wagervision_chat_demo") || "[]");
-
-  box.innerHTML = `
-    <div class="chat-message system">
-      Welcome to WagerVision room.
-    </div>
-  `;
-
-  saved.forEach(m => {
-    const div = document.createElement("div");
-    div.className = "chat-message";
-    div.innerHTML = `<span class="chat-name">${m.name}</span>${m.text}`;
-    box.appendChild(div);
-  });
-
-  box.scrollTop = box.scrollHeight;
-}
-
-function sendChatMessage(){
-  const input = el("chatInput");
-  if(!input) return;
-
-  const msg = input.value.trim();
-  if(!msg) return;
-
-  const user = localStorage.getItem("wv_user") || "Guest";
-  const name = user.includes("@") ? user.split("@")[0] : user;
-
-  const saved = JSON.parse(localStorage.getItem("wagervision_chat_demo") || "[]");
-  saved.push({
-    name,
-    text: msg,
-    time: new Date().toISOString()
-  });
-
-  localStorage.setItem("wagervision_chat_demo", JSON.stringify(saved.slice(-60)));
-  input.value = "";
-  renderChatMessages();
-}
-
-document.addEventListener("DOMContentLoaded", renderChatMessages);
-window.sendChatMessage = sendChatMessage;
-
 </script>
 <script>
 "use strict";
@@ -3876,9 +3828,13 @@ setInterval(killBadTopSignInBar, 500);
 </script>
 
 
+
 <script>
-/* WAGERVISION CHAT BUTTON HARD FIX */
+/* WAGERVISION LIVE SUPABASE CHAT */
 (function(){
+  let chatChannel = null;
+  let chatLoaded = false;
+
   function safeText(value){
     return String(value || "")
       .replaceAll("&", "&amp;")
@@ -3888,16 +3844,38 @@ setInterval(killBadTopSignInBar, 500);
       .replaceAll("'", "&#039;");
   }
 
-  window.renderChatMessages = function(){
+  function formatChatTime(value){
+    try {
+      return new Date(value).toLocaleTimeString([], {
+        hour: "numeric",
+        minute: "2-digit"
+      });
+    } catch(e) {
+      return "";
+    }
+  }
+
+  function addChatMessage(row){
+    const box = document.getElementById("chatMessages");
+    if(!box || !row) return;
+
+    const div = document.createElement("div");
+    div.className = "chat-message";
+    div.innerHTML = `
+      <span class="chat-name">
+        ${safeText(row.username || "User")}
+        <small>${safeText(formatChatTime(row.created_at))}</small>
+      </span>
+      ${safeText(row.message)}
+    `;
+
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+  }
+
+  window.renderChatMessages = async function(){
     const box = document.getElementById("chatMessages");
     if(!box) return;
-
-    let saved = [];
-    try {
-      saved = JSON.parse(localStorage.getItem("wagervision_chat_demo") || "[]");
-    } catch(e) {
-      saved = [];
-    }
 
     box.innerHTML = `
       <div class="chat-message system">
@@ -3905,45 +3883,79 @@ setInterval(killBadTopSignInBar, 500);
       </div>
     `;
 
-    saved.forEach(m => {
-      const div = document.createElement("div");
-      div.className = "chat-message";
-      div.innerHTML = `<span class="chat-name">${safeText(m.name)}</span>${safeText(m.text)}`;
-      box.appendChild(div);
-    });
+    if(!window.supabaseClient){
+      box.innerHTML += `<div class="chat-message system">Chat is not connected yet.</div>`;
+      return;
+    }
 
+    const { data: authData } = await supabaseClient.auth.getUser();
+    const user = authData?.user;
+
+    if(!user){
+      box.innerHTML += `<div class="chat-message system">Sign in to view and send chat messages.</div>`;
+      return;
+    }
+
+    const { data, error } = await supabaseClient
+      .from("chat_messages")
+      .select("id,user_id,username,message,created_at")
+      .order("created_at", { ascending: true })
+      .limit(80);
+
+    if(error){
+      console.warn("Chat load error:", error);
+      box.innerHTML += `<div class="chat-message system">Could not load chat messages.</div>`;
+      return;
+    }
+
+    (data || []).forEach(addChatMessage);
     box.scrollTop = box.scrollHeight;
+    chatLoaded = true;
   };
 
-  window.sendChatMessage = function(){
+  window.sendChatMessage = async function(){
     const input = document.getElementById("chatInput");
     if(!input) return;
 
     const msg = input.value.trim();
     if(!msg) return;
 
-    const user = localStorage.getItem("wv_user") || "Guest";
-    const name = user.includes("@") ? user.split("@")[0] : user;
-
-    let saved = [];
-    try {
-      saved = JSON.parse(localStorage.getItem("wagervision_chat_demo") || "[]");
-    } catch(e) {
-      saved = [];
+    if(!window.supabaseClient){
+      alert("Chat is not connected yet.");
+      return;
     }
 
-    saved.push({
-      name,
-      text: msg,
-      time: new Date().toISOString()
-    });
+    const { data: authData } = await supabaseClient.auth.getUser();
+    const user = authData?.user;
 
-    localStorage.setItem("wagervision_chat_demo", JSON.stringify(saved.slice(-60)));
+    if(!user){
+      if(typeof openAuth === "function"){
+        openAuth("Sign in to send chat messages.");
+      } else {
+        alert("Sign in to send chat messages.");
+      }
+      return;
+    }
+
+    const username = user.email ? user.email.split("@")[0] : "User";
+
     input.value = "";
-    window.renderChatMessages();
+
+    const { error } = await supabaseClient
+      .from("chat_messages")
+      .insert({
+        user_id: user.id,
+        username,
+        message: msg
+      });
+
+    if(error){
+      console.warn("Chat send error:", error);
+      alert("Message could not send.");
+    }
   };
 
-  function wireChat(){
+  function wireLiveChat(){
     const input = document.getElementById("chatInput");
     const row = document.querySelector(".chat-input-row");
     const btn = row ? row.querySelector("button") : null;
@@ -3953,7 +3965,8 @@ setInterval(killBadTopSignInBar, 500);
       btn.type = "button";
     }
 
-    if(input){
+    if(input && !input.dataset.chatWired){
+      input.dataset.chatWired = "true";
       input.addEventListener("keydown", function(e){
         if(e.key === "Enter"){
           e.preventDefault();
@@ -3963,10 +3976,32 @@ setInterval(killBadTopSignInBar, 500);
     }
 
     window.renderChatMessages();
+
+    if(window.supabaseClient && !chatChannel){
+      chatChannel = supabaseClient
+        .channel("wagervision-chat-room")
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "chat_messages"
+          },
+          function(payload){
+            if(chatLoaded){
+              addChatMessage(payload.new);
+            } else {
+              window.renderChatMessages();
+            }
+          }
+        )
+        .subscribe();
+    }
   }
 
-  document.addEventListener("DOMContentLoaded", wireChat);
-  window.addEventListener("load", wireChat);
+  document.addEventListener("DOMContentLoaded", wireLiveChat);
+  window.addEventListener("load", wireLiveChat);
+  window.wireLiveChat = wireLiveChat;
 })();
 </script>
 
