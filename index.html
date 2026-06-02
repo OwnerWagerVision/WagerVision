@@ -2417,7 +2417,7 @@ function decimalFromAmerican(price){
 }
 
 async function getCurrentUser(){
-  const { data } = await sb.auth.getUser();
+  const { data } = await supabaseClient.auth.getUser();
   return data?.user || null;
 }
 
