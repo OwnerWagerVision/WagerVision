@@ -1765,7 +1765,7 @@ body.landing-mode .floating-signin {
     </div>
 
     <div class="tiny-note">
-      Demo mode: messages save on this device for now. Live user chat comes next with Supabase.
+      Live chat is available for signed-in users.
     </div>
   </div>
 </section>
@@ -3932,6 +3932,7 @@ setInterval(killBadTopSignInBar, 500);
   }
 
   window.renderChatMessages = async function(){
+    chatLoaded = false;
     const box = document.getElementById("chatMessages");
     if(!box) return;
 
@@ -3954,10 +3955,6 @@ setInterval(killBadTopSignInBar, 500);
       box.innerHTML += `
         <div class="chat-message system">
           Sign in to view and send chat messages.
-          <br>
-          <button class="chat-login-btn" type="button" onclick="openAuth('Sign in to use the chat room.')">
-            Sign In
-          </button>
         </div>
       `;
       await setChatGate();
