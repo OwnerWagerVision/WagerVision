@@ -2417,7 +2417,7 @@ function decimalFromAmerican(price){
 }
 
 async function getCurrentUser(){
-  const { data } = await supabaseClient.auth.getUser();
+  const { data } = await sb.auth.getUser();
   return data?.user || null;
 }
 
@@ -3685,7 +3685,7 @@ async function loadSavedApiKey(){
 }
 
 async function initAuth(){
-  const { data } = await supabaseClient.auth.getUser();
+  const { data } = await sb.auth.getUser();
   updateAuthButton(data?.user || null);
   await loadSavedApiKey();
   await loadUserSettings();
@@ -3855,6 +3855,12 @@ setInterval(killBadTopSignInBar, 500);
   let chatChannel = null;
   let chatLoaded = false;
 
+  function getChatSupabase(){
+    if(window.supabaseClient) return window.supabaseClient;
+    if(typeof supabaseClient !== "undefined") return supabaseClient;
+    return null;
+  }
+
   function safeText(value){
     return String(value || "")
       .replaceAll("&", "&amp;")
@@ -3871,7 +3877,7 @@ setInterval(killBadTopSignInBar, 500);
 
     let user = null;
     if(window.supabaseClient){
-      const { data } = await supabaseClient.auth.getUser();
+      const { data } = await sb.auth.getUser();
       user = data?.user || null;
     }
 
@@ -3935,12 +3941,13 @@ setInterval(killBadTopSignInBar, 500);
       </div>
     `;
 
-    if(!window.supabaseClient){
+    const sb = getChatSupabase();
+    if(!sb){
       box.innerHTML += `<div class="chat-message system">Chat is not connected yet.</div>`;
       return;
     }
 
-    const { data: authData } = await supabaseClient.auth.getUser();
+    const { data: authData } = await sb.auth.getUser();
     const user = authData?.user;
 
     if(!user){
@@ -3959,7 +3966,7 @@ setInterval(killBadTopSignInBar, 500);
 
     await setChatGate();
 
-    const { data, error } = await supabaseClient
+    const { data, error } = await sb
       .from("chat_messages")
       .select("id,user_id,username,message,created_at")
       .order("created_at", { ascending: true })
@@ -3983,12 +3990,13 @@ setInterval(killBadTopSignInBar, 500);
     const msg = input.value.trim();
     if(!msg) return;
 
-    if(!window.supabaseClient){
+    const sb = getChatSupabase();
+    if(!sb){
       alert("Chat is not connected yet.");
       return;
     }
 
-    const { data: authData } = await supabaseClient.auth.getUser();
+    const { data: authData } = await sb.auth.getUser();
     const user = authData?.user;
 
     if(!user){
@@ -4004,7 +4012,7 @@ setInterval(killBadTopSignInBar, 500);
 
     input.value = "";
 
-    const { error } = await supabaseClient
+    const { error } = await sb
       .from("chat_messages")
       .insert({
         user_id: user.id,
@@ -4041,8 +4049,9 @@ setInterval(killBadTopSignInBar, 500);
     setChatGate();
     window.renderChatMessages();
 
-    if(window.supabaseClient && !chatChannel){
-      chatChannel = supabaseClient
+    const sb = getChatSupabase();
+    if(sb && !chatChannel){
+      chatChannel = sb
         .channel("wagervision-chat-room")
         .on(
           "postgres_changes",
