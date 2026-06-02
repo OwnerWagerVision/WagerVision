@@ -1394,6 +1394,25 @@ body.landing-mode .floating-signin {
   }
 }
 
+
+/* WAGERVISION CHAT SIGN-IN GATE */
+.chat-input-row.locked input {
+  opacity: 0.65 !important;
+  cursor: not-allowed !important;
+}
+
+.chat-input-row.locked button {
+  opacity: 0.85 !important;
+}
+
+.chat-login-btn {
+  margin-top: 10px;
+  width: auto !important;
+  padding: 9px 14px !important;
+  border-radius: 999px !important;
+  font-size: 12px !important;
+}
+
 </style>
 </head>
 
@@ -1741,7 +1760,7 @@ body.landing-mode .floating-signin {
     </div>
 
     <div class="chat-input-row">
-      <input id="chatInput" type="text" placeholder="Drop a message..." maxlength="220">
+      <input id="chatInput" type="text" placeholder="Sign in to join the room..." maxlength="220" disabled>
       <button type="button" onclick="sendChatMessage()">Send</button>
     </div>
 
@@ -3546,6 +3565,7 @@ previousOddsMap = {};
 
   closeAuth();
   updateAuthButton(null);
+  if(typeof wireLiveChat === "function") wireLiveChat();
   showTab("game", document.querySelector(".tab"));
 }
 
@@ -3844,6 +3864,38 @@ setInterval(killBadTopSignInBar, 500);
       .replaceAll("'", "&#039;");
   }
 
+  async function setChatGate(){
+    const input = document.getElementById("chatInput");
+    const row = document.querySelector(".chat-input-row");
+    const btn = row ? row.querySelector("button") : null;
+
+    let user = null;
+    if(window.supabaseClient){
+      const { data } = await supabaseClient.auth.getUser();
+      user = data?.user || null;
+    }
+
+    if(input){
+      input.disabled = !user;
+      input.placeholder = user ? "Drop a message..." : "Sign in to join the room...";
+    }
+
+    if(btn){
+      btn.textContent = user ? "Send" : "Sign In";
+      btn.onclick = user
+        ? window.sendChatMessage
+        : function(){
+            if(typeof openAuth === "function") openAuth("Sign in to use the chat room.");
+          };
+    }
+
+    if(row){
+      row.classList.toggle("locked", !user);
+    }
+
+    return !!user;
+  }
+
   function formatChatTime(value){
     try {
       return new Date(value).toLocaleTimeString([], {
@@ -3892,9 +3944,20 @@ setInterval(killBadTopSignInBar, 500);
     const user = authData?.user;
 
     if(!user){
-      box.innerHTML += `<div class="chat-message system">Sign in to view and send chat messages.</div>`;
+      box.innerHTML += `
+        <div class="chat-message system">
+          Sign in to view and send chat messages.
+          <br>
+          <button class="chat-login-btn" type="button" onclick="openAuth('Sign in to use the chat room.')">
+            Sign In
+          </button>
+        </div>
+      `;
+      await setChatGate();
       return;
     }
+
+    await setChatGate();
 
     const { data, error } = await supabaseClient
       .from("chat_messages")
@@ -3975,6 +4038,7 @@ setInterval(killBadTopSignInBar, 500);
       });
     }
 
+    setChatGate();
     window.renderChatMessages();
 
     if(window.supabaseClient && !chatChannel){
