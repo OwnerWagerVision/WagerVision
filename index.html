@@ -3859,9 +3859,23 @@ setInterval(killBadTopSignInBar, 500);
   function sb(){
     if(window.supabaseClient) return window.supabaseClient;
     try {
-      if(typeof supabaseClient !== "undefined") return supabaseClient;
+      if(typeof supabaseClient !== "undefined") {
+        window.supabaseClient = supabaseClient;
+        return supabaseClient;
+      }
     } catch(e) {}
     return null;
+  }
+
+  async function waitForSupabase(){
+    let client = sb();
+
+    for(let i = 0; i < 20 && !client; i++){
+      await new Promise(resolve => setTimeout(resolve, 150));
+      client = sb();
+    }
+
+    return client;
   }
 
   function safeText(value){
@@ -3928,7 +3942,7 @@ setInterval(killBadTopSignInBar, 500);
 
   window.renderChatMessages = async function(){
     const box = document.getElementById("chatMessages");
-    const client = sb();
+    const client = await waitForSupabase();
 
     if(!box) return;
 
@@ -3985,7 +3999,7 @@ setInterval(killBadTopSignInBar, 500);
 
   window.sendChatMessage = async function(){
     const input = document.getElementById("chatInput");
-    const client = sb();
+    const client = await waitForSupabase();
 
     if(!input || !client) return;
 
