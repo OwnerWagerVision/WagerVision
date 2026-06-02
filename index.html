@@ -1760,8 +1760,8 @@ body.landing-mode .floating-signin {
     </div>
 
     <div class="chat-input-row">
-      <input id="chatInput" type="text" placeholder="Sign in to join the room..." maxlength="220" disabled>
-      <button type="button" onclick="sendChatMessage()">Send</button>
+      <input id="chatInput" type="text" placeholder="Drop a message..." maxlength="220">
+      <button id="chatSendBtn" type="button">Send</button>
     </div>
 
     <div class="tiny-note">
@@ -3849,15 +3849,18 @@ setInterval(killBadTopSignInBar, 500);
 
 
 
+
 <script>
-/* WAGERVISION LIVE SUPABASE CHAT */
+/* WAGERVISION LIVE SUPABASE CHAT - CLEAN VERSION */
 (function(){
   let chatChannel = null;
-  let chatLoaded = false;
+  let currentUser = null;
 
-  function getChatSupabase(){
+  function sb(){
     if(window.supabaseClient) return window.supabaseClient;
-    if(typeof supabaseClient !== "undefined") return supabaseClient;
+    try {
+      if(typeof supabaseClient !== "undefined") return supabaseClient;
+    } catch(e) {}
     return null;
   }
 
@@ -3870,39 +3873,7 @@ setInterval(killBadTopSignInBar, 500);
       .replaceAll("'", "&#039;");
   }
 
-  async function setChatGate(){
-    const input = document.getElementById("chatInput");
-    const row = document.querySelector(".chat-input-row");
-    const btn = row ? row.querySelector("button") : null;
-
-    let user = null;
-    if(window.supabaseClient){
-      const { data } = await sb.auth.getUser();
-      user = data?.user || null;
-    }
-
-    if(input){
-      input.disabled = !user;
-      input.placeholder = user ? "Drop a message..." : "Sign in to join the room...";
-    }
-
-    if(btn){
-      btn.textContent = user ? "Send" : "Sign In";
-      btn.onclick = user
-        ? window.sendChatMessage
-        : function(){
-            if(typeof openAuth === "function") openAuth("Sign in to use the chat room.");
-          };
-    }
-
-    if(row){
-      row.classList.toggle("locked", !user);
-    }
-
-    return !!user;
-  }
-
-  function formatChatTime(value){
+  function timeOnly(value){
     try {
       return new Date(value).toLocaleTimeString([], {
         hour: "numeric",
@@ -3913,7 +3884,31 @@ setInterval(killBadTopSignInBar, 500);
     }
   }
 
-  function addChatMessage(row){
+  function setChatLocked(locked){
+    const input = document.getElementById("chatInput");
+    const btn = document.getElementById("chatSendBtn");
+    const row = document.querySelector(".chat-input-row");
+
+    if(input){
+      input.disabled = locked;
+      input.placeholder = locked ? "Sign in to join the room..." : "Drop a message...";
+    }
+
+    if(btn){
+      btn.textContent = locked ? "Sign In" : "Send";
+      btn.onclick = locked
+        ? function(){
+            if(typeof openAuth === "function") openAuth("Sign in to use the chat room.");
+          }
+        : window.sendChatMessage;
+    }
+
+    if(row){
+      row.classList.toggle("locked", locked);
+    }
+  }
+
+  function addMessage(row){
     const box = document.getElementById("chatMessages");
     if(!box || !row) return;
 
@@ -3922,7 +3917,7 @@ setInterval(killBadTopSignInBar, 500);
     div.innerHTML = `
       <span class="chat-name">
         ${safeText(row.username || "User")}
-        <small>${safeText(formatChatTime(row.created_at))}</small>
+        <small>${safeText(timeOnly(row.created_at))}</small>
       </span>
       ${safeText(row.message)}
     `;
@@ -3932,8 +3927,9 @@ setInterval(killBadTopSignInBar, 500);
   }
 
   window.renderChatMessages = async function(){
-    chatLoaded = false;
     const box = document.getElementById("chatMessages");
+    const client = sb();
+
     if(!box) return;
 
     box.innerHTML = `
@@ -3942,28 +3938,32 @@ setInterval(killBadTopSignInBar, 500);
       </div>
     `;
 
-    const sb = getChatSupabase();
-    if(!sb){
-      box.innerHTML += `<div class="chat-message system">Chat is not connected yet.</div>`;
+    if(!client){
+      setChatLocked(true);
+      box.innerHTML += `
+        <div class="chat-message system">
+          Chat is not online yet.
+        </div>
+      `;
       return;
     }
 
-    const { data: authData } = await sb.auth.getUser();
-    const user = authData?.user;
+    const { data: authData } = await client.auth.getUser();
+    currentUser = authData?.user || null;
 
-    if(!user){
+    if(!currentUser){
+      setChatLocked(true);
       box.innerHTML += `
         <div class="chat-message system">
           Sign in to view and send chat messages.
         </div>
       `;
-      await setChatGate();
       return;
     }
 
-    await setChatGate();
+    setChatLocked(false);
 
-    const { data, error } = await sb
+    const { data, error } = await client
       .from("chat_messages")
       .select("id,user_id,username,message,created_at")
       .order("created_at", { ascending: true })
@@ -3971,48 +3971,44 @@ setInterval(killBadTopSignInBar, 500);
 
     if(error){
       console.warn("Chat load error:", error);
-      box.innerHTML += `<div class="chat-message system">Could not load chat messages.</div>`;
+      box.innerHTML += `
+        <div class="chat-message system">
+          Could not load chat messages.
+        </div>
+      `;
       return;
     }
 
-    (data || []).forEach(addChatMessage);
+    (data || []).forEach(addMessage);
     box.scrollTop = box.scrollHeight;
-    chatLoaded = true;
   };
 
   window.sendChatMessage = async function(){
     const input = document.getElementById("chatInput");
-    if(!input) return;
+    const client = sb();
+
+    if(!input || !client) return;
 
     const msg = input.value.trim();
     if(!msg) return;
 
-    const sb = getChatSupabase();
-    if(!sb){
-      alert("Chat is not connected yet.");
+    const { data: authData } = await client.auth.getUser();
+    currentUser = authData?.user || null;
+
+    if(!currentUser){
+      setChatLocked(true);
+      if(typeof openAuth === "function") openAuth("Sign in to use the chat room.");
       return;
     }
 
-    const { data: authData } = await sb.auth.getUser();
-    const user = authData?.user;
-
-    if(!user){
-      if(typeof openAuth === "function"){
-        openAuth("Sign in to send chat messages.");
-      } else {
-        alert("Sign in to send chat messages.");
-      }
-      return;
-    }
-
-    const username = user.email ? user.email.split("@")[0] : "User";
+    const username = currentUser.email ? currentUser.email.split("@")[0] : "User";
 
     input.value = "";
 
-    const { error } = await sb
+    const { error } = await client
       .from("chat_messages")
       .insert({
-        user_id: user.id,
+        user_id: currentUser.id,
         username,
         message: msg
       });
@@ -4023,14 +4019,13 @@ setInterval(killBadTopSignInBar, 500);
     }
   };
 
-  function wireLiveChat(){
+  window.wireLiveChat = function(){
     const input = document.getElementById("chatInput");
-    const row = document.querySelector(".chat-input-row");
-    const btn = row ? row.querySelector("button") : null;
+    const btn = document.getElementById("chatSendBtn");
+    const client = sb();
 
     if(btn){
       btn.onclick = window.sendChatMessage;
-      btn.type = "button";
     }
 
     if(input && !input.dataset.chatWired){
@@ -4043,12 +4038,10 @@ setInterval(killBadTopSignInBar, 500);
       });
     }
 
-    setChatGate();
     window.renderChatMessages();
 
-    const sb = getChatSupabase();
-    if(sb && !chatChannel){
-      chatChannel = sb
+    if(client && !chatChannel){
+      chatChannel = client
         .channel("wagervision-chat-room")
         .on(
           "postgres_changes",
@@ -4058,20 +4051,15 @@ setInterval(killBadTopSignInBar, 500);
             table: "chat_messages"
           },
           function(payload){
-            if(chatLoaded){
-              addChatMessage(payload.new);
-            } else {
-              window.renderChatMessages();
-            }
+            addMessage(payload.new);
           }
         )
         .subscribe();
     }
-  }
+  };
 
-  document.addEventListener("DOMContentLoaded", wireLiveChat);
-  window.addEventListener("load", wireLiveChat);
-  window.wireLiveChat = wireLiveChat;
+  document.addEventListener("DOMContentLoaded", window.wireLiveChat);
+  window.addEventListener("load", window.wireLiveChat);
 })();
 </script>
 
