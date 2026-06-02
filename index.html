@@ -4077,5 +4077,72 @@ setInterval(killBadTopSignInBar, 500);
 })();
 </script>
 
+
+<script>
+/* WAGERVISION CHAT AUTH STATE SYNC */
+(function(){
+  function getWVClient(){
+    if(window.supabaseClient) return window.supabaseClient;
+    try {
+      if(typeof supabaseClient !== "undefined") {
+        window.supabaseClient = supabaseClient;
+        return supabaseClient;
+      }
+    } catch(e) {}
+    return null;
+  }
+
+  function syncChatAfterAuth(){
+    setTimeout(function(){
+      if(typeof updateAuthButton === "function"){
+        getWVClient()?.auth.getUser().then(({ data }) => {
+          updateAuthButton(data?.user || null);
+        });
+      }
+
+      if(typeof wireLiveChat === "function"){
+        wireLiveChat();
+      }
+
+      if(typeof renderChatMessages === "function"){
+        renderChatMessages();
+      }
+    }, 250);
+  }
+
+  function installAuthSync(){
+    const client = getWVClient();
+    if(!client || window.__wvChatAuthSyncInstalled) return;
+
+    window.__wvChatAuthSyncInstalled = true;
+
+    client.auth.onAuthStateChange(function(event, session){
+      if(event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "TOKEN_REFRESHED"){
+        if(session?.user?.email){
+          localStorage.setItem("wv_user", session.user.email);
+        }
+
+        if(event === "SIGNED_OUT"){
+          localStorage.removeItem("wv_user");
+        }
+
+        syncChatAfterAuth();
+      }
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", function(){
+    installAuthSync();
+    setTimeout(installAuthSync, 500);
+    setTimeout(installAuthSync, 1500);
+  });
+
+  window.addEventListener("load", function(){
+    installAuthSync();
+    syncChatAfterAuth();
+  });
+})();
+</script>
+
 </body>
 </html>
