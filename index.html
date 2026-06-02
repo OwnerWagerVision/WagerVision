@@ -1227,14 +1227,64 @@ body.landing-mode .floating-signin {
   z-index: 9999 !important;
 }
 
+
+/* WAGERVISION ACCOUNT BUTTON FINAL FIX */
+#signInBtn.signin-btn {
+  position: fixed !important;
+  top: 92px !important;
+  right: 38px !important;
+  left: auto !important;
+  bottom: auto !important;
+  z-index: 99999 !important;
+
+  width: auto !important;
+  max-width: 210px !important;
+  height: auto !important;
+
+  padding: 8px 14px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(56, 189, 248, 0.55) !important;
+  background: rgba(15, 23, 42, 0.92) !important;
+  color: #dbeafe !important;
+
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+
+  box-shadow: 0 0 18px rgba(14, 165, 233, 0.25) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+#signInBtn.signin-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 24px rgba(14, 165, 233, 0.38) !important;
+}
+
+/* Kill duplicate account buttons */
+#globalSignInBtn,
+.global-signin-btn {
+  display: none !important;
+}
+
+@media (max-width: 700px) {
+  #signInBtn.signin-btn {
+    top: 84px !important;
+    right: 12px !important;
+    max-width: 150px !important;
+    padding: 7px 10px !important;
+    font-size: 12px !important;
+  }
+}
+
 </style>
 </head>
 
 <body class="landing-mode">
 
-<button id="globalSignInBtn" class="global-signin-btn" onclick="openAuthModal()">
-  Sign In
-</button>
+<!-- Duplicate global sign-in button removed. Main account button is #signInBtn. -->
 
 <div id="landingPage">
   <div class="landing-inner">
@@ -3358,9 +3408,12 @@ previousOddsMap = {};
 }
 
 function updateAuthButton(user){
-  const btn = el("signInBtn");
-  if(!btn) return;
-  btn.textContent = user?.email ? `👤 ${user.email.split("@")[0]}` : "👤 Sign In";
+  const label = user?.email ? `👤 ${user.email.split("@")[0]}` : "👤 Sign In";
+
+  ["signInBtn", "globalSignInBtn"].forEach(id => {
+    const btn = el(id);
+    if(btn) btn.textContent = label;
+  });
 }
 
 async function saveUserSettings(){
