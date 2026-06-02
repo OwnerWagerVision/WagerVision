@@ -1354,6 +1354,46 @@ body.landing-mode .floating-signin {
   }
 }
 
+
+/* WAGERVISION CHAT INPUT POLISH */
+.chat-input-row {
+  align-items: stretch !important;
+}
+
+.chat-input-row input {
+  min-height: 46px !important;
+  font-size: 15px !important;
+  padding: 12px 14px !important;
+  border-radius: 14px !important;
+}
+
+.chat-input-row button {
+  min-height: 46px !important;
+  width: 70px !important;
+  max-width: 70px !important;
+  padding: 0 10px !important;
+  font-size: 12px !important;
+  border-radius: 14px !important;
+  flex: 0 0 70px !important;
+}
+
+@media (max-width: 700px) {
+  .chat-input-row input {
+    min-height: 48px !important;
+    font-size: 15px !important;
+    padding: 13px 14px !important;
+  }
+
+  .chat-input-row button {
+    min-height: 48px !important;
+    width: 58px !important;
+    max-width: 58px !important;
+    flex: 0 0 58px !important;
+    font-size: 11px !important;
+    padding: 0 6px !important;
+  }
+}
+
 </style>
 </head>
 
@@ -1691,12 +1731,12 @@ body.landing-mode .floating-signin {
   <div class="panel chat-panel">
     <div class="section-title">💬 WagerVision Chat Room</div>
     <p class="muted">
-      Talk games, edges, bad beats, sharp lines, and questionable life choices.
+      Welcome to WagerVision room.
     </p>
 
     <div id="chatMessages" class="chat-messages">
       <div class="chat-message system">
-        Welcome to the WagerVision room. Keep it sharp. Keep it clean. Mostly.
+        Welcome to WagerVision room.
       </div>
     </div>
 
@@ -1762,7 +1802,7 @@ function renderChatMessages(){
 
   box.innerHTML = `
     <div class="chat-message system">
-      Welcome to the WagerVision room. Keep it sharp. Keep it clean. Mostly.
+      Welcome to WagerVision room.
     </div>
   `;
 
