@@ -1413,6 +1413,15 @@ body.landing-mode .floating-signin {
   font-size: 12px !important;
 }
 
+
+/* WAGERVISION CHAT TAB ONLY FIX */
+body:not(.chat-active) #chatMessages,
+body:not(.chat-active) .chat-input-row,
+body:not(.chat-active) .chat-panel,
+body:not(.chat-active) #chat {
+  display: none !important;
+}
+
 </style>
 </head>
 
@@ -4142,6 +4151,22 @@ setInterval(killBadTopSignInBar, 500);
     syncChatAfterAuth();
   });
 })();
+</script>
+
+
+<script>
+/* WAGERVISION CHAT TAB VISIBILITY FALLBACK */
+document.addEventListener("click", function(e){
+  const tabBtn = e.target.closest(".tab");
+  if(!tabBtn) return;
+
+  const text = (tabBtn.textContent || "").toLowerCase();
+  document.body.classList.toggle("chat-active", text.includes("chat"));
+});
+
+document.addEventListener("DOMContentLoaded", function(){
+  document.body.classList.remove("chat-active");
+});
 </script>
 
 </body>
