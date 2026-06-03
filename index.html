@@ -3280,18 +3280,51 @@ try{
     if (Math.abs(edge) >= 8) confidence = "High"; 
     else if (Math.abs(edge) >= 4) confidence = "Medium";     
  
+   const pickModel = pickHome ? model.homeScore : awayModel;
+   const pickMarket = oddsInfo.bestProb;
+   const pickLine = oddsInfo.best;
+
+   const reasons = [];
+
+   if(edge >= 8){
+     reasons.push("Strong value gap between WagerVision and the market");
+   } else if(edge >= 4){
+     reasons.push("Playable model edge over the market");
+   } else if(edge > 0){
+     reasons.push("Small positive edge, more of a cautious lean");
+   }
+
+   if(pickLine > 0 && edge > 0){
+     reasons.push("Plus-money price while the model still shows value");
+   }
+
+   if(pickModel >= 60){
+     reasons.push("Model probability is showing a strong win lean");
+   } else if(pickModel >= 55){
+     reasons.push("Model probability is above a coin-flip range");
+   }
+
+   if(Math.abs(model.homeScore - 50) >= 7){
+     reasons.push("Matchup profile is separating from a true 50/50 game");
+   }
+
+   if(pickMarket && pickModel > pickMarket){
+     reasons.push("WagerVision number is higher than the market implied probability");
+   }
+
    picks.push({
   home: home.name,
   away: away.name,
   pick: pickHome ? home.name : away.name,
-  model: pickHome ? model.homeScore : awayModel,
+  model: pickModel,
   fadeTeam: pickHome ? away.name : home.name,
   fadeLine: pickHome ? awayOddsInfo.best : homeOddsInfo.best,
-  market: oddsInfo.bestProb,
+  market: pickMarket,
   edge,
   confidence,
-  american: oddsInfo.best,
-  book: oddsInfo.bestBook
+  american: pickLine,
+  book: oddsInfo.bestBook,
+  reasons
 });
 
     }catch(error){
@@ -4201,6 +4234,10 @@ document.addEventListener("DOMContentLoaded", function(){
 
     if(line > 0){
       reply += `• Dog status: Underdog price\\n`;
+    }
+
+    if(Array.isArray(p.reasons) && p.reasons.length){
+      reply += `• Reasons: ${p.reasons.slice(0,3).join("; ")}\\n`;
     }
 
     reply += `\\n`;
