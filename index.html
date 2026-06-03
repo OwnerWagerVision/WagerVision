@@ -4122,33 +4122,9 @@ document.addEventListener("DOMContentLoaded", function(){
     ].join("\n");
   }
 
-  function buildExplainReply(team){
-    const card = findTeamCard(team);
 
-    if(!card){
-      return `I could not find ${team} on the current board yet. Load the games or scan the edge board first, then try @explain ${team} again.`;
-    }
+  /* Old duplicate buildExplainReply removed */
 
-    const pick = pullPick(card);
-    const pct = pullPercent(card);
-    const edge = pullEdge(card);
-
-    let reply = `Here is the WagerVision read on ${team}:\n`;
-
-    if(pct){
-      reply += `The model is showing around ${pct}, which means this is not just a gut feel. `;
-    } else {
-      reply += `The model has this team showing up in the current matchup data. `;
-    }
-
-    if(edge){
-      reply += `The edge looks like roughly ${edge}, so the market may not be pricing this one cleanly. `;
-    }
-
-    reply += `The lean appears tied to the matchup profile: price, form, pitching, run prevention, and how the board is valuing the name on the jersey. Vegas prices the market. WagerVision prices the matchup.`;
-
-    return reply;
-  }
 
   function buildUnderdogsReply(){
     const cards = getPageCards();
