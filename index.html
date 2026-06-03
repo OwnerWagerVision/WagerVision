@@ -4201,6 +4201,169 @@ document.addEventListener("DOMContentLoaded", function(){
     return "Strongest WagerVision looks I can see right now:\n" + lines.join("\n");
   }
 
+
+  /* BETTER @EXPLAIN ENGINE */
+  function normalizeTeamName(team){
+    const q = String(team || "").toLowerCase().trim();
+
+    const aliases = {
+      jays: "blue jays",
+      bluejays: "blue jays",
+      toronto: "blue jays",
+      yanks: "yankees",
+      nyy: "yankees",
+      bosox: "red sox",
+      sox: "red sox",
+      boston: "red sox",
+      chisox: "white sox",
+      cards: "cardinals",
+      stl: "cardinals",
+      dbacks: "diamondbacks",
+      snakes: "diamondbacks",
+      arizona: "diamondbacks",
+      rocks: "rockies",
+      colorado: "rockies",
+      halos: "angels",
+      atl: "braves",
+      atlanta: "braves"
+    };
+
+    return aliases[q] || q;
+  }
+
+  function getUsefulTeamText(team){
+    const target = normalizeTeamName(team);
+
+    const selectors = [
+      "tr",
+      ".edge-card",
+      ".game-card",
+      ".pick-card",
+      ".data-box",
+      ".panel",
+      ".card",
+      "section"
+    ];
+
+    let matches = [];
+
+    selectors.forEach(sel => {
+      document.querySelectorAll(sel).forEach(el => {
+        const txt = (el.innerText || "").trim();
+        const low = txt.toLowerCase();
+
+        if(!txt || txt.length < 20) return;
+        if(!low.includes(target)) return;
+
+        let score = 0;
+        if(/pick/i.test(txt)) score += 5;
+        if(/edge/i.test(txt)) score += 5;
+        if(/model/i.test(txt)) score += 4;
+        if(/market/i.test(txt)) score += 4;
+        if(/vegas/i.test(txt)) score += 3;
+        if(/%/.test(txt)) score += 3;
+        if(/[+-]\d{3}/.test(txt)) score += 3;
+        if(txt.length < 700) score += 2;
+
+        matches.push({ score, txt });
+      });
+    });
+
+    matches.sort((a,b) => b.score - a.score);
+
+    return matches[0]?.txt || "";
+  }
+
+  function extractAllPercents(txt){
+    return [...txt.matchAll(/(\d{1,2}(?:\.\d+)?)\s*%/g)].map(m => m[1] + "%");
+  }
+
+  function extractAmericanLines(txt){
+    return [...txt.matchAll(/[+-]\d{3,4}/g)].map(m => m[0]);
+  }
+
+  function extractLabelValue(txt, label){
+    const re = new RegExp(label + "[^0-9+\\-]{0,25}([+\\-]?\\d{1,3}(?:\\.\\d+)?%?|[+\\-]\\d{3,4})", "i");
+    const m = txt.match(re);
+    return m ? m[1] : "";
+  }
+
+  function betterPickFromText(txt, team){
+    const target = normalizeTeamName(team);
+
+    const pickMatch = txt.match(/pick[:\s]+([A-Za-z .]+)/i);
+    if(pickMatch) return pickMatch[1].trim().split("\n")[0];
+
+    const teams = [
+      "Blue Jays","Yankees","Red Sox","Rays","Orioles","Tigers","Guardians","Twins","White Sox","Royals",
+      "Astros","Rangers","Mariners","Angels","Athletics",
+      "Braves","Mets","Phillies","Marlins","Nationals",
+      "Cubs","Brewers","Cardinals","Reds","Pirates",
+      "Dodgers","Padres","Giants","Diamondbacks","Rockies"
+    ];
+
+    const found = teams.find(t => t.toLowerCase().includes(target) || target.includes(t.toLowerCase()));
+    return found || team;
+  }
+
+  function buildExplainReply(team){
+    const card = getUsefulTeamText(team);
+
+    if(!card){
+      return `I can’t find enough board data for ${team} yet. Load today’s games or run the edge board first, then try @explain ${team} again.`;
+    }
+
+    const pick = betterPickFromText(card, team);
+    const percents = extractAllPercents(card);
+    const lines = extractAmericanLines(card);
+
+    const modelPct =
+      extractLabelValue(card, "model") ||
+      extractLabelValue(card, "our") ||
+      percents[0] ||
+      "";
+
+    const marketPct =
+      extractLabelValue(card, "market") ||
+      extractLabelValue(card, "vegas") ||
+      percents[1] ||
+      "";
+
+    const edge =
+      extractLabelValue(card, "edge") ||
+      "";
+
+    let reply = `WagerVision read on ${pick}:\n`;
+
+    if(modelPct){
+      reply += `• Model number: ${modelPct}\n`;
+    }
+
+    if(marketPct){
+      reply += `• Market number: ${marketPct}\n`;
+    }
+
+    if(edge){
+      reply += `• Estimated edge: ${edge}\n`;
+    }
+
+    if(lines.length){
+      reply += `• Line showing: ${lines.slice(0,2).join(" / ")}\n`;
+    }
+
+    if(modelPct && marketPct){
+      reply += `\nThe reason we like this angle is simple: our number appears higher than the market number. That means WagerVision sees value where the book may be underrating the matchup.`;
+    } else if(modelPct){
+      reply += `\nThe model is giving this side a playable number, but I’m not seeing enough market detail in the board text to give a full edge breakdown yet.`;
+    } else {
+      reply += `\nI found the team on the board, but not enough clean percentage or edge data. Run the edge scan first for a sharper explanation.`;
+    }
+
+    reply += `\n\nVegas prices the market. WagerVision prices the matchup.`;
+
+    return reply;
+  }
+
   function getAIReply(msg){
     const lower = msg.toLowerCase().trim();
 
