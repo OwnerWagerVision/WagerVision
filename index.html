@@ -3864,6 +3864,8 @@ setInterval(killBadTopSignInBar, 500);
 (function(){
   let chatChannel = null;
   let currentUser = null;
+  let chatSending = false;
+  const seenChatIds = new Set();
 
   function sb(){
     if(window.supabaseClient) return window.supabaseClient;
@@ -3935,6 +3937,9 @@ setInterval(killBadTopSignInBar, 500);
     const box = document.getElementById("chatMessages");
     if(!box || !row) return;
 
+    if(row.id && seenChatIds.has(row.id)) return;
+    if(row.id) seenChatIds.add(row.id);
+
     const div = document.createElement("div");
     div.className = "chat-message";
     div.innerHTML = `
@@ -3954,6 +3959,8 @@ setInterval(killBadTopSignInBar, 500);
     const client = await waitForSupabase();
 
     if(!box) return;
+
+    seenChatIds.clear();
 
     box.innerHTML = `
       <div class="chat-message system">
@@ -4007,6 +4014,8 @@ setInterval(killBadTopSignInBar, 500);
   };
 
   window.sendChatMessage = async function(){
+    if(chatSending) return;
+
     const input = document.getElementById("chatInput");
     const client = await waitForSupabase();
 
@@ -4015,10 +4024,17 @@ setInterval(killBadTopSignInBar, 500);
     const msg = input.value.trim();
     if(!msg) return;
 
+    chatSending = true;
+
+    const sendBtn = document.getElementById("chatSendBtn");
+    if(sendBtn) sendBtn.disabled = true;
+
     const { data: authData } = await client.auth.getUser();
     currentUser = authData?.user || null;
 
     if(!currentUser){
+      chatSending = false;
+      if(sendBtn) sendBtn.disabled = false;
       setChatLocked(true);
       if(typeof openAuth === "function") openAuth("Sign in to use the chat room.");
       return;
@@ -4040,6 +4056,9 @@ setInterval(killBadTopSignInBar, 500);
       console.warn("Chat send error:", error);
       alert("Message could not send.");
     }
+
+    chatSending = false;
+    if(sendBtn) sendBtn.disabled = false;
   };
 
   window.wireLiveChat = function(){
@@ -4047,7 +4066,8 @@ setInterval(killBadTopSignInBar, 500);
     const btn = document.getElementById("chatSendBtn");
     const client = sb();
 
-    if(btn){
+    if(btn && !btn.dataset.chatButtonWired){
+      btn.dataset.chatButtonWired = "true";
       btn.onclick = window.sendChatMessage;
     }
 
