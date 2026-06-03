@@ -3860,7 +3860,90 @@ setInterval(killBadTopSignInBar, 500);
 
 
 <script>
-/* WAGERVISION LIVE SUPABASE CHAT - CLEAN VERSION */
+/* WAGERVISION CHAT AUTH STATE SYNC */
+(function(){
+  function getWVClient(){
+    if(window.supabaseClient) return window.supabaseClient;
+    try {
+      if(typeof supabaseClient !== "undefined") {
+        window.supabaseClient = supabaseClient;
+        return supabaseClient;
+      }
+    } catch(e) {}
+    return null;
+  }
+
+  function syncChatAfterAuth(){
+    setTimeout(function(){
+      if(typeof updateAuthButton === "function"){
+        getWVClient()?.auth.getUser().then(({ data }) => {
+          updateAuthButton(data?.user || null);
+        });
+      }
+
+      if(typeof wireLiveChat === "function"){
+        wireLiveChat();
+      }
+
+      if(typeof renderChatMessages === "function"){
+        renderChatMessages();
+      }
+    }, 250);
+  }
+
+  function installAuthSync(){
+    const client = getWVClient();
+    if(!client || window.__wvChatAuthSyncInstalled) return;
+
+    window.__wvChatAuthSyncInstalled = true;
+
+    client.auth.onAuthStateChange(function(event, session){
+      if(event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "TOKEN_REFRESHED"){
+        if(session?.user?.email){
+          localStorage.setItem("wv_user", session.user.email);
+        }
+
+        if(event === "SIGNED_OUT"){
+          localStorage.removeItem("wv_user");
+        }
+
+        syncChatAfterAuth();
+      }
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", function(){
+    installAuthSync();
+    setTimeout(installAuthSync, 500);
+    setTimeout(installAuthSync, 1500);
+  });
+
+  window.addEventListener("load", function(){
+    installAuthSync();
+    syncChatAfterAuth();
+  });
+})();
+</script>
+
+
+<script>
+/* WAGERVISION CHAT TAB VISIBILITY FALLBACK */
+document.addEventListener("click", function(e){
+  const tabBtn = e.target.closest(".tab");
+  if(!tabBtn) return;
+
+  const text = (tabBtn.textContent || "").toLowerCase();
+  document.body.classList.toggle("chat-active", text.includes("chat"));
+});
+
+document.addEventListener("DOMContentLoaded", function(){
+  document.body.classList.remove("chat-active");
+});
+</script>
+
+
+<script>
+/* WAGERVISION LIVE SUPABASE CHAT WITH AI COMMANDS */
 (function(){
   let chatChannel = null;
   let currentUser = null;
@@ -3916,7 +3999,7 @@ setInterval(killBadTopSignInBar, 500);
 
     if(input){
       input.disabled = locked;
-      input.placeholder = locked ? "Sign in to join the room..." : "Drop a message...";
+      input.placeholder = locked ? "Sign in to join the room..." : "Drop a message or type @help...";
     }
 
     if(btn){
@@ -3952,6 +4035,195 @@ setInterval(killBadTopSignInBar, 500);
 
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
+  }
+
+  function getPageCards(){
+    const selectors = [
+      ".edge-card",
+      ".game-card",
+      ".pick-card",
+      ".data-box",
+      ".panel",
+      ".card",
+      "tr"
+    ];
+
+    const cards = [];
+
+    selectors.forEach(sel => {
+      document.querySelectorAll(sel).forEach(el => {
+        const txt = (el.innerText || "").trim();
+        if(txt.length > 25 && txt.length < 1800){
+          cards.push(txt);
+        }
+      });
+    });
+
+    return [...new Set(cards)];
+  }
+
+  function findTeamCard(team){
+    const q = String(team || "").toLowerCase().trim();
+    if(!q) return "";
+
+    const aliases = {
+      jays: "blue jays",
+      bluejays: "blue jays",
+      yanks: "yankees",
+      sox: "red sox",
+      chisox: "white sox",
+      cards: "cardinals",
+      dbacks: "diamondbacks",
+      snakes: "diamondbacks",
+      mariners: "mariners",
+      rocks: "rockies",
+      halos: "angels"
+    };
+
+    const target = aliases[q] || q;
+
+    return getPageCards().find(txt =>
+      txt.toLowerCase().includes(target)
+    ) || "";
+  }
+
+  function pullPercent(txt){
+    const m = txt.match(/(\d{1,2}(?:\.\d+)?)\s*%/);
+    return m ? m[1] + "%" : "";
+  }
+
+  function pullEdge(txt){
+    const m = txt.match(/edge[^0-9\-+]*(\-?\+?\d{1,2}(?:\.\d+)?)\s*%?/i);
+    return m ? m[1] + "%" : "";
+  }
+
+  function pullPick(txt){
+    const m = txt.match(/pick[:\s]+([A-Za-z .]+)/i);
+    if(m) return m[1].trim().split("\n")[0];
+
+    const teams = [
+      "Blue Jays","Yankees","Red Sox","Rays","Orioles","Tigers","Guardians","Twins","White Sox","Royals",
+      "Astros","Rangers","Mariners","Angels","Athletics",
+      "Braves","Mets","Phillies","Marlins","Nationals",
+      "Cubs","Brewers","Cardinals","Reds","Pirates",
+      "Dodgers","Padres","Giants","Diamondbacks","Rockies"
+    ];
+
+    return teams.find(t => txt.toLowerCase().includes(t.toLowerCase())) || "this side";
+  }
+
+  function buildHelpReply(){
+    return [
+      "WagerVision AI commands:",
+      "@explain team — explains why the model likes or fades that team.",
+      "@underdogs — shows possible plus-money dogs from the board.",
+      "@best — looks for the strongest available edges.",
+      "Example: @explain jays"
+    ].join("\n");
+  }
+
+  function buildExplainReply(team){
+    const card = findTeamCard(team);
+
+    if(!card){
+      return `I could not find ${team} on the current board yet. Load the games or scan the edge board first, then try @explain ${team} again.`;
+    }
+
+    const pick = pullPick(card);
+    const pct = pullPercent(card);
+    const edge = pullEdge(card);
+
+    let reply = `Here is the WagerVision read on ${team}:\n`;
+
+    if(pct){
+      reply += `The model is showing around ${pct}, which means this is not just a gut feel. `;
+    } else {
+      reply += `The model has this team showing up in the current matchup data. `;
+    }
+
+    if(edge){
+      reply += `The edge looks like roughly ${edge}, so the market may not be pricing this one cleanly. `;
+    }
+
+    reply += `The lean appears tied to the matchup profile: price, form, pitching, run prevention, and how the board is valuing the name on the jersey. Vegas prices the market. WagerVision prices the matchup.`;
+
+    return reply;
+  }
+
+  function buildUnderdogsReply(){
+    const cards = getPageCards();
+
+    const dogCards = cards.filter(txt => {
+      const lower = txt.toLowerCase();
+      return lower.includes("+") || lower.includes("underdog") || lower.includes("dog");
+    }).slice(0, 6);
+
+    if(!dogCards.length){
+      return "I do not see clear underdogs on the current board yet. Load today’s odds or scan the edge board first, then type @underdogs again.";
+    }
+
+    const lines = dogCards.map(txt => {
+      const pick = pullPick(txt);
+      const pct = pullPercent(txt);
+      const edge = pullEdge(txt);
+
+      let line = `• ${pick}`;
+      if(pct) line += ` — model ${pct}`;
+      if(edge) line += ` — edge ${edge}`;
+      return line;
+    });
+
+    return "Possible WagerVision underdog looks:\n" + lines.join("\n");
+  }
+
+  function buildBestReply(){
+    const cards = getPageCards();
+
+    const useful = cards
+      .filter(txt => /edge|strong|value|pick|model|%/i.test(txt))
+      .slice(0, 5);
+
+    if(!useful.length){
+      return "I do not see enough board data yet. Load games or run the edge scan first, then type @best again.";
+    }
+
+    const lines = useful.map(txt => {
+      const pick = pullPick(txt);
+      const pct = pullPercent(txt);
+      const edge = pullEdge(txt);
+
+      let line = `• ${pick}`;
+      if(pct) line += ` — model ${pct}`;
+      if(edge) line += ` — edge ${edge}`;
+      return line;
+    });
+
+    return "Strongest WagerVision looks I can see right now:\n" + lines.join("\n");
+  }
+
+  function getAIReply(msg){
+    const lower = msg.toLowerCase().trim();
+
+    if(lower === "@help") return buildHelpReply();
+    if(lower === "@underdogs") return buildUnderdogsReply();
+    if(lower === "@best") return buildBestReply();
+
+    if(lower.startsWith("@explain ")){
+      const team = msg.replace(/^@explain\s+/i, "").trim();
+      return buildExplainReply(team);
+    }
+
+    return null;
+  }
+
+  async function insertChatRow(client, user, username, message){
+    return await client
+      .from("chat_messages")
+      .insert({
+        user_id: user.id,
+        username,
+        message
+      });
   }
 
   window.renderChatMessages = async function(){
@@ -4041,20 +4313,24 @@ setInterval(killBadTopSignInBar, 500);
     }
 
     const username = currentUser.email ? currentUser.email.split("@")[0] : "User";
+    const aiReply = getAIReply(msg);
 
     input.value = "";
 
-    const { error } = await client
-      .from("chat_messages")
-      .insert({
-        user_id: currentUser.id,
-        username,
-        message: msg
-      });
+    const first = await insertChatRow(client, currentUser, username, msg);
 
-    if(error){
-      console.warn("Chat send error:", error);
+    if(first.error){
+      console.warn("Chat send error:", first.error);
       alert("Message could not send.");
+      chatSending = false;
+      if(sendBtn) sendBtn.disabled = false;
+      return;
+    }
+
+    if(aiReply){
+      setTimeout(async function(){
+        await insertChatRow(client, currentUser, "WagerVision AI", aiReply);
+      }, 450);
     }
 
     chatSending = false;
@@ -4104,89 +4380,6 @@ setInterval(killBadTopSignInBar, 500);
   document.addEventListener("DOMContentLoaded", window.wireLiveChat);
   window.addEventListener("load", window.wireLiveChat);
 })();
-</script>
-
-
-<script>
-/* WAGERVISION CHAT AUTH STATE SYNC */
-(function(){
-  function getWVClient(){
-    if(window.supabaseClient) return window.supabaseClient;
-    try {
-      if(typeof supabaseClient !== "undefined") {
-        window.supabaseClient = supabaseClient;
-        return supabaseClient;
-      }
-    } catch(e) {}
-    return null;
-  }
-
-  function syncChatAfterAuth(){
-    setTimeout(function(){
-      if(typeof updateAuthButton === "function"){
-        getWVClient()?.auth.getUser().then(({ data }) => {
-          updateAuthButton(data?.user || null);
-        });
-      }
-
-      if(typeof wireLiveChat === "function"){
-        wireLiveChat();
-      }
-
-      if(typeof renderChatMessages === "function"){
-        renderChatMessages();
-      }
-    }, 250);
-  }
-
-  function installAuthSync(){
-    const client = getWVClient();
-    if(!client || window.__wvChatAuthSyncInstalled) return;
-
-    window.__wvChatAuthSyncInstalled = true;
-
-    client.auth.onAuthStateChange(function(event, session){
-      if(event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "TOKEN_REFRESHED"){
-        if(session?.user?.email){
-          localStorage.setItem("wv_user", session.user.email);
-        }
-
-        if(event === "SIGNED_OUT"){
-          localStorage.removeItem("wv_user");
-        }
-
-        syncChatAfterAuth();
-      }
-    });
-  }
-
-  document.addEventListener("DOMContentLoaded", function(){
-    installAuthSync();
-    setTimeout(installAuthSync, 500);
-    setTimeout(installAuthSync, 1500);
-  });
-
-  window.addEventListener("load", function(){
-    installAuthSync();
-    syncChatAfterAuth();
-  });
-})();
-</script>
-
-
-<script>
-/* WAGERVISION CHAT TAB VISIBILITY FALLBACK */
-document.addEventListener("click", function(e){
-  const tabBtn = e.target.closest(".tab");
-  if(!tabBtn) return;
-
-  const text = (tabBtn.textContent || "").toLowerCase();
-  document.body.classList.toggle("chat-active", text.includes("chat"));
-});
-
-document.addEventListener("DOMContentLoaded", function(){
-  document.body.classList.remove("chat-active");
-});
 </script>
 
 </body>
