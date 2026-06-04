@@ -3346,7 +3346,8 @@ try{
   confidence,
   american: pickLine,
   book: oddsInfo.bestBook,
-  reasons
+  reasons,
+  modelReasons: Array.isArray(model.reasons) ? model.reasons.slice(0, 8) : []
 });
 
     }catch(error){
@@ -4234,6 +4235,44 @@ document.addEventListener("DOMContentLoaded", function(){
     return "Pass";
   }
 
+  function humanReason(line){
+    const s = String(line || "").toLowerCase();
+
+    if(s.includes("ops")){
+      return "the offense has an OPS advantage";
+    }
+
+    if(s.includes("batting average")){
+      return "they are getting batting average support";
+    }
+
+    if(s.includes("starting pitcher") || s.includes("starter era") || s.includes("starter whip")){
+      return "the starting pitching matchup is helping them";
+    }
+
+    if(s.includes("triple edge")){
+      return "they show a combined edge across offense and run prevention";
+    }
+
+    if(s.includes("park factor")){
+      return "the park factor is slightly helping the projection";
+    }
+
+    if(s.includes("home field")){
+      return "home field is part of the price";
+    }
+
+    if(s.includes("injury")){
+      return "the injury adjustment is affecting the matchup";
+    }
+
+    if(s.includes("late-game") || s.includes("score per inning") || s.includes("base runner")){
+      return "the live game state is moving the number";
+    }
+
+    return "";
+  }
+
   function buildExplainReply(team){
     const p = findRealPick(team);
 
@@ -4246,39 +4285,47 @@ document.addEventListener("DOMContentLoaded", function(){
     const edge = Number(p.edge || 0);
     const line = Number(p.american || 0);
 
-    let reply = `WagerVision read on ${p.pick}:\\n`;
-    reply += `• Game: ${p.away} @ ${p.home}\\n`;
-    reply += `• Model: ${model.toFixed(1)}%\\n`;
-    reply += `• Market: ${market.toFixed(1)}%\\n`;
-    reply += `• Edge: ${edge >= 0 ? "+" : ""}${edge.toFixed(1)}%\\n`;
-    reply += `• Line: ${displayAmerican(line)}${p.book ? " at " + p.book : ""}\\n`;
-    reply += `• Confidence: ${confidenceLabel(edge)}\\n`;
+    const rawReasons = []
+      .concat(Array.isArray(p.reasons) ? p.reasons : [])
+      .concat(Array.isArray(p.modelReasons) ? p.modelReasons : []);
 
-    if(line > 0){
-      reply += `• Dog status: Underdog price\\n`;
+    const humanReasons = rawReasons
+      .map(humanReason)
+      .filter(Boolean)
+      .filter((v, i, arr) => arr.indexOf(v) === i)
+      .slice(0, 3);
+
+    let reply = `We have ${p.pick} priced at ${model.toFixed(1)}%, while the market is sitting around ${market.toFixed(1)}%. That gives WagerVision a ${edge >= 0 ? "+" : ""}${edge.toFixed(1)}% edge`;
+
+    if(line){
+      reply += ` at ${displayAmerican(line)}`;
+      if(p.book) reply += ` on ${p.book}`;
     }
 
-    if(Array.isArray(p.reasons) && p.reasons.length){
-      reply += `• Reasons: ${p.reasons.slice(0,3).join("; ")}\\n`;
-    }
-
-    reply += `\\n`;
+    reply += `. `;
 
     if(edge >= 8){
-      reply += `This is one of the stronger value spots because our model is well above the market number. `;
+      reply += `That is a strong value gap, not just a tiny lean. `;
     } else if(edge >= 4){
-      reply += `This is a playable lean because WagerVision has the probability higher than the market is pricing it. `;
+      reply += `That is a playable lean. `;
     } else if(edge > 0){
-      reply += `There is a small edge here, but not a hammer spot. `;
+      reply += `That is a small edge, so it is more cautious than aggressive. `;
     } else {
-      reply += `This is not showing clean value right now. `;
+      reply += `That is not showing clean value right now. `;
+    }
+
+    if(humanReasons.length){
+      reply += `The model is leaning this way because ${humanReasons.join(", and ")}. `;
+    } else {
+      reply += `The model is leaning this way because the matchup profile is pricing stronger than the betting market. `;
     }
 
     if(line > 0 && edge > 0){
-      reply += `The book is still giving plus money while the model sees a better chance than the market implies. `;
+      reply += `The useful part is the plus-money price. The book is still paying underdog money, but our number gives them a better chance than the market implies. `;
     }
 
-    reply += `Vegas prices the market. WagerVision prices the matchup.`;
+    reply += `In plain English: Vegas is pricing the line one way, but our numbers say ${p.pick} should be priced a little stronger.`;
+
     return reply;
   }
 
