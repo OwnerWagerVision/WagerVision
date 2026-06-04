@@ -1441,6 +1441,15 @@ body:not(.chat-active) #chat {
 }
 
 </style>
+
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0f172a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="WagerVision">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="/icon-192.png">
+
 </head>
 
 <body class="landing-mode">
@@ -4543,6 +4552,18 @@ document.addEventListener("DOMContentLoaded", function(){
   document.addEventListener("DOMContentLoaded", window.wireLiveChat);
   window.addEventListener("load", window.wireLiveChat);
 })();
+</script>
+
+
+<script>
+/* WAGERVISION PWA SERVICE WORKER */
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function(){
+    navigator.serviceWorker.register("/service-worker.js")
+      .then(function(){ console.log("WagerVision app worker registered."); })
+      .catch(function(error){ console.warn("Service worker failed:", error); });
+  });
+}
 </script>
 
 </body>
