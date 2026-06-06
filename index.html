@@ -3352,12 +3352,27 @@ try{
       const home = game.teams.home.team;
       const away = game.teams.away.team;
 
-      const [hs, as, hp, ap] = await Promise.all([
+      const [hs, as, hp, ap, homeRecord, awayRecord] = await Promise.all([
         getTeamStats(home.id, season),
         getTeamStats(away.id, season),
         getPitcherStats(game.teams.home.probablePitcher?.id, season),
-        getPitcherStats(game.teams.away.probablePitcher?.id, season)
+        getPitcherStats(game.teams.away.probablePitcher?.id, season),
+        getTeamRecord(home.id, season),
+        getTeamRecord(away.id, season)
       ]);
+
+      window.wagerVisionSeasonRecords = {
+        home: {
+          name: home.name,
+          wins: Number(homeRecord?.wins || 0),
+          losses: Number(homeRecord?.losses || 0)
+        },
+        away: {
+          name: away.name,
+          wins: Number(awayRecord?.wins || 0),
+          losses: Number(awayRecord?.losses || 0)
+        }
+      };
 
       const model = modelCalc({
   homeAvg: hs.avg,
