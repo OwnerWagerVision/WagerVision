@@ -2067,52 +2067,6 @@ async function getTeamStats(teamId,season){
     fetchJSON(`https://statsapi.mlb.com/api/v1/teams/${teamId}/stats?stats=season&group=pitching&season=${season}`)
   ]);
   
-// ------------------------------
-// WAGERVISION TEAM STRENGTH ANCHOR
-// Season record reality check.
-// Adds to current weighting system. Does not replace it.
-// ------------------------------
-try {
-  const seasonRecords = window.wagerVisionSeasonRecords || {};
-
-  const homeWins = Number(homeTeam?.wins || homeTeam?.record?.wins || homeTeam?.leagueRecord?.wins || seasonRecords.home?.wins || 0);
-  const homeLosses = Number(homeTeam?.losses || homeTeam?.record?.losses || homeTeam?.leagueRecord?.losses || seasonRecords.home?.losses || 0);
-
-  const awayWins = Number(awayTeam?.wins || awayTeam?.record?.wins || awayTeam?.leagueRecord?.wins || seasonRecords.away?.wins || 0);
-  const awayLosses = Number(awayTeam?.losses || awayTeam?.record?.losses || awayTeam?.leagueRecord?.losses || seasonRecords.away?.losses || 0);
-
-  console.log("Season record check:", {
-    homeName: homeTeam?.name,
-    awayName: awayTeam?.name,
-    homeWins,
-    homeLosses,
-    awayWins,
-    awayLosses
-  });
-
-  const homeGames = homeWins + homeLosses;
-  const awayGames = awayWins + awayLosses;
-
-  if (homeGames > 0 && awayGames > 0) {
-    const homeWinPct = homeWins / homeGames;
-    const awayWinPct = awayWins / awayGames;
-
-    let recordEdge = (homeWinPct - awayWinPct) * 26;
-    recordEdge = clamp(recordEdge, -7, 7);
-
-    homeScore += recordEdge;
-
-    if (typeof reasons !== "undefined") {
-      reasons.push(
-        recordEdge > 0
-          ? `Season record gives home a ${recordEdge.toFixed(1)} point reality-check boost.`
-          : `Season record gives away a ${Math.abs(recordEdge).toFixed(1)} point reality-check boost.`
-      );
-    }
-  }
-} catch (err) {
-  console.warn("Team Strength Anchor skipped:", err);
-}
 
 
 return {
@@ -3042,7 +2996,54 @@ if(input.inning >= 8 && input.scoreLead < 0){
   reasons.push("Late-game leverage: trailing -1.5.");
 }
 
-    return { homeScore:clamp(s,3,97), reasons };
+  
+  // ------------------------------
+  // WAGERVISION TEAM STRENGTH ANCHOR
+  // Season record reality check.
+  // Adds to current weighting system. Does not replace it.
+  // ------------------------------
+  try {
+    const seasonRecords = window.wagerVisionSeasonRecords || {};
+
+    const homeWins = Number(seasonRecords.home?.wins || 0);
+    const homeLosses = Number(seasonRecords.home?.losses || 0);
+    const awayWins = Number(seasonRecords.away?.wins || 0);
+    const awayLosses = Number(seasonRecords.away?.losses || 0);
+
+    console.log("Season record check:", {
+      homeName: seasonRecords.home?.name || "",
+      awayName: seasonRecords.away?.name || "",
+      homeWins,
+      homeLosses,
+      awayWins,
+      awayLosses
+    });
+
+    const homeGames = homeWins + homeLosses;
+    const awayGames = awayWins + awayLosses;
+
+    if (homeGames > 0 && awayGames > 0) {
+      const homeWinPct = homeWins / homeGames;
+      const awayWinPct = awayWins / awayGames;
+
+      let recordEdge = (homeWinPct - awayWinPct) * 26;
+      recordEdge = clamp(recordEdge, -7, 7);
+
+      s += recordEdge;
+
+      if (typeof reasons !== "undefined") {
+        reasons.push(
+          recordEdge > 0
+            ? `Season record gives home a ${recordEdge.toFixed(1)} point reality-check boost.`
+            : `Season record gives away a ${Math.abs(recordEdge).toFixed(1)} point reality-check boost.`
+        );
+      }
+    }
+  } catch (err) {
+    console.warn("Team Strength Anchor skipped:", err);
+  }
+
+  return { homeScore:clamp(s,3,97), reasons };
 }
 
 function updateOverUnderReadout(){
