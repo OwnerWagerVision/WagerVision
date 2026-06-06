@@ -2034,6 +2034,33 @@ function statValue(stats,name){
   return stats?.stats?.[0]?.splits?.[0]?.stat?.[name] ?? null;
 }
 
+
+async function getTeamRecord(teamId, season){
+  try {
+    const url = `https://statsapi.mlb.com/api/v1/standings?leagueId=103,104&season=${season}&standingsTypes=regularSeason`;
+    const data = await fetchJSON(url);
+
+    const records = data?.records || [];
+
+    for (const division of records) {
+      for (const teamRecord of division.teamRecords || []) {
+        if (Number(teamRecord?.team?.id) === Number(teamId)) {
+          return {
+            wins: Number(teamRecord.wins || 0),
+            losses: Number(teamRecord.losses || 0),
+            pct: Number(teamRecord.winningPercentage || 0)
+          };
+        }
+      }
+    }
+
+    return { wins: 0, losses: 0, pct: 0 };
+  } catch (err) {
+    console.warn("Could not fetch team record:", teamId, err);
+    return { wins: 0, losses: 0, pct: 0 };
+  }
+}
+
 async function getTeamStats(teamId,season){
   const [hitting,pitching] = await Promise.all([
     fetchJSON(`https://statsapi.mlb.com/api/v1/teams/${teamId}/stats?stats=season&group=hitting&season=${season}`),
@@ -2191,28 +2218,30 @@ async function loadSelectedGame(){
   const home = game.teams.home.team;
   const away = game.teams.away.team;
 
-  window.wagerVisionSeasonRecords = {
-    home: {
-      name: home.name,
-      wins: Number(game.teams.home.leagueRecord?.wins || 0),
-      losses: Number(game.teams.home.leagueRecord?.losses || 0)
-    },
-    away: {
-      name: away.name,
-      wins: Number(game.teams.away.leagueRecord?.wins || 0),
-      losses: Number(game.teams.away.leagueRecord?.losses || 0)
-    }
-  };
-
   setText("loadStatus", "Pulling team stats, pitcher stats, and live state...");
 
   try{
-    const [hs, as, hp, ap] = await Promise.all([
+    const [hs, as, hp, ap, homeRecord, awayRecord] = await Promise.all([
       getTeamStats(home.id, season),
       getTeamStats(away.id, season),
       getPitcherStats(game.teams.home.probablePitcher?.id, season),
-      getPitcherStats(game.teams.away.probablePitcher?.id, season)
+      getPitcherStats(game.teams.away.probablePitcher?.id, season),
+      getTeamRecord(home.id, season),
+      getTeamRecord(away.id, season)
     ]);
+
+    window.wagerVisionSeasonRecords = {
+      home: {
+        name: home.name,
+        wins: Number(homeRecord?.wins || 0),
+        losses: Number(homeRecord?.losses || 0)
+      },
+      away: {
+        name: away.name,
+        wins: Number(awayRecord?.wins || 0),
+        losses: Number(awayRecord?.losses || 0)
+      }
+    };
 
     setVal("homeTeam", home.name);
     setVal("awayTeam", away.name);
