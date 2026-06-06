@@ -2046,11 +2046,13 @@ async function getTeamStats(teamId,season){
 // Adds to current weighting system. Does not replace it.
 // ------------------------------
 try {
-  const homeWins = Number(homeTeam?.wins || homeTeam?.record?.wins || homeTeam?.leagueRecord?.wins || 0);
-  const homeLosses = Number(homeTeam?.losses || homeTeam?.record?.losses || homeTeam?.leagueRecord?.losses || 0);
+  const seasonRecords = window.wagerVisionSeasonRecords || {};
 
-  const awayWins = Number(awayTeam?.wins || awayTeam?.record?.wins || awayTeam?.leagueRecord?.wins || 0);
-  const awayLosses = Number(awayTeam?.losses || awayTeam?.record?.losses || awayTeam?.leagueRecord?.losses || 0);
+  const homeWins = Number(homeTeam?.wins || homeTeam?.record?.wins || homeTeam?.leagueRecord?.wins || seasonRecords.home?.wins || 0);
+  const homeLosses = Number(homeTeam?.losses || homeTeam?.record?.losses || homeTeam?.leagueRecord?.losses || seasonRecords.home?.losses || 0);
+
+  const awayWins = Number(awayTeam?.wins || awayTeam?.record?.wins || awayTeam?.leagueRecord?.wins || seasonRecords.away?.wins || 0);
+  const awayLosses = Number(awayTeam?.losses || awayTeam?.record?.losses || awayTeam?.leagueRecord?.losses || seasonRecords.away?.losses || 0);
 
   console.log("Season record check:", {
     homeName: homeTeam?.name,
@@ -2188,6 +2190,19 @@ async function loadSelectedGame(){
   const season = new Date(date).getFullYear();
   const home = game.teams.home.team;
   const away = game.teams.away.team;
+
+  window.wagerVisionSeasonRecords = {
+    home: {
+      name: home.name,
+      wins: Number(game.teams.home.leagueRecord?.wins || 0),
+      losses: Number(game.teams.home.leagueRecord?.losses || 0)
+    },
+    away: {
+      name: away.name,
+      wins: Number(game.teams.away.leagueRecord?.wins || 0),
+      losses: Number(game.teams.away.leagueRecord?.losses || 0)
+    }
+  };
 
   setText("loadStatus", "Pulling team stats, pitcher stats, and live state...");
 
