@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WagerVision Markets</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:radial-gradient(circle at top left,rgba(34,197,94,.18),transparent 30%),#050816;
+  color:#f8fafc;
+}
+.wrap{width:min(1050px,94%);margin:auto;padding:28px 0 60px}
+.hero,.card{
+  background:rgba(15,23,42,.86);
+  border:1px solid rgba(148,163,184,.25);
+  border-radius:24px;
+  padding:22px;
+  box-shadow:0 22px 70px rgba(0,0,0,.35);
+}
+.topbar{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:18px}
+.brand{font-weight:900;color:#86efac;letter-spacing:.08em;text-transform:uppercase;font-size:12px}
+a{color:#86efac;text-decoration:none;font-weight:800}
+h1{font-size:clamp(34px,6vw,62px);line-height:.95;margin:8px 0}
+p{color:#cbd5e1;line-height:1.5}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}
+input{
+  width:100%;padding:14px;border-radius:14px;
+  border:1px solid rgba(148,163,184,.3);
+  background:#020617;color:white;font-size:16px;
+}
+button{
+  width:100%;margin-top:12px;padding:15px;border:0;border-radius:16px;
+  background:linear-gradient(135deg,#22c55e,#38bdf8);
+  color:#020617;font-weight:900;font-size:16px;cursor:pointer;
+}
+.results{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}
+.score{font-size:56px;font-weight:900;margin:8px 0}
+.badge{display:inline-block;padding:8px 12px;border-radius:999px;font-weight:900}
+.buy{background:rgba(34,197,94,.18);color:#86efac}
+.watch{background:rgba(234,179,8,.18);color:#fde68a}
+.avoid{background:rgba(239,68,68,.18);color:#fecaca}
+.stat{display:flex;justify-content:space-between;border-bottom:1px solid rgba(148,163,184,.15);padding:11px 0}
+.stat span{color:#94a3b8}
+.status{font-size:14px;color:#94a3b8;margin-top:10px}
+@media(max-width:800px){.grid,.results{grid-template-columns:1fr}.topbar{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand">WagerVision Markets</div>
+    <a href="/index.html">← Back to MLB Picks</a>
+  </div>
+
+  <section class="hero">
+    <div class="brand">Stock watcher v1</div>
+    <h1>The market sets the price. We find the edge.</h1>
+    <p>Enter a ticker and let the first WagerVision Markets model score the setup. Research only. Not financial advice.</p>
+
+    <div class="grid">
+      <div>
+        <p>FMP API Key</p>
+        <input id="apiKey" placeholder="Paste Financial Modeling Prep API key">
+      </div>
+      <div>
+        <p>Ticker</p>
+        <input id="ticker" value="AAPL" placeholder="AAPL, NVDA, TSLA">
+      </div>
+    </div>
+
+    <button onclick="analyzeStock()">Analyze Stock</button>
+    <div class="status" id="status">Ready.</div>
+  </section>
+
+  <section class="results">
+    <div class="card">
+      <div class="brand" id="company">No stock loaded</div>
+      <h2 id="symbol">Enter a ticker</h2>
+      <div class="score" id="score">--</div>
+      <div class="badge watch" id="signal">Watchlist</div>
+      <p id="read">The model will score price action, valuation, volume, and yearly range.</p>
+    </div>
+
+    <div class="card">
+      <div class="brand">Market Snapshot</div>
+      <div class="stat"><span>Price</span><strong id="price">--</strong></div>
+      <div class="stat"><span>Day Change</span><strong id="change">--</strong></div>
+      <div class="stat"><span>P/E</span><strong id="pe">--</strong></div>
+      <div class="stat"><span>Market Cap</span><strong id="cap">--</strong></div>
+      <div class="stat"><span>Volume</span><strong id="volume">--</strong></div>
+      <div class="stat"><span>52W Range</span><strong id="range">--</strong></div>
+    </div>
+  </section>
+</div>
+
+<script>
+const API_BASE = "https://financialmodelingprep.com/stable";
+
+function el(id){return document.getElementById(id)}
+function setText(id,v){el(id).textContent=v}
+function clamp(n,min,max){return Math.max(min,Math.min(max,n))}
+function money(v){const n=Number(v);return Number.isFinite(n)?"$"+n.toFixed(2):"--"}
+function compact(v){
+  const n=Number(v);
+  if(!Number.isFinite(n))return"--";
+  if(Math.abs(n)>=1e12)return(n/1e12).toFixed(2)+"T";
+  if(Math.abs(n)>=1e9)return(n/1e9).toFixed(2)+"B";
+  if(Math.abs(n)>=1e6)return(n/1e6).toFixed(2)+"M";
+  return n.toLocaleString();
+}
+
+async function fmp(endpoint,key){
+  const sep=endpoint.includes("?")?"&":"?";
+  const url=`${API_BASE}${endpoint}${sep}apikey=${encodeURIComponent(key)}`;
+  const res=await fetch(url);
+  if(!res.ok)throw new Error("FMP request failed");
+  return res.json();
+}
+
+function scoreStock(q){
+  let score=50;
+  const reasons=[];
+
+  const change=Number(q.changePercentage ?? q.changesPercentage ?? 0);
+  const pe=Number(q.pe ?? 0);
+  const price=Number(q.price ?? 0);
+  const high=Number(q.yearHigh ?? 0);
+  const low=Number(q.yearLow ?? 0);
+  const volume=Number(q.volume ?? 0);
+  const avgVolume=Number(q.avgVolume ?? 0);
+
+  if(change>2){score+=8;reasons.push("strong short-term momentum")}
+  else if(change>.5){score+=4;reasons.push("positive price action")}
+  else if(change<-2){score-=8;reasons.push("heavy selling pressure")}
+  else if(change<-.5){score-=4;reasons.push("slight negative pressure")}
+
+  if(pe>0&&pe<18){score+=8;reasons.push("reasonable valuation")}
+  else if(pe>=18&&pe<=35){score+=2;reasons.push("valuation is acceptable")}
+  else if(pe>50){score-=8;reasons.push("expensive valuation")}
+
+  if(price&&high&&low&&high>low){
+    const pos=(price-low)/(high-low);
+    if(pos>.75){score+=6;reasons.push("trading near yearly strength")}
+    else if(pos<.25){score-=6;reasons.push("trading near yearly weakness")}
+  }
+
+  if(volume&&avgVolume&&volume>avgVolume*1.5){
+    score+=4;reasons.push("above-average volume")
+  }
+
+  score=clamp(Math.round(score),1,99);
+
+  let signal="Watchlist", cls="watch";
+  if(score>=70){signal="Buy Signal";cls="buy"}
+  if(score<45){signal="Avoid / Weak";cls="avoid"}
+
+  return{score,signal,cls,reasons};
+}
+
+async function analyzeStock(){
+  const key=el("apiKey").value.trim();
+  const ticker=el("ticker").value.trim().toUpperCase();
+
+  if(!key){setText("status","Paste your FMP API key first.");return}
+  if(!ticker){setText("status","Enter a ticker.");return}
+
+  localStorage.setItem("wvm_fmp_key",key);
+  setText("status",`Analyzing ${ticker}...`);
+
+  try{
+    const data=await fmp(`/quote?symbol=${encodeURIComponent(ticker)}`,key);
+    const q=Array.isArray(data)?data[0]:data;
+
+    if(!q||!q.symbol)throw new Error("No ticker found");
+
+    const model=scoreStock(q);
+
+    setText("company",q.name||q.symbol);
+    setText("symbol",q.symbol);
+    setText("score",model.score+"/100");
+
+    const badge=el("signal");
+    badge.textContent=model.signal;
+    badge.className="badge "+model.cls;
+
+    setText("price",money(q.price));
+    setText("change",Number(q.changePercentage ?? q.changesPercentage ?? 0).toFixed(2)+"%");
+    setText("pe",q.pe?Number(q.pe).toFixed(2):"--");
+    setText("cap",compact(q.marketCap));
+    setText("volume",compact(q.volume));
+    setText("range",money(q.yearLow)+" - "+money(q.yearHigh));
+
+    const reason=model.reasons.length?model.reasons.join(", "):"mixed signals with no obvious edge";
+    setText("read",`${q.symbol} scores ${model.score}/100. The model sees ${reason}. This is the first signal layer, not a final investment call.`);
+
+    setText("status","Analysis complete.");
+  }catch(err){
+    console.error(err);
+    setText("status","Could not analyze ticker. Check API key, ticker, or console.");
+  }
+}
+
+window.addEventListener("DOMContentLoaded",()=>{
+  const saved=localStorage.getItem("wvm_fmp_key");
+  if(saved)el("apiKey").value=saved;
+});
+</script>
+</body>
+</html>
