@@ -2052,6 +2052,15 @@ try {
   const awayWins = Number(awayTeam?.wins || awayTeam?.record?.wins || awayTeam?.leagueRecord?.wins || 0);
   const awayLosses = Number(awayTeam?.losses || awayTeam?.record?.losses || awayTeam?.leagueRecord?.losses || 0);
 
+  console.log("Season record check:", {
+    homeName: homeTeam?.name,
+    awayName: awayTeam?.name,
+    homeWins,
+    homeLosses,
+    awayWins,
+    awayLosses
+  });
+
   const homeGames = homeWins + homeLosses;
   const awayGames = awayWins + awayLosses;
 
