@@ -2097,8 +2097,8 @@ try {
     const homeWinPct = homeWins / homeGames;
     const awayWinPct = awayWins / awayGames;
 
-    let recordEdge = (homeWinPct - awayWinPct) * 14;
-    recordEdge = clamp(recordEdge, -4, 4);
+    let recordEdge = (homeWinPct - awayWinPct) * 26;
+    recordEdge = clamp(recordEdge, -7, 7);
 
     homeScore += recordEdge;
 
