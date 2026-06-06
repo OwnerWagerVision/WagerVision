@@ -2039,7 +2039,45 @@ async function getTeamStats(teamId,season){
     fetchJSON(`https://statsapi.mlb.com/api/v1/teams/${teamId}/stats?stats=season&group=hitting&season=${season}`),
     fetchJSON(`https://statsapi.mlb.com/api/v1/teams/${teamId}/stats?stats=season&group=pitching&season=${season}`)
   ]);
-  return {
+  
+// ------------------------------
+// WAGERVISION TEAM STRENGTH ANCHOR
+// Season record reality check.
+// Adds to current weighting system. Does not replace it.
+// ------------------------------
+try {
+  const homeWins = Number(homeTeam?.wins || homeTeam?.record?.wins || homeTeam?.leagueRecord?.wins || 0);
+  const homeLosses = Number(homeTeam?.losses || homeTeam?.record?.losses || homeTeam?.leagueRecord?.losses || 0);
+
+  const awayWins = Number(awayTeam?.wins || awayTeam?.record?.wins || awayTeam?.leagueRecord?.wins || 0);
+  const awayLosses = Number(awayTeam?.losses || awayTeam?.record?.losses || awayTeam?.leagueRecord?.losses || 0);
+
+  const homeGames = homeWins + homeLosses;
+  const awayGames = awayWins + awayLosses;
+
+  if (homeGames > 0 && awayGames > 0) {
+    const homeWinPct = homeWins / homeGames;
+    const awayWinPct = awayWins / awayGames;
+
+    let recordEdge = (homeWinPct - awayWinPct) * 14;
+    recordEdge = clamp(recordEdge, -4, 4);
+
+    homeScore += recordEdge;
+
+    if (typeof reasons !== "undefined") {
+      reasons.push(
+        recordEdge > 0
+          ? `Season record gives home a ${recordEdge.toFixed(1)} point reality-check boost.`
+          : `Season record gives away a ${Math.abs(recordEdge).toFixed(1)} point reality-check boost.`
+      );
+    }
+  }
+} catch (err) {
+  console.warn("Team Strength Anchor skipped:", err);
+}
+
+
+return {
     avg:Number(statValue(hitting,"avg")) || 0.250,
     ops:Number(statValue(hitting,"ops")) || 0.700,
     era:Number(statValue(pitching,"era")) || 4.20,
