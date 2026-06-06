@@ -1450,9 +1450,80 @@ body:not(.chat-active) #chat {
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="/icon-192.png">
 
+
+<style id="wv-platform-menu-style">
+.wv-platform-menu {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 99999;
+  font-family: Arial, sans-serif;
+}
+
+.wv-menu-btn {
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(15, 23, 42, 0.92);
+  color: #f8fafc;
+  border-radius: 999px;
+  padding: 10px 14px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.wv-menu-panel {
+  display: none;
+  position: absolute;
+  top: 46px;
+  right: 0;
+  min-width: 210px;
+  background: rgba(2, 6, 23, 0.96);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 18px;
+  padding: 8px;
+}
+
+.wv-platform-menu.open .wv-menu-panel {
+  display: block;
+}
+
+.wv-menu-panel a,
+.wv-menu-panel button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  color: #e2e8f0;
+  text-decoration: none;
+  background: transparent;
+  border: 0;
+  border-radius: 12px;
+  padding: 11px 12px;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.wv-menu-panel a:hover,
+.wv-menu-panel button:hover {
+  background: rgba(34, 197, 94, 0.14);
+  color: #86efac;
+}
+</style>
+
 </head>
 
 <body class="landing-mode">
+
+<div class="wv-platform-menu" id="wvPlatformMenu">
+  <button class="wv-menu-btn" type="button" onclick="toggleWvMenu()">☰ WagerVision</button>
+  <div class="wv-menu-panel">
+    <a href="/index.html">⚾ MLB Picks</a>
+    <a href="/markets.html">📈 Markets</a>
+    <button type="button" onclick="showTab && showTab('board')">🔥 Edge Board</button>
+    <button type="button" onclick="showTab && showTab('slip')">🧾 Bet Slip</button>
+    <button type="button" onclick="showTab && showTab('settings')">⚙ Settings</button>
+  </div>
+</div>
+
 
 <!-- Duplicate global sign-in button removed. Main account button is #signInBtn. -->
 
@@ -4671,6 +4742,20 @@ if ("serviceWorker" in navigator) {
       .catch(function(error){ console.warn("Service worker failed:", error); });
   });
 }
+</script>
+
+
+<script id="wv-platform-menu-script">
+function toggleWvMenu() {
+  const menu = document.getElementById("wvPlatformMenu");
+  if (menu) menu.classList.toggle("open");
+}
+
+document.addEventListener("click", function(e) {
+  const menu = document.getElementById("wvPlatformMenu");
+  if (!menu) return;
+  if (!menu.contains(e.target)) menu.classList.remove("open");
+});
 </script>
 
 </body>
