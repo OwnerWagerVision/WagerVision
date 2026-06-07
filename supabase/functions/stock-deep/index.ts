@@ -36,15 +36,24 @@ Deno.serve(async (req) => {
       return await res.json();
     }
 
-    const [profile, ratios, news] = await Promise.all([
-      fmp(`/profile?symbol=${encodeURIComponent(ticker)}`),
-      fmp(`/ratios?symbol=${encodeURIComponent(ticker)}&limit=1`),
-      fmp(`/news/stock?symbols=${encodeURIComponent(ticker)}&limit=5`),	
-    ]);
+const [profile, ratios, stockNews, pressReleases, generalNews] = await Promise.all([
+  fmp(`/profile?symbol=${encodeURIComponent(ticker)}`),
+  fmp(`/ratios?symbol=${encodeURIComponent(ticker)}&limit=1`),
+  fmp(`/news/stock?symbols=${encodeURIComponent(ticker)}&limit=5`),
+  fmp(`/news/press-releases?symbols=${encodeURIComponent(ticker)}&limit=5`),
+  fmp(`/news/general-latest?page=0&limit=5`),
+]);
 
-    return new Response(JSON.stringify({ profile, ratios, news }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+const news =
+  Array.isArray(stockNews) && stockNews.length ? stockNews :
+  Array.isArray(pressReleases) && pressReleases.length ? pressReleases :
+  Array.isArray(generalNews) && generalNews.length ? generalNews :
+  [];
+
+return new Response(JSON.stringify({ profile, ratios, news }), {
+  headers: { ...corsHeaders, "Content-Type": "application/json" },
+});
+
 
   } catch (err) {
     return new Response(JSON.stringify({ error: err.message || "Deep analysis failed" }), {
