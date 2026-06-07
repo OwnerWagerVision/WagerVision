@@ -268,6 +268,7 @@ button[onclick="runDeepAnalysis()"]{
 <script>
 const API_BASE = "https://financialmodelingprep.com/stable";
 const STOCK_QUOTE_URL = "https://zejuncnaujnofzzreaoo.supabase.co/functions/v1/stock-quote";
+const STOCK_DEEP_URL = "https://zejuncnaujnofzzreaoo.supabase.co/functions/v1/stock-deep";
 
 async function stockQuote(ticker){
   const url = `${STOCK_QUOTE_URL}?ticker=${encodeURIComponent(ticker)}`;
@@ -474,7 +475,6 @@ async function analyzeStock(){
   }
 }
 async function runDeepAnalysis(){
-  const key = el("apiKey").value.trim();
   const ticker = el("ticker").value.trim().toUpperCase();
 
   if(!ticker){
@@ -498,14 +498,17 @@ async function runDeepAnalysis(){
   setText("status","Running deep analysis for " + ticker + "...");
 
   try{
-    const profileData = await fmp(`/profile?symbol=${ticker}`, key).catch(()=>[]);
-    const ratiosData = await fmp(`/ratios?symbol=${ticker}&limit=1`, key).catch(()=>[]);
-    const newsData = await fmp(`/stock-news?symbols=${ticker}&limit=5`, key).catch(()=>[]);
+    const res = await fetch(`${STOCK_DEEP_URL}?ticker=${encodeURIComponent(ticker)}`);
+    const deep = await res.json();
+
+    if(!res.ok){
+      throw new Error(deep.error || "Deep analysis failed");
+    }
 
     const data = {
-      profile: firstRow(profileData) || {},
-      ratios: firstRow(ratiosData) || {},
-      news: Array.isArray(newsData) ? newsData : []
+      profile: firstRow(deep.profile) || {},
+      ratios: firstRow(deep.ratios) || {},
+      news: Array.isArray(deep.news) ? deep.news : []
     };
 
     localStorage.setItem(cacheKey, JSON.stringify({time: now, data}));
