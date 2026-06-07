@@ -72,6 +72,9 @@ button{
     </div>
 
     <button onclick="analyzeStock()">Analyze Stock</button>
+<button onclick="runDeepAnalysis()" style="margin-top:8px;background:linear-gradient(135deg,#38bdf8,#a78bfa);">
+  Run Deep Analysis
+</button>
     <div class="status" id="status">Ready.</div>
   </section>
 
@@ -311,6 +314,100 @@ async function analyzeStock(){
     console.error(err);
     setText("status","Error: "+(err.message||err));
   }
+}
+async function runDeepAnalysis(){
+  const key = el("apiKey").value.trim();
+  const ticker = el("ticker").value.trim().toUpperCase();
+
+  if(!key){
+    setText("status","Paste your FMP API key first.");
+    return;
+  }
+
+  if(!ticker){
+    setText("status","Enter a ticker.");
+    return;
+  }
+
+  const cacheKey = "wvm_deep_" + ticker;
+  const cached = localStorage.getItem(cacheKey);
+  const now = Date.now();
+  const oneDay = 24 * 60 * 60 * 1000;
+
+  if(cached){
+    const saved = JSON.parse(cached);
+    if(saved.time && now - saved.time < oneDay){
+      applyDeepData(saved.data, true);
+      return;
+    }
+  }
+
+  setText("status","Running deep analysis for " + ticker + "...");
+
+  try{
+    const profileData = await fmp(`/profile?symbol=${ticker}`, key).catch(()=>[]);
+    const ratiosData = await fmp(`/ratios?symbol=${ticker}&limit=1`, key).catch(()=>[]);
+    const newsData = await fmp(`/stock-news?symbols=${ticker}&limit=5`, key).catch(()=>[]);
+
+    const data = {
+      profile: firstRow(profileData) || {},
+      ratios: firstRow(ratiosData) || {},
+      news: Array.isArray(newsData) ? newsData : []
+    };
+
+    localStorage.setItem(cacheKey, JSON.stringify({time: now, data}));
+    applyDeepData(data, false);
+
+  }catch(err){
+    console.error(err);
+    setText("status","Deep analysis error: " + (err.message || err));
+  }
+}
+
+function applyDeepData(data, fromCache){
+  const profile = data.profile || {};
+  const ratios = data.ratios || {};
+  const news = data.news || [];
+
+  if(el("sector")) setText("sector", profile.sector || "--");
+  if(el("beta")) setText("beta", profile.beta ? Number(profile.beta).toFixed(2) : "--");
+
+  let risk = 65;
+  const beta = Number(profile.beta || 0);
+  const debt = Number(ratios.debtEquityRatio || 0);
+
+  if(beta > 1.6) risk -= 20;
+  else if(beta > 1.2) risk -= 10;
+  else if(beta > 0 && beta < 1) risk += 8;
+
+  if(debt > 2) risk -= 18;
+  else if(debt > 1) risk -= 8;
+
+  risk = clamp(Math.round(risk),1,99);
+
+  let sentiment = 50;
+  const text = news.map(n => (n.title || "").toLowerCase()).join(" ");
+
+  ["beats","growth","upgrade","profit","partnership","approval"].forEach(w=>{
+    if(text.includes(w)) sentiment += 5;
+  });
+
+  ["misses","lawsuit","downgrade","loss","warning","layoffs"].forEach(w=>{
+    if(text.includes(w)) sentiment -= 5;
+  });
+
+  sentiment = clamp(Math.round(sentiment),1,99);
+
+  if(el("growthScore")) setText("growthScore","Deep loaded");
+  if(el("riskScore")) setText("riskScore",risk + "/100");
+  if(el("sentimentScore")) setText("sentimentScore",sentiment + "/100");
+
+  if(el("newsBox")){
+    const headlines = news.slice(0,5).map(n => "• " + (n.title || "Untitled")).join("<br>");
+    el("newsBox").innerHTML = headlines || "No recent news returned.";
+  }
+
+  setText("status", fromCache ? "Deep analysis loaded from cache." : "Deep analysis complete and cached.");
 }
 window.addEventListener("DOMContentLoaded",()=>{
   const saved=localStorage.getItem("wvm_fmp_key");
