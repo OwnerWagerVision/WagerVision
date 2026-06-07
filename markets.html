@@ -252,34 +252,30 @@ async function analyzeStock(){
   const key=el("apiKey").value.trim();
   const ticker=el("ticker").value.trim().toUpperCase();
 
-  if(!key){setText("status","Paste your FMP API key first.");return}
-  if(!ticker){setText("status","Enter a ticker.");return}
+  if(!key){
+    setText("status","Paste your FMP API key first.");
+    return;
+  }
+
+  if(!ticker){
+    setText("status","Enter a ticker.");
+    return;
+  }
 
   localStorage.setItem("wvm_fmp_key",key);
-  setText("status",`Analyzing ${ticker}...`);
+  setText("status",`Analyzing ${ticker} with quote-only mode...`);
 
   try{
-    const [quoteData, profileData, metricsData, ratiosData, changesData, newsData] = await Promise.all([
-      fmp(`/quote?symbol=${encodeURIComponent(ticker)}`,key),
-      fmp(`/profile?symbol=${encodeURIComponent(ticker)}`,key).catch(()=>[]),
-      fmp(`/key-metrics?symbol=${encodeURIComponent(ticker)}&limit=1`,key).catch(()=>[]),
-      fmp(`/ratios?symbol=${encodeURIComponent(ticker)}&limit=1`,key).catch(()=>[]),
-      fmp(`/stock-price-change?symbol=${encodeURIComponent(ticker)}`,key).catch(()=>[]),
-      fmp(`/stock-news?symbols=${encodeURIComponent(ticker)}&limit=5`,key).catch(()=>[])
-    ]);
+    const quoteData = await fmp(`/quote?symbol=${encodeURIComponent(ticker)}`,key);
+    const q = firstRow(quoteData);
 
-    const q=firstRow(quoteData);
-    const profile=firstRow(profileData)||{};
-    const metrics=firstRow(metricsData)||{};
-    const ratios=firstRow(ratiosData)||{};
-    const changes=firstRow(changesData)||{};
-    const news=Array.isArray(newsData)?newsData:[];
+    if(!q || !q.symbol){
+      throw new Error("No ticker found");
+    }
 
-    if(!q||!q.symbol)throw new Error("No ticker found");
+    const model = scoreStock(q,{},{},{},{},[]);
 
-    const model=scoreStock(q,profile,metrics,ratios,changes,news);
-
-    setText("company",profile.companyName||q.name||q.symbol);
+    setText("company",q.name||q.symbol);
     setText("symbol",q.symbol);
     setText("score",model.score+"/100");
 
@@ -293,29 +289,29 @@ async function analyzeStock(){
     setText("cap",compact(q.marketCap));
     setText("volume",compact(q.volume));
     setText("range",money(q.yearLow)+" - "+money(q.yearHigh));
-    setText("sector",profile.sector||"--");
-    setText("beta",profile.beta?Number(profile.beta).toFixed(2):"--");
 
-    setText("momentumScore",model.momentum+"/100");
-    setText("valueScore",model.value+"/100");
-    setText("growthScore",model.growth+"/100");
-    setText("riskScore",model.risk+"/100");
-    setText("sentimentScore",model.sentiment+"/100");
+    if(el("sector")) setText("sector","Deep only");
+    if(el("beta")) setText("beta","--");
 
-    const headlines=news.slice(0,4).map(n=>"• "+(n.title||"Untitled")).join("<br>");
-    el("newsBox").innerHTML=headlines || "No recent news returned by the data source.";
+    if(el("momentumScore")) setText("momentumScore",model.momentum+"/100");
+    if(el("valueScore")) setText("valueScore",model.value+"/100");
+    if(el("growthScore")) setText("growthScore","Deep only");
+    if(el("riskScore")) setText("riskScore","Deep only");
+    if(el("sentimentScore")) setText("sentimentScore","Deep only");
 
-    const reason=model.reasons.length?model.reasons.join(", "):"mixed signals with no obvious edge";
-    setText("read",`${q.symbol} scores ${model.score}/100. The model sees ${reason}. This combines price action, valuation, growth, risk, and basic news sentiment.`);
+    if(el("newsBox")){
+      el("newsBox").innerHTML="News is disabled in quote-only mode to save API calls. We’ll add Deep Analysis next.";
+    }
 
-    setText("status","Analysis complete.");
+    const reason=model.reasons.length?model.reasons.join(", "):"mixed quote-based signals";
+    setText("read",`${q.symbol} scores ${model.score}/100. Quote-only mode sees ${reason}.`);
+
+    setText("status","Analysis complete. Quote-only mode used about 1 API call.");
   }catch(err){
     console.error(err);
-    setText("status","Could not analyze ticker. Check API key, ticker, or console.");
+    setText("status","Error: "+(err.message||err));
   }
 }
-
-
 window.addEventListener("DOMContentLoaded",()=>{
   const saved=localStorage.getItem("wvm_fmp_key");
   if(saved)el("apiKey").value=saved;
