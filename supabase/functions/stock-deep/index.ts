@@ -3,6 +3,41 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+
+async function yahooNewsFallback(ticker: string) {
+  try {
+    const rssUrl = `https://feeds.finance.yahoo.com/rss/2.0/headline?s=${encodeURIComponent(ticker)}&region=US&lang=en-US`;
+    const rssRes = await fetch(rssUrl);
+    const rssText = await rssRes.text();
+
+    const items = [...rssText.matchAll(/<item>([\s\S]*?)<\/item>/g)].slice(0, 5);
+
+    return items.map((match) => {
+      const item = match[1];
+
+      const title =
+        (item.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/) ||
+         item.match(/<title>(.*?)<\/title>/) ||
+         [])[1] || "Market headline";
+
+      const link =
+        (item.match(/<link>(.*?)<\/link>/) || [])[1] || "";
+
+      const pubDate =
+        (item.match(/<pubDate>(.*?)<\/pubDate>/) || [])[1] || "";
+
+      return {
+        title,
+        url: link,
+        publishedDate: pubDate,
+        source: "Yahoo Finance"
+      };
+    });
+  } catch (_err) {
+    return [];
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -44,11 +79,15 @@ const [profile, ratios, stockNews, pressReleases, generalNews] = await Promise.a
   fmp(`/news/general-latest?page=0&limit=5`),
 ]);
 
-const news =
+let news =
   Array.isArray(stockNews) && stockNews.length ? stockNews :
   Array.isArray(pressReleases) && pressReleases.length ? pressReleases :
   Array.isArray(generalNews) && generalNews.length ? generalNews :
   [];
+
+if (!news.length) {
+  news = await yahooNewsFallback(ticker);
+}
 
 return new Response(JSON.stringify({ profile, ratios, news }), {
   headers: { ...corsHeaders, "Content-Type": "application/json" },
