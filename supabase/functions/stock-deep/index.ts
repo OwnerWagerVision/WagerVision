@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
     const [profile, ratios, news] = await Promise.all([
       fmp(`/profile?symbol=${encodeURIComponent(ticker)}`),
       fmp(`/ratios?symbol=${encodeURIComponent(ticker)}&limit=1`),
-      fmp(`/stock-news?symbols=${encodeURIComponent(ticker)}&limit=5`),
+      fmp(`/news/stock?symbols=${encodeURIComponent(ticker)}&limit=5`),	
     ]);
 
     return new Response(JSON.stringify({ profile, ratios, news }), {
