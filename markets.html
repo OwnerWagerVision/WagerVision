@@ -92,6 +92,24 @@ button{
       <div class="stat"><span>Market Cap</span><strong id="cap">--</strong></div>
       <div class="stat"><span>Volume</span><strong id="volume">--</strong></div>
       <div class="stat"><span>52W Range</span><strong id="range">--</strong></div>
+      <div class="stat"><span>Sector</span><strong id="sector">--</strong></div>
+      <div class="stat"><span>Beta</span><strong id="beta">--</strong></div>
+    </div>
+  </section>
+
+  <section class="results">
+    <div class="card">
+      <div class="brand">Model Breakdown</div>
+      <div class="stat"><span>Momentum</span><strong id="momentumScore">--</strong></div>
+      <div class="stat"><span>Value</span><strong id="valueScore">--</strong></div>
+      <div class="stat"><span>Growth</span><strong id="growthScore">--</strong></div>
+      <div class="stat"><span>Risk</span><strong id="riskScore">--</strong></div>
+      <div class="stat"><span>Sentiment</span><strong id="sentimentScore">--</strong></div>
+    </div>
+
+    <div class="card">
+      <div class="brand">Recent Market News</div>
+      <p id="newsBox">No news loaded yet.</p>
     </div>
   </section>
 </div>
@@ -120,45 +138,115 @@ async function fmp(endpoint,key){
   return res.json();
 }
 
-function scoreStock(q){
-  let score=50;
+function firstRow(data){
+  return Array.isArray(data) ? data[0] : data;
+}
+
+function pct(v){
+  const n=Number(v);
+  return Number.isFinite(n)?n.toFixed(2)+"%":"--";
+}
+
+function safeNum(v, fallback=0){
+  const n=Number(v);
+  return Number.isFinite(n)?n:fallback;
+}
+
+function scoreBucket(value){
+  return clamp(Math.round(value),1,99);
+}
+
+function scoreStock(q, profile={}, metrics={}, ratios={}, changes={}, news=[]){
   const reasons=[];
-
   const change=Number(q.changePercentage ?? q.changesPercentage ?? 0);
-  const pe=Number(q.pe ?? 0);
-  const price=Number(q.price ?? 0);
-  const high=Number(q.yearHigh ?? 0);
-  const low=Number(q.yearLow ?? 0);
-  const volume=Number(q.volume ?? 0);
-  const avgVolume=Number(q.avgVolume ?? 0);
+  const pe=safeNum(q.pe);
+  const price=safeNum(q.price);
+  const high=safeNum(q.yearHigh);
+  const low=safeNum(q.yearLow);
+  const volume=safeNum(q.volume);
+  const avgVolume=safeNum(q.avgVolume);
+  const beta=safeNum(profile.beta);
 
-  if(change>2){score+=8;reasons.push("strong short-term momentum")}
-  else if(change>.5){score+=4;reasons.push("positive price action")}
-  else if(change<-2){score-=8;reasons.push("heavy selling pressure")}
-  else if(change<-.5){score-=4;reasons.push("slight negative pressure")}
+  const revenueGrowth=safeNum(metrics.revenuePerShareGrowth ?? metrics.revenueGrowth);
+  const roe=safeNum(metrics.roe);
+  const debtToEquity=safeNum(ratios.debtEquityRatio);
+  const netMargin=safeNum(ratios.netProfitMargin);
 
-  if(pe>0&&pe<18){score+=8;reasons.push("reasonable valuation")}
-  else if(pe>=18&&pe<=35){score+=2;reasons.push("valuation is acceptable")}
-  else if(pe>50){score-=8;reasons.push("expensive valuation")}
+  let momentum=50;
+  if(change>2) momentum+=22;
+  else if(change>.5) momentum+=12;
+  else if(change< -2) momentum-=22;
+  else if(change< -.5) momentum-=12;
 
   if(price&&high&&low&&high>low){
     const pos=(price-low)/(high-low);
-    if(pos>.75){score+=6;reasons.push("trading near yearly strength")}
-    else if(pos<.25){score-=6;reasons.push("trading near yearly weakness")}
+    if(pos>.75) momentum+=14;
+    else if(pos<.25) momentum-=14;
   }
 
-  if(volume&&avgVolume&&volume>avgVolume*1.5){
-    score+=4;reasons.push("above-average volume")
-  }
+  if(volume&&avgVolume&&volume>avgVolume*1.5) momentum+=8;
+  momentum=scoreBucket(momentum);
 
-  score=clamp(Math.round(score),1,99);
+  let value=50;
+  if(pe>0&&pe<18) value+=24;
+  else if(pe>=18&&pe<=35) value+=8;
+  else if(pe>50) value-=24;
+  else if(pe<=0) value-=8;
+  value=scoreBucket(value);
+
+  let growth=50;
+  if(revenueGrowth>.15) growth+=22;
+  else if(revenueGrowth>.05) growth+=12;
+  else if(revenueGrowth<0) growth-=18;
+
+  if(roe>.20) growth+=12;
+  else if(roe>.10) growth+=6;
+
+  if(netMargin>.20) growth+=10;
+  else if(netMargin<0) growth-=16;
+
+  growth=scoreBucket(growth);
+
+  let risk=65;
+  if(beta>1.6) risk-=20;
+  else if(beta>1.2) risk-=10;
+  else if(beta>0&&beta<1) risk+=8;
+
+  if(debtToEquity>2) risk-=18;
+  else if(debtToEquity>1) risk-=8;
+
+  risk=scoreBucket(risk);
+
+  let sentiment=50;
+  const newsText=news.map(n=>(n.title||"").toLowerCase()).join(" ");
+  const goodWords=["beats","surges","growth","upgrade","record","profit","partnership","approval","raises"];
+  const badWords=["misses","falls","lawsuit","downgrade","cut","probe","loss","warning","layoffs"];
+  goodWords.forEach(w=>{if(newsText.includes(w))sentiment+=5});
+  badWords.forEach(w=>{if(newsText.includes(w))sentiment-=5});
+  sentiment=scoreBucket(sentiment);
+
+  const score=Math.round(
+    momentum*.25+
+    value*.20+
+    growth*.22+
+    risk*.18+
+    sentiment*.15
+  );
+
+  if(momentum>=65) reasons.push("positive momentum");
+  if(value>=65) reasons.push("reasonable valuation");
+  if(growth>=65) reasons.push("strong growth or profitability signals");
+  if(risk<45) reasons.push("elevated risk");
+  if(sentiment>=60) reasons.push("positive news tone");
+  if(sentiment<45) reasons.push("negative news tone");
 
   let signal="Watchlist", cls="watch";
-  if(score>=70){signal="Buy Signal";cls="buy"}
-  if(score<45){signal="Avoid / Weak";cls="avoid"}
+  if(score>=72){signal="Buy Signal";cls="buy"}
+  else if(score<45){signal="Avoid / Weak";cls="avoid"}
 
-  return{score,signal,cls,reasons};
+  return{score,signal,cls,reasons,momentum,value,growth,risk,sentiment};
 }
+
 
 async function analyzeStock(){
   const key=el("apiKey").value.trim();
@@ -171,14 +259,27 @@ async function analyzeStock(){
   setText("status",`Analyzing ${ticker}...`);
 
   try{
-    const data=await fmp(`/quote?symbol=${encodeURIComponent(ticker)}`,key);
-    const q=Array.isArray(data)?data[0]:data;
+    const [quoteData, profileData, metricsData, ratiosData, changesData, newsData] = await Promise.all([
+      fmp(`/quote?symbol=${encodeURIComponent(ticker)}`,key),
+      fmp(`/profile?symbol=${encodeURIComponent(ticker)}`,key).catch(()=>[]),
+      fmp(`/key-metrics?symbol=${encodeURIComponent(ticker)}&limit=1`,key).catch(()=>[]),
+      fmp(`/ratios?symbol=${encodeURIComponent(ticker)}&limit=1`,key).catch(()=>[]),
+      fmp(`/stock-price-change?symbol=${encodeURIComponent(ticker)}`,key).catch(()=>[]),
+      fmp(`/stock-news?symbols=${encodeURIComponent(ticker)}&limit=5`,key).catch(()=>[])
+    ]);
+
+    const q=firstRow(quoteData);
+    const profile=firstRow(profileData)||{};
+    const metrics=firstRow(metricsData)||{};
+    const ratios=firstRow(ratiosData)||{};
+    const changes=firstRow(changesData)||{};
+    const news=Array.isArray(newsData)?newsData:[];
 
     if(!q||!q.symbol)throw new Error("No ticker found");
 
-    const model=scoreStock(q);
+    const model=scoreStock(q,profile,metrics,ratios,changes,news);
 
-    setText("company",q.name||q.symbol);
+    setText("company",profile.companyName||q.name||q.symbol);
     setText("symbol",q.symbol);
     setText("score",model.score+"/100");
 
@@ -192,9 +293,20 @@ async function analyzeStock(){
     setText("cap",compact(q.marketCap));
     setText("volume",compact(q.volume));
     setText("range",money(q.yearLow)+" - "+money(q.yearHigh));
+    setText("sector",profile.sector||"--");
+    setText("beta",profile.beta?Number(profile.beta).toFixed(2):"--");
+
+    setText("momentumScore",model.momentum+"/100");
+    setText("valueScore",model.value+"/100");
+    setText("growthScore",model.growth+"/100");
+    setText("riskScore",model.risk+"/100");
+    setText("sentimentScore",model.sentiment+"/100");
+
+    const headlines=news.slice(0,4).map(n=>"• "+(n.title||"Untitled")).join("<br>");
+    el("newsBox").innerHTML=headlines || "No recent news returned by the data source.";
 
     const reason=model.reasons.length?model.reasons.join(", "):"mixed signals with no obvious edge";
-    setText("read",`${q.symbol} scores ${model.score}/100. The model sees ${reason}. This is the first signal layer, not a final investment call.`);
+    setText("read",`${q.symbol} scores ${model.score}/100. The model sees ${reason}. This combines price action, valuation, growth, risk, and basic news sentiment.`);
 
     setText("status","Analysis complete.");
   }catch(err){
@@ -202,6 +314,7 @@ async function analyzeStock(){
     setText("status","Could not analyze ticker. Check API key, ticker, or console.");
   }
 }
+
 
 window.addEventListener("DOMContentLoaded",()=>{
   const saved=localStorage.getItem("wvm_fmp_key");
