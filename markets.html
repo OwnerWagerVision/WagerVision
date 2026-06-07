@@ -210,12 +210,12 @@ button[onclick="runDeepAnalysis()"]{
 
     <div class="grid">
       <div>
-        <p>FMP API Key</p>
-        <input id="apiKey" placeholder="Paste Financial Modeling Prep API key">
+        <p>Ticker Symbol</p>
+        <input id="ticker" value="AAPL" placeholder="AAPL, NVDA, TSLA">
       </div>
       <div>
-        <p>Ticker</p>
-        <input id="ticker" value="AAPL" placeholder="AAPL, NVDA, TSLA">
+        <p>Secure Data Feed</p>
+        <input value="Connected through WagerVision" disabled>
       </div>
     </div>
 
@@ -267,6 +267,23 @@ button[onclick="runDeepAnalysis()"]{
 
 <script>
 const API_BASE = "https://financialmodelingprep.com/stable";
+const STOCK_QUOTE_URL = "https://zejuncnaujnofzzreaoo.supabase.co/functions/v1/stock-quote";
+
+async function stockQuote(ticker){
+  const url = `${STOCK_QUOTE_URL}?ticker=${encodeURIComponent(ticker)}`;
+  const res = await fetch(url);
+  const body = await res.text();
+
+  if(!res.ok){
+    throw new Error(`Stock quote failed ${res.status}: ${body.slice(0,160)}`);
+  }
+
+  try{
+    return JSON.parse(body);
+  }catch(err){
+    throw new Error("Stock quote returned bad JSON");
+  }
+}
 
 function el(id){return document.getElementById(id)}
 function setText(id,v){el(id).textContent=v}
@@ -400,24 +417,17 @@ function scoreStock(q, profile={}, metrics={}, ratios={}, changes={}, news=[]){
 
 
 async function analyzeStock(){
-  const key=el("apiKey").value.trim();
   const ticker=el("ticker").value.trim().toUpperCase();
-
-  if(!key){
-    setText("status","Paste your FMP API key first.");
-    return;
-  }
 
   if(!ticker){
     setText("status","Enter a ticker.");
     return;
   }
 
-  localStorage.setItem("wvm_fmp_key",key);
-  setText("status",`Analyzing ${ticker} with quote-only mode...`);
+  setText("status",`Analyzing ${ticker} with secure stock feed...`);
 
   try{
-    const quoteData = await fmp(`/quote?symbol=${encodeURIComponent(ticker)}`,key);
+    const quoteData = await stockQuote(ticker);
     const q = firstRow(quoteData);
 
     if(!q || !q.symbol){
@@ -457,7 +467,7 @@ async function analyzeStock(){
     const reason=model.reasons.length?model.reasons.join(", "):"mixed quote-based signals";
     setText("read",`${q.symbol} scores ${model.score}/100. Quote-only mode sees ${reason}.`);
 
-    setText("status","Analysis complete. Quote-only mode used about 1 API call.");
+    setText("status","Analysis complete. Secure stock feed used.");
   }catch(err){
     console.error(err);
     setText("status","Error: "+(err.message||err));
@@ -466,11 +476,6 @@ async function analyzeStock(){
 async function runDeepAnalysis(){
   const key = el("apiKey").value.trim();
   const ticker = el("ticker").value.trim().toUpperCase();
-
-  if(!key){
-    setText("status","Paste your FMP API key first.");
-    return;
-  }
 
   if(!ticker){
     setText("status","Enter a ticker.");
@@ -557,10 +562,7 @@ function applyDeepData(data, fromCache){
 
   setText("status", fromCache ? "Deep analysis loaded from cache." : "Deep analysis complete and cached.");
 }
-window.addEventListener("DOMContentLoaded",()=>{
-  const saved=localStorage.getItem("wvm_fmp_key");
-  if(saved)el("apiKey").value=saved;
-});
+window.addEventListener("DOMContentLoaded",()=>{});
 </script>
 </body>
 </html>
