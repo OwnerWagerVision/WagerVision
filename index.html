@@ -2674,6 +2674,10 @@ function convertSharpToGames(data){
   {
     key: "h2h",
     outcomes: []
+  },
+  {
+    key: "totals",
+    outcomes: []
   }
 ]
       };
@@ -2686,10 +2690,26 @@ function convertSharpToGames(data){
           ? item.away_team
           : item.selection;
 
-    gamesMap[key].bookmakers[book].markets[0].outcomes.push({
-      name: outcomeName,
-      price: Number(item.odds_american)
-    });
+    const h2hMarket = gamesMap[key].bookmakers[book].markets.find(m => m.key === "h2h");
+
+    if (item.selection_type === "home" || item.selection_type === "away") {
+      h2hMarket.outcomes.push({
+        name: outcomeName,
+        price: Number(item.odds_american)
+      });
+    }
+
+    if (String(item.selection_type || item.selection || "").toLowerCase().includes("over") || String(item.selection_type || item.selection || "").toLowerCase().includes("under")) {
+      console.log("TOTALS ITEM FOUND:", item);
+      const totalsMarket = gamesMap[key].bookmakers[book].markets.find(m => m.key === "totals");
+      const totalName = String(item.selection_type || item.selection || "").toLowerCase().includes("under") ? "Under" : "Over";
+
+      totalsMarket.outcomes.push({
+        name: totalName,
+        price: Number(item.odds_american),
+        point: Number(item.handicap ?? item.line ?? item.total ?? item.points)
+      });
+    }
   });
 
   return Object.values(gamesMap).map(game => ({
