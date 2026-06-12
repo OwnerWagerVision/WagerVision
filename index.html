@@ -4778,5 +4778,14 @@ document.addEventListener("click", function(e) {
 });
 </script>
 
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const d = document.querySelector('input[type="date"]');
+  if (!d || !d.showPicker) return;
+  d.addEventListener("click", () => d.showPicker());
+});
+</script>
+
 </body>
 </html>
