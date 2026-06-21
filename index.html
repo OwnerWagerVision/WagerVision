@@ -1547,6 +1547,7 @@ body:not(.chat-active) #chat {
     <a href="/markets.html">📈 Markets</a>
     <button type="button" onclick="showTab && showTab('board')">🔥 Edge Board</button>
     <button type="button" onclick="showTab && showTab('slip')">🧾 Bet Slip</button>
+    <button type="button" onclick="showTab && showTab('results')">📊 Results</button>
     <button type="button" onclick="showTab && showTab('settings')">⚙ Settings</button>
   </div>
 </div>
@@ -1656,6 +1657,7 @@ body:not(.chat-active) #chat {
     <button class="tab active" onclick="showTab('game',this)" type="button">Game</button>
     <button class="tab" onclick="showTab('board',this)" type="button">Edges</button>
     <button class="tab" onclick="showTab('slip',this)" type="button">Bet Slip</button>
+    <button class="tab" onclick="showTab('results',this)" type="button">Results</button>
     <button class="tab" onclick="showTab('chat',this)" type="button">Chat Room</button>
     <button class="tab" onclick="showTab('settings',this)" type="button">Settings</button>
   </div>
@@ -1880,6 +1882,79 @@ body:not(.chat-active) #chat {
   </section>
 
    
+
+<section id="results" class="section">
+  <div class="summary-strip">
+    <div class="summary-card">
+      <span>Record</span>
+      <strong id="resultsRecord">0-0</strong>
+    </div>
+
+    <div class="summary-card">
+      <span>Win Rate</span>
+      <strong id="resultsWinRate">0.0%</strong>
+    </div>
+
+    <div class="summary-card">
+      <span>Profit</span>
+      <strong id="resultsUnits">0.00u</strong>
+    </div>
+
+    <div class="summary-card">
+      <span>Underdogs</span>
+      <strong id="resultsDogRecord">0-0</strong>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="board-header">
+      <div>
+        <h2>WagerVision Results</h2>
+        <div class="small">
+          Every tracked prediction, every result, and every unit. No selective memory.
+        </div>
+      </div>
+
+      <button type="button" onclick="renderResults()">Refresh Results</button>
+    </div>
+
+    <div class="status" id="resultsStatus">
+      Results are calculated from predictions saved by this browser.
+    </div>
+
+    <div class="quick-grid" style="margin-top:16px;">
+      <div class="data-box">
+        <strong>50–59%</strong><br>
+        <span id="resultsBucket50">0-0</span>
+      </div>
+
+      <div class="data-box">
+        <strong>60–64%</strong><br>
+        <span id="resultsBucket60">0-0</span>
+      </div>
+
+      <div class="data-box">
+        <strong>65–69%</strong><br>
+        <span id="resultsBucket65">0-0</span>
+      </div>
+
+      <div class="data-box">
+        <strong>70%+</strong><br>
+        <span id="resultsBucket70">0-0</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Prediction Ledger</h2>
+
+    <div id="resultsLedger" class="board-list">
+      <div class="data-box">No predictions have been recorded yet.</div>
+    </div>
+  </div>
+</section>
+
+
 <section id="chat" class="tab-content">
   <div class="panel chat-panel">
     <div class="section-title">💬 WagerVision Chat Room</div>
@@ -2070,12 +2145,221 @@ function updateLiveBar(payout, edge, confidence, legs){
   setText("liveLegs", legs);
 }
 
+
+function resultsEscape(value){
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function normalizePredictionResult(value){
+  const result = String(value || "pending").toLowerCase();
+
+  if(["w", "win", "won"].includes(result)) return "win";
+  if(["l", "loss", "lost"].includes(result)) return "loss";
+  if(["push", "tie"].includes(result)) return "push";
+
+  return "pending";
+}
+
+function predictionUnits(entry){
+  if(Number.isFinite(Number(entry.profitUnits))){
+    return Number(entry.profitUnits);
+  }
+
+  const result = normalizePredictionResult(entry.result);
+  const line = Number(entry.line);
+
+  if(result === "loss") return -1;
+  if(result !== "win") return 0;
+  if(!Number.isFinite(line)) return 0;
+
+  return line > 0 ? line / 100 : 100 / Math.abs(line);
+}
+
+function predictionProbability(entry){
+  const raw = String(entry.modelProb ?? "").replace(/[^\d.]/g, "");
+  const probability = Number(raw);
+
+  return Number.isFinite(probability) ? probability : 0;
+}
+
+function predictionPickTeam(entry){
+  if(entry.pickTeam) return entry.pickTeam;
+
+  const homeProbability = predictionProbability(entry);
+
+  if(homeProbability >= 50){
+    return entry.home || "Home team";
+  }
+
+  return entry.away || "Away team";
+}
+
+function predictionBucket(probability){
+  if(probability >= 70) return "70";
+  if(probability >= 65) return "65";
+  if(probability >= 60) return "60";
+  return "50";
+}
+
+function recordText(entries){
+  const wins = entries.filter(entry =>
+    normalizePredictionResult(entry.result) === "win"
+  ).length;
+
+  const losses = entries.filter(entry =>
+    normalizePredictionResult(entry.result) === "loss"
+  ).length;
+
+  return `${wins}-${losses}`;
+}
+
+function renderResults(){
+  predictionLog = JSON.parse(
+    localStorage.getItem("wv_prediction_log") || "[]"
+  );
+
+  const completed = predictionLog.filter(entry => {
+    const result = normalizePredictionResult(entry.result);
+    return result === "win" || result === "loss";
+  });
+
+  const wins = completed.filter(entry =>
+    normalizePredictionResult(entry.result) === "win"
+  ).length;
+
+  const losses = completed.filter(entry =>
+    normalizePredictionResult(entry.result) === "loss"
+  ).length;
+
+  const winRate = completed.length
+    ? (wins / completed.length) * 100
+    : 0;
+
+  const totalUnits = predictionLog.reduce(
+    (sum, entry) => sum + predictionUnits(entry),
+    0
+  );
+
+  const underdogs = completed.filter(entry =>
+    entry.isUnderdog === true || Number(entry.line) > 0
+  );
+
+  setText("resultsRecord", `${wins}-${losses}`);
+  setText("resultsWinRate", `${winRate.toFixed(1)}%`);
+  setText(
+    "resultsUnits",
+    `${totalUnits >= 0 ? "+" : ""}${totalUnits.toFixed(2)}u`
+  );
+  setText("resultsDogRecord", recordText(underdogs));
+
+  const buckets = {
+    "50": [],
+    "60": [],
+    "65": [],
+    "70": []
+  };
+
+  completed.forEach(entry => {
+    const probability = predictionProbability(entry);
+    buckets[predictionBucket(probability)].push(entry);
+  });
+
+  setText("resultsBucket50", recordText(buckets["50"]));
+  setText("resultsBucket60", recordText(buckets["60"]));
+  setText("resultsBucket65", recordText(buckets["65"]));
+  setText("resultsBucket70", recordText(buckets["70"]));
+
+  const pending = predictionLog.filter(entry =>
+    normalizePredictionResult(entry.result) === "pending"
+  ).length;
+
+  setText(
+    "resultsStatus",
+    `${predictionLog.length} tracked predictions · ${completed.length} graded · ${pending} pending`
+  );
+
+  const ledger = el("resultsLedger");
+
+  if(!ledger) return;
+
+  if(!predictionLog.length){
+    ledger.innerHTML =
+      '<div class="data-box">No predictions have been recorded yet.</div>';
+    return;
+  }
+
+  const sorted = [...predictionLog].sort((a, b) =>
+    String(b.time || b.gameDate || "").localeCompare(
+      String(a.time || a.gameDate || "")
+    )
+  );
+
+  ledger.innerHTML = sorted.map(entry => {
+    const result = normalizePredictionResult(entry.result);
+    const pickTeam = predictionPickTeam(entry);
+    const probability = predictionProbability(entry);
+    const units = predictionUnits(entry);
+
+    const resultLabel =
+      result === "win" ? "✅ WIN" :
+      result === "loss" ? "❌ LOSS" :
+      result === "push" ? "➖ PUSH" :
+      "⏳ PENDING";
+
+    const matchup =
+      entry.away && entry.home
+        ? `${entry.away} @ ${entry.home}`
+        : `${pickTeam} prediction`;
+
+    const lineDisplay =
+      Number.isFinite(Number(entry.line))
+        ? `${Number(entry.line) > 0 ? "+" : ""}${Number(entry.line)}`
+        : entry.line || "—";
+
+    const dateDisplay =
+      entry.gameDate ||
+      String(entry.time || "").slice(0, 10) ||
+      "Unknown date";
+
+    return `
+      <div class="data-box">
+        <div class="board-header">
+          <div>
+            <strong>${resultsEscape(pickTeam)}</strong>
+            <div class="small">${resultsEscape(matchup)}</div>
+          </div>
+
+          <strong>${resultLabel}</strong>
+        </div>
+
+        <div class="small" style="margin-top:10px;">
+          ${resultsEscape(dateDisplay)}
+          · Model ${probability ? probability.toFixed(1) + "%" : "—"}
+          · Line ${resultsEscape(lineDisplay)}
+          · ${units >= 0 ? "+" : ""}${units.toFixed(2)}u
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
 function showTab(id, tab){
-  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+  document.querySelectorAll(".section, .tab-content").forEach(s => s.classList.remove("active"));
   document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+
   const section = el(id);
+
   if(section) section.classList.add("active");
   if(tab) tab.classList.add("active");
+
+  if(id === "results"){
+    renderResults();
+  }
 }
 
 function acceptAge(){
@@ -2960,29 +3244,58 @@ setText("loadStatus", "Sportsbook odds loaded.");
   function logPrediction(game){
   if(!game) return;
 
+  const home = game.home_team || game.teams?.home?.team?.name || "";
+  const away = game.away_team || game.teams?.away?.team?.name || "";
+  const gameId = String(game.gamePk || game.id || `${new Date().toISOString().slice(0,10)}-${away}-${home}`);
+
+  const homeProbText = document.getElementById("homeProb")?.textContent || "";
+  const homeProb = parseFloat(homeProbText.replace(/[^\d.]/g, ""));
+
+  if(!home || !away || !Number.isFinite(homeProb)) return;
+
+  const awayProb = 100 - homeProb;
+  const pickSide = homeProb >= 50 ? "home" : "away";
+  const pickTeam = pickSide === "home" ? home : away;
+  const opponent = pickSide === "home" ? away : home;
+  const modelProb = pickSide === "home" ? homeProb : awayProb;
+
+  const homeLine = text("bestHomeLine");
+  const awayLine = text("bestAwayLine");
+  const pickLine = pickSide === "home" ? homeLine : awayLine;
+
   const exists = predictionLog.some(entry =>
-    entry.home === game.home_team &&
-    entry.away === game.away_team
+    String(entry.gameId) === gameId &&
+    entry.pickTeam === pickTeam
   );
 
-  if (exists) return;
+  if(exists) return;
+
+  const numericLine = parseInt(String(pickLine).replace(/[^\d+-]/g, ""), 10);
 
   const entry = {
+    gameId,
     time: new Date().toISOString(),
-    home: game.home_team,
-    away: game.away_team,
-    modelProb: document.getElementById("homeProb")?.textContent || "",
+    gameDate: game.gameDate || new Date().toISOString().slice(0,10),
+    home,
+    away,
+    pickSide,
+    pickTeam,
+    opponent,
+    modelProb: Number(modelProb.toFixed(1)),
     marketProb: document.getElementById("marketProb")?.textContent || "",
     edge: document.getElementById("edgeValue")?.textContent || "",
-    line: text("bestHomeLine"),
-    result: null
+    line: Number.isFinite(numericLine) ? numericLine : pickLine,
+    isUnderdog: Number.isFinite(numericLine) ? numericLine > 0 : false,
+    result: "pending",
+    profitUnits: 0,
+    homeScore: null,
+    awayScore: null,
+    gradedAt: null
   };
 
   predictionLog.push(entry);
-
   localStorage.setItem("wv_prediction_log", JSON.stringify(predictionLog));
 }
-
 function getParkFactor(stadium){
   const parks = {
     "Coors Field": {type:"Hitter-friendly", impact:2},
