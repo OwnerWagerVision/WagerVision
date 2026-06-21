@@ -2235,7 +2235,63 @@ function calculateWinUnits(line){
     : 100 / Math.abs(odds);
 }
 
+
+function repairPredictionLog(){
+  predictionLog = JSON.parse(
+    localStorage.getItem("wv_prediction_log") || "[]"
+  );
+
+  let changed = false;
+
+  predictionLog.forEach(entry => {
+    if(!entry.pickTeam){
+      const probability = predictionProbability(entry);
+
+      if(entry.home && entry.away && probability){
+        entry.pickTeam =
+          probability >= 50
+            ? entry.home
+            : entry.away;
+
+        entry.pickSide =
+          entry.pickTeam === entry.home
+            ? "home"
+            : "away";
+
+        entry.opponent =
+          entry.pickTeam === entry.home
+            ? entry.away
+            : entry.home;
+
+        changed = true;
+      }
+    }
+
+    if(
+      entry.gradedAt &&
+      normalizePredictionResult(entry.result) === "loss" &&
+      !entry.pickTeam
+    ){
+      entry.result = "pending";
+      entry.profitUnits = 0;
+      entry.homeScore = null;
+      entry.awayScore = null;
+      entry.gradedAt = null;
+      changed = true;
+    }
+  });
+
+  if(changed){
+    localStorage.setItem(
+      "wv_prediction_log",
+      JSON.stringify(predictionLog)
+    );
+  }
+}
+
 async function gradePendingPredictions(){
+  repairPredictionLog();
+
   predictionLog = JSON.parse(
     localStorage.getItem("wv_prediction_log") || "[]"
   );
@@ -2335,6 +2391,8 @@ async function gradePendingPredictions(){
                 : "";
 
           if(!winner) return;
+
+          if(!entry.pickTeam) return;
 
           const won =
             normalizedTeamName(winner) ===
@@ -3958,6 +4016,7 @@ function boardPickAway(pick){
 
 function boardPickProbability(pick){
   const raw =
+    pick.model ??
     pick.modelProb ??
     pick.modelProbability ??
     pick.probability ??
@@ -3973,6 +4032,7 @@ function boardPickProbability(pick){
 
 function boardPickLine(pick, pickTeam, home, away){
   let raw =
+    pick.american ??
     pick.line ??
     pick.moneyline ??
     pick.pickLine ??
@@ -4073,6 +4133,7 @@ function logBoardPicks(picks){
         "",
       modelProb: probability,
       marketProb:
+        pick.market ??
         pick.marketProb ??
         pick.marketProbability ??
         pick.vegasProb ??
