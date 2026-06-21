@@ -3757,6 +3757,204 @@ currentSlipPick = {
 return currentSlipPick;
 }
 
+
+function boardPickNumber(value){
+  const number = Number(
+    String(value ?? "").replace(/[^\d+.-]/g, "")
+  );
+
+  return Number.isFinite(number) ? number : null;
+}
+
+function boardPickTeam(pick){
+  return (
+    pick.pickTeam ||
+    pick.pick ||
+    pick.team ||
+    pick.selectedTeam ||
+    pick.winner ||
+    ""
+  );
+}
+
+function boardPickHome(pick){
+  return (
+    pick.home ||
+    pick.homeTeam ||
+    pick.home_team ||
+    pick.game?.home_team ||
+    pick.game?.teams?.home?.team?.name ||
+    ""
+  );
+}
+
+function boardPickAway(pick){
+  return (
+    pick.away ||
+    pick.awayTeam ||
+    pick.away_team ||
+    pick.game?.away_team ||
+    pick.game?.teams?.away?.team?.name ||
+    ""
+  );
+}
+
+function boardPickProbability(pick){
+  const raw =
+    pick.modelProb ??
+    pick.modelProbability ??
+    pick.probability ??
+    pick.wvProb ??
+    pick.winProbability ??
+    pick.confidence ??
+    "";
+
+  const number = boardPickNumber(raw);
+
+  return number === null ? 0 : number;
+}
+
+function boardPickLine(pick, pickTeam, home, away){
+  let raw =
+    pick.line ??
+    pick.moneyline ??
+    pick.pickLine ??
+    pick.bestLine ??
+    pick.odds ??
+    "";
+
+  if(raw === "" || raw === null || raw === undefined){
+    if(pickTeam === home){
+      raw =
+        pick.homeLine ??
+        pick.bestHomeLine ??
+        pick.homeOdds ??
+        "";
+    }else if(pickTeam === away){
+      raw =
+        pick.awayLine ??
+        pick.bestAwayLine ??
+        pick.awayOdds ??
+        "";
+    }
+  }
+
+  const number = boardPickNumber(raw);
+
+  return number === null ? raw : number;
+}
+
+function logBoardPicks(picks){
+  if(!Array.isArray(picks) || !picks.length) return;
+
+  predictionLog = JSON.parse(
+    localStorage.getItem("wv_prediction_log") || "[]"
+  );
+
+  const today =
+    el("gameDate")?.value ||
+    new Date().toISOString().slice(0, 10);
+
+  let added = 0;
+
+  picks.forEach((pick, index) => {
+    const home = boardPickHome(pick);
+    const away = boardPickAway(pick);
+    const pickTeam = boardPickTeam(pick);
+
+    if(!home || !away || !pickTeam) return;
+
+    const probability = boardPickProbability(pick);
+    const line = boardPickLine(
+      pick,
+      pickTeam,
+      home,
+      away
+    );
+
+    const numericLine = Number(line);
+
+    const gameId = String(
+      pick.gameId ||
+      pick.gamePk ||
+      pick.id ||
+      pick.game?.gamePk ||
+      `${today}-${away}-${home}`
+    );
+
+    const key = `${gameId}-${pickTeam}`;
+
+    const exists = predictionLog.some(entry => {
+      const entryKey =
+        `${entry.gameId || `${entry.gameDate}-${entry.away}-${entry.home}`}-${entry.pickTeam}`;
+
+      return entryKey === key;
+    });
+
+    if(exists) return;
+
+    const pickSide =
+      pickTeam === home ? "home" :
+      pickTeam === away ? "away" :
+      "";
+
+    predictionLog.push({
+      gameId,
+      time: new Date().toISOString(),
+      gameDate:
+        pick.gameDate ||
+        pick.date ||
+        pick.game?.gameDate ||
+        today,
+      home,
+      away,
+      pickSide,
+      pickTeam,
+      opponent:
+        pickTeam === home ? away :
+        pickTeam === away ? home :
+        "",
+      modelProb: probability,
+      marketProb:
+        pick.marketProb ??
+        pick.marketProbability ??
+        pick.vegasProb ??
+        "",
+      edge:
+        pick.edge ??
+        pick.edgeValue ??
+        "",
+      line:
+        Number.isFinite(numericLine)
+          ? numericLine
+          : line,
+      isUnderdog:
+        Number.isFinite(numericLine)
+          ? numericLine > 0
+          : false,
+      source: "edge-board",
+      result: "pending",
+      profitUnits: 0,
+      homeScore: null,
+      awayScore: null,
+      gradedAt: null
+    });
+
+    added += 1;
+  });
+
+  if(added){
+    localStorage.setItem(
+      "wv_prediction_log",
+      JSON.stringify(predictionLog)
+    );
+
+    console.log(
+      `WagerVision logged ${added} Edge Board pick(s).`
+    );
+  }
+}
+
 async function scanBoard(){
   if(!loadedGames.length) await loadGames();
   if(!loadedGames.length) return;
@@ -3904,6 +4102,7 @@ try{
 
   picks.sort((a,b) => b.edge - a.edge);
   lastBoardPicks = picks;
+  logBoardPicks(picks);
   window.wagerVisionPicks = picks;
 
   setText("topEdge", picks.length ? `${picks[0].edge >= 0 ? "+" : ""}${picks[0].edge.toFixed(1)}%` : "—");
