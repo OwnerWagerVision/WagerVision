@@ -2218,7 +2218,163 @@ function recordText(entries){
   return `${wins}-${losses}`;
 }
 
-function renderResults(){
+
+function normalizedTeamName(value){
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+}
+
+function calculateWinUnits(line){
+  const odds = Number(line);
+
+  if(!Number.isFinite(odds)) return 0;
+
+  return odds > 0
+    ? odds / 100
+    : 100 / Math.abs(odds);
+}
+
+async function gradePendingPredictions(){
+  predictionLog = JSON.parse(
+    localStorage.getItem("wv_prediction_log") || "[]"
+  );
+
+  const pending = predictionLog.filter(entry =>
+    normalizePredictionResult(entry.result) === "pending"
+  );
+
+  if(!pending.length) return 0;
+
+  const dates = [...new Set(
+    pending
+      .map(entry =>
+        String(entry.gameDate || entry.time || "").slice(0, 10)
+      )
+      .filter(Boolean)
+  )];
+
+  let graded = 0;
+
+  for(const date of dates){
+    try{
+      const url =
+        `https://statsapi.mlb.com/api/v1/schedule` +
+        `?sportId=1&date=${encodeURIComponent(date)}` +
+        `&hydrate=linescore`;
+
+      const data = await fetchJSON(url);
+
+      const games = (data.dates || [])
+        .flatMap(day => day.games || []);
+
+      pending
+        .filter(entry =>
+          String(entry.gameDate || entry.time || "").slice(0, 10) === date
+        )
+        .forEach(entry => {
+          const entryGameId = String(entry.gameId || "");
+
+          const game = games.find(candidate => {
+            if(
+              entryGameId &&
+              String(candidate.gamePk) === entryGameId
+            ){
+              return true;
+            }
+
+            const candidateHome =
+              candidate.teams?.home?.team?.name || "";
+
+            const candidateAway =
+              candidate.teams?.away?.team?.name || "";
+
+            return (
+              normalizedTeamName(candidateHome) ===
+                normalizedTeamName(entry.home) &&
+              normalizedTeamName(candidateAway) ===
+                normalizedTeamName(entry.away)
+            );
+          });
+
+          if(!game) return;
+
+          const status =
+            game.status?.abstractGameState ||
+            game.status?.detailedState ||
+            "";
+
+          const isFinal =
+            String(status).toLowerCase().includes("final") ||
+            String(status).toLowerCase().includes("completed");
+
+          if(!isFinal) return;
+
+          const homeScore = Number(
+            game.teams?.home?.score ??
+            game.linescore?.teams?.home?.runs
+          );
+
+          const awayScore = Number(
+            game.teams?.away?.score ??
+            game.linescore?.teams?.away?.runs
+          );
+
+          if(
+            !Number.isFinite(homeScore) ||
+            !Number.isFinite(awayScore)
+          ){
+            return;
+          }
+
+          const winner =
+            homeScore > awayScore
+              ? game.teams?.home?.team?.name
+              : awayScore > homeScore
+                ? game.teams?.away?.team?.name
+                : "";
+
+          if(!winner) return;
+
+          const won =
+            normalizedTeamName(winner) ===
+            normalizedTeamName(entry.pickTeam);
+
+          entry.result = won ? "win" : "loss";
+          entry.profitUnits = won
+            ? calculateWinUnits(entry.line)
+            : -1;
+
+          entry.homeScore = homeScore;
+          entry.awayScore = awayScore;
+          entry.gradedAt = new Date().toISOString();
+
+          graded += 1;
+        });
+
+    }catch(error){
+      console.error(
+        `Could not grade predictions for ${date}:`,
+        error
+      );
+    }
+  }
+
+  if(graded){
+    localStorage.setItem(
+      "wv_prediction_log",
+      JSON.stringify(predictionLog)
+    );
+  }
+
+  return graded;
+}
+
+async function renderResults(){
+  setText("resultsStatus", "Checking final MLB scores...");
+
+  const newlyGraded = await gradePendingPredictions();
+
   predictionLog = JSON.parse(
     localStorage.getItem("wv_prediction_log") || "[]"
   );
@@ -2280,7 +2436,8 @@ function renderResults(){
 
   setText(
     "resultsStatus",
-    `${predictionLog.length} tracked predictions · ${completed.length} graded · ${pending} pending`
+    `${predictionLog.length} tracked predictions · ${completed.length} graded · ${pending} pending` +
+    (newlyGraded ? ` · ${newlyGraded} newly graded` : "")
   );
 
   const ledger = el("resultsLedger");
