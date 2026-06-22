@@ -2290,15 +2290,37 @@ function repairPredictionLog(){
 }
 
 async function gradePendingPredictions(){
-  repairPredictionLog();
+  const { data, error } = await supabaseClient
+    .from("wv_predictions")
+    .select("*")
+    .eq("result", "pending")
+    .gte("game_date", "2026-06-22");
 
-  predictionLog = JSON.parse(
-    localStorage.getItem("wv_prediction_log") || "[]"
-  );
+  if(error){
+    console.error("Could not load pending official predictions:", error);
+    return 0;
+  }
 
-  const pending = predictionLog.filter(entry =>
-    normalizePredictionResult(entry.result) === "pending"
-  );
+  predictionLog = (data || []).map(row => ({
+    gameId: row.game_id,
+    gameDate: row.game_date,
+    time: row.created_at,
+    away: row.away_team,
+    home: row.home_team,
+    pickTeam: row.pick_team,
+    pickSide: row.pick_side,
+    modelProb: Number(row.model_probability),
+    marketProb: row.market_probability,
+    edge: row.edge,
+    line: row.american_line,
+    isUnderdog: Number(row.american_line) > 0,
+    awayScore: row.away_score,
+    homeScore: row.home_score,
+    result: row.result,
+    gradedAt: null
+  }));
+
+  const pending = predictionLog;
 
   if(!pending.length) return 0;
 
@@ -2423,6 +2445,29 @@ async function gradePendingPredictions(){
       "wv_prediction_log",
       JSON.stringify(predictionLog)
     );
+
+    const finished = predictionLog.filter(entry =>
+      entry.gradedAt &&
+      ["win", "loss"].includes(
+        normalizePredictionResult(entry.result)
+      )
+    );
+
+    for(const entry of finished){
+      const { error } = await supabaseClient
+        .from("wv_predictions")
+        .update({
+          result: normalizePredictionResult(entry.result),
+          home_score: entry.homeScore,
+          away_score: entry.awayScore,
+          game_status: "final"
+        })
+        .eq("game_id", String(entry.gameId));
+
+      if(error){
+        console.error("Official result update failed:", error);
+      }
+    }
   }
 
   return graded;
@@ -2433,9 +2478,35 @@ async function renderResults(){
 
   const newlyGraded = await gradePendingPredictions();
 
-  predictionLog = JSON.parse(
-    localStorage.getItem("wv_prediction_log") || "[]"
-  );
+  const { data, error } = await supabaseClient
+    .from("wv_predictions")
+    .select("*")
+    .gte("game_date", "2026-06-22")
+    .order("game_date", { ascending: false });
+
+  if(error){
+    console.error("Could not load official results:", error);
+    setText("resultsStatus", "Could not load official results.");
+    return;
+  }
+
+  predictionLog = (data || []).map(row => ({
+    gameId: row.game_id,
+    gameDate: row.game_date,
+    time: row.created_at,
+    away: row.away_team,
+    home: row.home_team,
+    pickTeam: row.pick_team,
+    pickSide: row.pick_side,
+    modelProb: Number(row.model_probability),
+    marketProb: row.market_probability,
+    edge: row.edge,
+    line: row.american_line,
+    isUnderdog: Number(row.american_line) > 0,
+    awayScore: row.away_score,
+    homeScore: row.home_score,
+    result: row.result
+  }));
 
   const completed = predictionLog.filter(entry => {
     const result = normalizePredictionResult(entry.result);
@@ -3456,7 +3527,7 @@ setText("loadStatus", "Sportsbook odds loaded.");
   }
 }
 
-  function logPrediction(game){
+  async function logPrediction(game){
   if(!game) return;
 
   const home = game.home_team || game.teams?.home?.team?.name || "";
@@ -3510,6 +3581,34 @@ setText("loadStatus", "Sportsbook odds loaded.");
 
   predictionLog.push(entry);
   localStorage.setItem("wv_prediction_log", JSON.stringify(predictionLog));
+
+  try{
+    const { data } = await supabaseClient.auth.getSession();
+
+    if(data?.session){
+      await supabaseClient
+        .from("wv_predictions")
+        .upsert({
+          game_id: gameId,
+          game_date: entry.gameDate,
+          away_team: away,
+          home_team: home,
+          pick_team: pickTeam,
+          pick_side: pickSide,
+          model_probability: entry.modelProb,
+          market_probability: parseFloat(String(entry.marketProb).replace(/[^\\d.-]/g, "")) || null,
+          edge: parseFloat(String(entry.edge).replace(/[^\\d.-]/g, "")) || null,
+          american_line: Number.isFinite(numericLine) ? numericLine : null,
+          game_status: "scheduled",
+          result: "pending"
+        },{
+          onConflict: "game_id",
+          ignoreDuplicates: true
+        });
+    }
+  }catch(error){
+    console.error("Official results save failed:", error);
+  }
 }
 function getParkFactor(stadium){
   const parks = {
