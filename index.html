@@ -3579,8 +3579,19 @@ async function loadOdds(){
     console.log("Odds info:", info);
 
     if(!info){
-      if(oddsBox) oddsBox.innerHTML = `<div class="data-box">No matching odds found for this game.</div>`;
-      setText("loadStatus", "No matching odds found.");
+      calculateOdds();
+      await logPrediction(selectedGameData);
+
+      if(oddsBox){
+        oddsBox.innerHTML =
+          `<div class="data-box">WagerVision prediction published. Sportsbook odds were unavailable.</div>`;
+      }
+
+      setText(
+        "loadStatus",
+        "Prediction published without sportsbook odds."
+      );
+
       return;
     }
 
@@ -3644,7 +3655,11 @@ setText("loadStatus", "Sportsbook odds loaded.");
   const entry = {
     gameId,
     time: new Date().toISOString(),
-    gameDate: game.gameDate || new Date().toISOString().slice(0,10),
+    gameDate:
+      game.officialDate ||
+      String(game.gameDate || "").slice(0,10) ||
+      text("gameDate") ||
+      new Date().toLocaleDateString("en-CA"),
     home,
     away,
     pickSide,
