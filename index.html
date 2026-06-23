@@ -1915,7 +1915,15 @@ body:not(.chat-active) #chat {
         </div>
       </div>
 
-      <button type="button" onclick="renderResults()">Refresh Results</button>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button id="publishTodayPicks"
+          type="button"
+          onclick="publishTodayPicks()"
+          style="display:none;">
+          Publish Today’s Picks
+        </button>
+        <button type="button" onclick="renderResults()">Refresh Results</button>
+      </div>
     </div>
 
     <div class="status" id="resultsStatus">
@@ -2474,6 +2482,7 @@ async function gradePendingPredictions(){
 }
 
 async function renderResults(){
+  await updatePublishButtonVisibility();
   setText("resultsStatus", "Checking final MLB scores...");
 
   const newlyGraded = await gradePendingPredictions();
@@ -2899,6 +2908,82 @@ updateOverUnderReadout();
   console.error(error);
   setText("loadStatus", "Game Loaded.");
 }
+}
+
+async function updatePublishButtonVisibility(){
+  const button = el("publishTodayPicks");
+  if(!button) return;
+
+  const user = await getCurrentUser();
+  const isOwner =
+    user?.email?.toLowerCase() === "cmstingers@gmail.com";
+
+  button.style.display = isOwner ? "" : "none";
+}
+
+async function publishTodayPicks(){
+  const user = await getCurrentUser();
+
+  if(user?.email?.toLowerCase() !== "cmstingers@gmail.com"){
+    alert("Only the WagerVision administrator can publish picks.");
+    return;
+  }
+
+  const button = el("publishTodayPicks");
+
+  if(button){
+    button.disabled = true;
+    button.textContent = "Publishing...";
+  }
+
+  try{
+    if(!loadedGames.length){
+      await loadGames();
+    }
+
+    if(!loadedGames.length){
+      setText("resultsStatus", "No games are available to publish.");
+      return;
+    }
+
+    let processed = 0;
+
+    for(let i = 0; i < loadedGames.length; i++){
+      if(el("gameSelect")){
+        el("gameSelect").value = String(i);
+      }
+
+      const game = loadedGames[i];
+      const away = game.teams?.away?.team?.name || "Away";
+      const home = game.teams?.home?.team?.name || "Home";
+
+      setText(
+        "resultsStatus",
+        `Publishing ${i + 1} of ${loadedGames.length}: ${away} @ ${home}`
+      );
+
+      await loadSelectedGame();
+      await loadOdds();
+
+      processed += 1;
+    }
+
+    setText(
+      "resultsStatus",
+      `${processed} games processed. Loading official slate...`
+    );
+
+    await renderResults();
+
+  }catch(error){
+    console.error("Publish all picks failed:", error);
+    setText("resultsStatus", "Could not publish the complete slate.");
+  }finally{
+    if(button){
+      button.disabled = false;
+      button.textContent = "Publish Today’s Picks";
+    }
+  }
 }
 
 async function refreshLiveState(showMessage = true){
@@ -3515,9 +3600,7 @@ async function loadOdds(){
 
   calculateOdds();
 
-setTimeout(() => {
-  logPrediction(game);
-}, 50);
+await logPrediction(selectedGameData || game);
 
 setText("loadStatus", "Sportsbook odds loaded.");
   }catch(error){
