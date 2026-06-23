@@ -3656,9 +3656,9 @@ setText("loadStatus", "Sportsbook odds loaded.");
     gameId,
     time: new Date().toISOString(),
     gameDate:
+      text("gameDate") ||
       game.officialDate ||
       String(game.gameDate || "").slice(0,10) ||
-      text("gameDate") ||
       new Date().toLocaleDateString("en-CA"),
     home,
     away,
