@@ -3648,8 +3648,6 @@ setText("loadStatus", "Sportsbook odds loaded.");
     entry.pickTeam === pickTeam
   );
 
-  if(exists) return;
-
   const numericLine = parseInt(String(pickLine).replace(/[^\d+-]/g, ""), 10);
 
   const entry = {
@@ -3677,8 +3675,13 @@ setText("loadStatus", "Sportsbook odds loaded.");
     gradedAt: null
   };
 
-  predictionLog.push(entry);
-  localStorage.setItem("wv_prediction_log", JSON.stringify(predictionLog));
+  if(!exists){
+    predictionLog.push(entry);
+    localStorage.setItem(
+      "wv_prediction_log",
+      JSON.stringify(predictionLog)
+    );
+  }
 
   try{
     const { data } = await supabaseClient.auth.getSession();
@@ -3701,7 +3704,7 @@ setText("loadStatus", "Sportsbook odds loaded.");
           result: "pending"
         },{
           onConflict: "game_id",
-          ignoreDuplicates: true
+          ignoreDuplicates: false
         });
     }
   }catch(error){
