@@ -1688,60 +1688,7 @@ body:not(.chat-active) #chat {
 
     <img src="logo1.png" alt="WagerVision Logo" class="landing-logo">
 
-<section class="game-recap-card" id="gameRecapCard">
 
-  <button
-    class="game-recap-trigger"
-    type="button"
-    onclick="toggleGameRecap()"
-  >
-    <div>
-      <strong>🎬 GAME RECAP</strong>
-      <span>Watch today’s MLB highlights</span>
-    </div>
-
-    <span>⌄</span>
-  </button>
-
-  <div class="game-recap-panel" id="gameRecapPanel">
-
-    <div class="game-recap-video-wrap">
-
-      <video
-        id="gameRecapVideo"
-        muted
-        playsinline
-        controls
-      ></video>
-
-      <div id="gameRecapLoading">
-        Loading today’s recaps...
-      </div>
-
-    </div>
-
-    <div class="game-recap-meta">
-
-      <strong id="gameRecapMatchup">
-        Today’s MLB Highlights
-      </strong>
-
-      <span id="gameRecapCounter">
-        0 of 0
-      </span>
-
-    </div>
-
-    <button
-      type="button"
-      onclick="skipGameRecap()"
-    >
-      ⏭ Skip
-    </button>
-
-  </div>
-
-</section>
 
 <div id="ageGate" style="margin-bottom:12px;">
   <div style="font-size:13px; margin-bottom:8px;">
@@ -1827,6 +1774,61 @@ body:not(.chat-active) #chat {
   <h1>Vegas sets the line. We correct it.</h1>
 
   <p>Real MLB data, live game state, sportsbook odds, edge ranking, and estimated bet slip payouts.</p>
+</section>
+
+<section class="game-recap-card" id="gameRecapCard">
+
+  <button
+    class="game-recap-trigger"
+    type="button"
+    onclick="toggleGameRecap()"
+  >
+    <div>
+      <strong>🎬 GAME RECAP</strong>
+      <span>Watch today’s MLB highlights</span>
+    </div>
+
+    <span>⌄</span>
+  </button>
+
+  <div class="game-recap-panel" id="gameRecapPanel">
+
+    <div class="game-recap-video-wrap">
+
+      <video
+        id="gameRecapVideo"
+        muted
+        playsinline
+        controls
+      ></video>
+
+      <div id="gameRecapLoading">
+        Loading today’s recaps...
+      </div>
+
+    </div>
+
+    <div class="game-recap-meta">
+
+      <strong id="gameRecapMatchup">
+        Today’s MLB Highlights
+      </strong>
+
+      <span id="gameRecapCounter">
+        0 of 0
+      </span>
+
+    </div>
+
+    <button
+      type="button"
+      onclick="skipGameRecap()"
+    >
+      ⏭ Skip
+    </button>
+
+  </div>
+
 </section>
 
 
