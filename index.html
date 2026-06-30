@@ -1440,6 +1440,104 @@ body:not(.chat-active) #chat {
   color: #e0f2fe;
 }
 
+/* ===== GAME RECAP ===== */
+.game-recap-card{
+  margin:0 0 12px;
+  border:1px solid rgba(96,165,250,.35);
+  border-radius:18px;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at top right,rgba(59,130,246,.18),transparent 42%),
+    linear-gradient(180deg,rgba(15,23,42,.96),rgba(2,6,23,.96));
+  box-shadow:0 14px 35px rgba(0,0,0,.3);
+}
+
+.game-recap-trigger{
+  width:100%;
+  border:0;
+  border-radius:0;
+  padding:15px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  text-align:left;
+  background:transparent;
+  color:#fff;
+  cursor:pointer;
+}
+
+.game-recap-trigger div{
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+}
+
+.game-recap-trigger strong{
+  font-size:15px;
+  letter-spacing:.7px;
+}
+
+.game-recap-trigger span{
+  color:#94a3b8;
+  font-size:12px;
+}
+
+.game-recap-panel{
+  display:none;
+  padding:0 12px 12px;
+}
+
+.game-recap-card.open .game-recap-panel{
+  display:block;
+}
+
+.game-recap-video-wrap{
+  position:relative;
+  overflow:hidden;
+  border-radius:14px;
+  background:#000;
+  aspect-ratio:16/9;
+}
+
+#gameRecapVideo{
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:cover;
+  background:#000;
+}
+
+#gameRecapLoading{
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  padding:20px;
+  text-align:center;
+  color:#cbd5e1;
+  font-size:13px;
+  background:#020617;
+}
+
+.game-recap-meta{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  padding:11px 2px 7px;
+}
+
+.game-recap-meta strong{
+  font-size:14px;
+}
+
+.game-recap-meta span{
+  color:#94a3b8;
+  font-size:11px;
+  white-space:nowrap;
+}
+
 </style>
 
 <link rel="manifest" href="/manifest.json">
@@ -1644,6 +1742,61 @@ body:not(.chat-active) #chat {
   <h1>Vegas sets the line. We correct it.</h1>
 
   <p>Real MLB data, live game state, sportsbook odds, edge ranking, and estimated bet slip payouts.</p>
+</section>
+
+<section class="game-recap-card" id="gameRecapCard">
+
+  <button
+    class="game-recap-trigger"
+    type="button"
+    onclick="toggleGameRecap()"
+  >
+    <div>
+      <strong>🎬 GAME RECAP</strong>
+      <span>Watch today’s MLB highlights</span>
+    </div>
+
+    <span>⌄</span>
+  </button>
+
+  <div class="game-recap-panel" id="gameRecapPanel">
+
+    <div class="game-recap-video-wrap">
+
+      <video
+        id="gameRecapVideo"
+        muted
+        playsinline
+        controls
+      ></video>
+
+      <div id="gameRecapLoading">
+        Loading today’s recaps...
+      </div>
+
+    </div>
+
+    <div class="game-recap-meta">
+
+      <strong id="gameRecapMatchup">
+        Today’s MLB Highlights
+      </strong>
+
+      <span id="gameRecapCounter">
+        0 of 0
+      </span>
+
+    </div>
+
+    <button
+      type="button"
+      onclick="skipGameRecap()"
+    >
+      ⏭ Skip
+    </button>
+
+  </div>
+
 </section>
 
 <section class="trust-strip">
@@ -5741,6 +5894,219 @@ document.addEventListener("DOMContentLoaded", () => {
   const d = document.querySelector('input[type="date"]');
   if (!d || !d.showPicker) return;
   d.addEventListener("click", () => d.showPicker());
+});
+</script>
+
+<script>
+let gameRecapItems = [];
+let gameRecapIndex = 0;
+
+function toggleGameRecap(){
+  const card = document.getElementById("gameRecapCard");
+  const video = document.getElementById("gameRecapVideo");
+
+  if(!card) return;
+
+  const opening = !card.classList.contains("open");
+  card.classList.toggle("open", opening);
+
+  if(opening){
+    loadGameRecaps();
+
+    if(video && video.src){
+      video.play().catch(() => {});
+    }
+  } else if(video){
+    video.pause();
+  }
+}
+
+function showGameRecap(index){
+  const item = gameRecapItems[index];
+  const video = document.getElementById("gameRecapVideo");
+  const loading = document.getElementById("gameRecapLoading");
+
+  if(!item || !video) return;
+
+  gameRecapIndex = index;
+
+  document.getElementById("gameRecapMatchup").textContent =
+    item.matchup || "MLB Game Recap";
+
+  document.getElementById("gameRecapCounter").textContent =
+    `${index + 1} of ${gameRecapItems.length}`;
+
+  video.src = item.videoUrl;
+  video.load();
+
+  if(loading){
+    loading.style.display = "none";
+  }
+
+  video.play().catch(() => {});
+}
+
+function skipGameRecap(){
+  if(!gameRecapItems.length) return;
+
+  const nextIndex =
+    gameRecapIndex + 1 < gameRecapItems.length
+      ? gameRecapIndex + 1
+      : 0;
+
+  showGameRecap(nextIndex);
+}
+
+async function loadGameRecaps(){
+
+async function loadGameRecaps(){
+  const loading = document.getElementById("gameRecapLoading");
+
+  if(gameRecapItems.length){
+    showGameRecap(gameRecapIndex);
+    return;
+  }
+
+  if(loading){
+    loading.style.display = "grid";
+    loading.textContent = "Checking MLB for game recaps...";
+  }
+
+  try{
+    const today = new Date();
+    const yesterday = new Date();
+
+    yesterday.setDate(today.getDate() - 1);
+
+    const formatDate = date =>
+      date.toLocaleDateString("en-CA");
+
+    const startDate = formatDate(yesterday);
+    const endDate = formatDate(today);
+
+    const scheduleUrl =
+      `https://statsapi.mlb.com/api/v1/schedule` +
+      `?sportId=1&startDate=${startDate}&endDate=${endDate}`;
+
+    const scheduleResponse = await fetch(scheduleUrl);
+
+    if(!scheduleResponse.ok){
+      throw new Error("MLB schedule request failed");
+    }
+
+    const scheduleData = await scheduleResponse.json();
+
+    const games = (scheduleData.dates || [])
+      .flatMap(date => date.games || [])
+      .filter(game =>
+        game.status?.abstractGameState === "Final"
+      )
+      .reverse();
+
+    const recaps = [];
+
+    for(const game of games){
+      try{
+        const contentResponse = await fetch(
+          `https://statsapi.mlb.com/api/v1/game/${game.gamePk}/content`
+        );
+
+        if(!contentResponse.ok) continue;
+
+        const contentData = await contentResponse.json();
+
+        const highlightItems =
+          contentData.highlights?.highlights?.items || [];
+
+        const recap =
+          highlightItems.find(item =>
+            /game recap|daily recap|condensed game/i.test(
+              `${item.title || ""} ${item.description || ""}`
+            )
+          ) ||
+          highlightItems.find(item =>
+            /recap/i.test(item.title || "")
+          );
+
+        if(!recap) continue;
+
+        const playbacks = recap.playbacks || [];
+
+        const video =
+          playbacks.find(playback =>
+            /mp4Avc.*1800K/i.test(playback.name || "")
+          ) ||
+          playbacks.find(playback =>
+            /mp4Avc.*1200K/i.test(playback.name || "")
+          ) ||
+          playbacks.find(playback =>
+            /\.mp4/i.test(playback.url || "")
+          );
+
+        if(!video?.url) continue;
+
+        const away = game.teams?.away;
+        const home = game.teams?.home;
+
+        recaps.push({
+          matchup:
+            `${away?.team?.name || "Away"} ` +
+            `${away?.score ?? ""} — ` +
+            `${home?.score ?? ""} ` +
+            `${home?.team?.name || "Home"}`,
+
+          videoUrl: video.url
+        });
+
+      } catch(error){
+        console.warn(
+          "Could not load recap:",
+          game.gamePk,
+          error
+        );
+      }
+    }
+
+    gameRecapItems = recaps;
+
+    if(!gameRecapItems.length){
+      document.getElementById("gameRecapMatchup").textContent =
+        "No Game Recaps Available";
+
+      document.getElementById("gameRecapCounter").textContent =
+        "0 of 0";
+
+      if(loading){
+        loading.style.display = "grid";
+        loading.textContent =
+          "MLB has not posted any recent game recaps yet.";
+      }
+
+      return;
+    }
+
+    showGameRecap(0);
+
+  } catch(error){
+    console.error("Game recap error:", error);
+
+    document.getElementById("gameRecapMatchup").textContent =
+      "Recaps Temporarily Unavailable";
+
+    if(loading){
+      loading.style.display = "grid";
+      loading.textContent =
+        "Could not connect to MLB highlights. Tap again shortly.";
+    }
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const video = document.getElementById("gameRecapVideo");
+
+  if(video){
+    video.addEventListener("ended", skipGameRecap);
+  }
 });
 </script>
 
