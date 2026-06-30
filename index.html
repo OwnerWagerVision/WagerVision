@@ -1781,7 +1781,14 @@ body:not(.chat-active) #chat {
   <button
     class="game-recap-trigger"
     type="button"
-    onclick="toggleGameRecap()"
+    onclick="
+  const card=this.closest('.game-recap-card');
+  const opening=!card.classList.contains('open');
+  card.classList.toggle('open',opening);
+  if(opening && window.loadGameRecaps){
+    window.loadGameRecaps();
+  }
+"
   >
     <div>
       <strong>🎬 GAME RECAP</strong>
