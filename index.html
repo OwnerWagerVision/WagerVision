@@ -1488,7 +1488,7 @@ body:not(.chat-active) #chat {
   padding:0 12px 12px;
 }
 
-.game-recap-card.open .game-recap-panel{
+.game-recap-card[open] .game-recap-panel{
   display:block;
 }
 
@@ -1776,27 +1776,16 @@ body:not(.chat-active) #chat {
   <p>Real MLB data, live game state, sportsbook odds, edge ranking, and estimated bet slip payouts.</p>
 </section>
 
-<section class="game-recap-card" id="gameRecapCard">
+<details class="game-recap-card" id="gameRecapCard" ontoggle="if(this.open) loadGameRecaps()">
 
-  <button
-    class="game-recap-trigger"
-    type="button"
-    onclick="
-  const card=this.closest('.game-recap-card');
-  const opening=!card.classList.contains('open');
-  card.classList.toggle('open',opening);
-  if(opening && window.loadGameRecaps){
-    window.loadGameRecaps();
-  }
-"
-  >
+  <summary class="game-recap-trigger">
     <div>
       <strong>🎬 GAME RECAP</strong>
       <span>Watch today’s MLB highlights</span>
     </div>
 
     <span>⌄</span>
-  </button>
+  </summary>
 
   <div class="game-recap-panel" id="gameRecapPanel">
 
@@ -1836,7 +1825,7 @@ body:not(.chat-active) #chat {
 
   </div>
 
-</section>
+</details>
 
 
 
