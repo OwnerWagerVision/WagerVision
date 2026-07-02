@@ -2031,7 +2031,7 @@ body:not(.chat-active) #chat {
 </section>
 
   <section id="teams" class="section"><div class="card"><h2>MLB Teams</h2><div class="small">Rosters, stats, recent form, and WagerVision analysis.</div><select id="teamSelect" onchange="loadTeamPage()"><option value="">Loading MLB teams...</option></select><div class="status" id="teamStatus">Choose a team.</div></div><div id="teamOverview" style="display:none;"><div class="card"><h2 id="teamPageName">MLB Team</h2><div id="teamRoster" class="data-box">Roster data will appear here.</div>
-<div id="playerProfile" class="card" style="display:none;margin-top:16px;"></div></div></div></section><section id="slip" class="section">
+</div></div></section><section id="slip" class="section">
     <div class="card">
       <h2>Bet Slip + Payout</h2>
       <div class="form-grid">
@@ -2885,12 +2885,15 @@ async function loadPlayerPage(id,row){
   box.innerHTML="Loading player...";
   try{
     const season=new Date().getFullYear();
-    const [r,sr]=await Promise.all([
+    const [r,hr,pr]=await Promise.all([
       fetch(`https://statsapi.mlb.com/api/v1/people/${id}`),
-      fetch(`https://statsapi.mlb.com/api/v1/people/${id}/stats?stats=season&group=hitting,pitching&season=${season}`)
+      fetch(`https://statsapi.mlb.com/api/v1/people/${id}/stats?stats=season&group=hitting&season=${season}`),
+      fetch(`https://statsapi.mlb.com/api/v1/people/${id}/stats?stats=season&group=pitching&season=${season}`)
     ]);
     const d=await r.json();
-    const sd=await sr.json();
+    const hd=await hr.json();
+    const pd=await pr.json();
+    const sd={stats:[...(hd.stats||[]),...(pd.stats||[])]};
     const x=d.people?.[0]||{};
     const groups=sd.stats||[];
     const hit=groups.find(g=>g.group?.displayName==="hitting")?.splits?.[0]?.stat||{};
