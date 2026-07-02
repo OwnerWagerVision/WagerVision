@@ -1839,6 +1839,7 @@ body:not(.chat-active) #chat {
   <div class="tabs">
     <button class="tab active" onclick="showTab('game',this)" type="button">Game</button>
     <button class="tab" onclick="showTab('board',this)" type="button">Edges</button>
+    <button class="tab" onclick="showTab('teams',this)" type="button">Teams</button>
     <button class="tab" onclick="showTab('slip',this)" type="button">Bet Slip</button>
     <button class="tab" onclick="showTab('results',this)" type="button">Results</button>
     <button class="tab" onclick="showTab('chat',this)" type="button">Chat Room</button>
@@ -2029,7 +2030,7 @@ body:not(.chat-active) #chat {
   </div>
 </section>
 
-  <section id="slip" class="section">
+  <section id="teams" class="section"><div class="card"><h2>MLB Teams</h2><div class="small">Rosters, stats, recent form, and WagerVision analysis.</div><select id="teamSelect" onchange="loadTeamPage()"><option value="">Loading MLB teams...</option></select><div class="status" id="teamStatus">Choose a team.</div></div><div id="teamOverview" style="display:none;"><div class="card"><h2 id="teamPageName">MLB Team</h2><div id="teamRoster" class="data-box">Roster data will appear here.</div></div></div></section><section id="slip" class="section">
     <div class="card">
       <h2>Bet Slip + Payout</h2>
       <div class="form-grid">
@@ -2826,6 +2827,54 @@ async function renderResults(){
   }).join("");
 }
 
+async function loadTeamList(){
+  const select=document.getElementById("teamSelect");
+  if(!select) return;
+  try{
+    const r=await fetch("https://statsapi.mlb.com/api/v1/teams?sportId=1");
+    const d=await r.json();
+    const teams=(d.teams||[]).sort((a,b)=>a.name.localeCompare(b.name));
+    select.innerHTML='<option value="">Choose an MLB team</option>'+teams.map(t=>`<option value="${t.id}">${t.name}</option>`).join("");
+  }catch(e){
+    select.innerHTML='<option value="">Could not load teams</option>';
+  }
+}
+
+async function loadTeamPage(){
+  const id=document.getElementById("teamSelect")?.value;
+  if(!id) return;
+
+  const status=document.getElementById("teamStatus");
+  const overview=document.getElementById("teamOverview");
+
+  status.textContent="Loading team roster...";
+
+  try{
+    const [teamRes,rosterRes]=await Promise.all([
+      fetch(`https://statsapi.mlb.com/api/v1/teams/${id}`),
+      fetch(`https://statsapi.mlb.com/api/v1/teams/${id}/roster?rosterType=active`)
+    ]);
+
+    const teamData=await teamRes.json();
+    const rosterData=await rosterRes.json();
+    const team=teamData.teams?.[0];
+
+    document.getElementById("teamPageName").innerHTML=
+      `<img src="https://www.mlbstatic.com/team-logos/${id}.svg" style="width:55px;vertical-align:middle;margin-right:12px">${team?.name||"MLB Team"}`;
+
+    document.getElementById("teamRoster").innerHTML=
+      (rosterData.roster||[]).map(p=>
+        `<div><strong>${p.person.fullName}</strong> — ${p.position.name}</div>`
+      ).join("");
+
+    overview.style.display="block";
+    status.textContent="Team loaded.";
+  }catch(e){
+    console.error(e);
+    status.textContent="Could not load team data.";
+  }
+}
+
 function showTab(id, tab){
   document.querySelectorAll(".section, .tab-content").forEach(s => s.classList.remove("active"));
   document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
@@ -2837,6 +2886,10 @@ function showTab(id, tab){
 
   if(id === "results"){
     renderResults();
+  }
+
+  if(id === "teams"){
+    loadTeamList();
   }
 }
 
@@ -4788,7 +4841,7 @@ function addPickToSlip(p){
   saveSlip();
   renderSlip();
   setText("slipCount", slip.length);
-  showTab("slip", document.querySelectorAll(".tab")[2]);
+  showTab("slip", document.querySelectorAll(".tab")[3]);
 }
 
 function clearSlip(){
