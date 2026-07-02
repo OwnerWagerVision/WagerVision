@@ -2877,10 +2877,11 @@ async function loadTeamPage(){
 }
 
 async function loadPlayerPage(id,row){
-  const box=document.getElementById("playerProfile");
-  if(!box) return;
-  box.style.display="block";
-  if(row) row.insertAdjacentElement("afterend",box);
+  document.querySelectorAll(".inline-player-profile").forEach(x=>x.remove());
+  const box=document.createElement("div");
+  box.className="inline-player-profile card";
+  box.style.margin="10px 0";
+  row.insertAdjacentElement("afterend",box);
   box.innerHTML="Loading player...";
   try{
     const season=new Date().getFullYear();
