@@ -2030,7 +2030,8 @@ body:not(.chat-active) #chat {
   </div>
 </section>
 
-  <section id="teams" class="section"><div class="card"><h2>MLB Teams</h2><div class="small">Rosters, stats, recent form, and WagerVision analysis.</div><select id="teamSelect" onchange="loadTeamPage()"><option value="">Loading MLB teams...</option></select><div class="status" id="teamStatus">Choose a team.</div></div><div id="teamOverview" style="display:none;"><div class="card"><h2 id="teamPageName">MLB Team</h2><div id="teamRoster" class="data-box">Roster data will appear here.</div></div></div></section><section id="slip" class="section">
+  <section id="teams" class="section"><div class="card"><h2>MLB Teams</h2><div class="small">Rosters, stats, recent form, and WagerVision analysis.</div><select id="teamSelect" onchange="loadTeamPage()"><option value="">Loading MLB teams...</option></select><div class="status" id="teamStatus">Choose a team.</div></div><div id="teamOverview" style="display:none;"><div class="card"><h2 id="teamPageName">MLB Team</h2><div id="teamRoster" class="data-box">Roster data will appear here.</div>
+<div id="playerProfile" class="card" style="display:none;margin-top:16px;"></div></div></div></section><section id="slip" class="section">
     <div class="card">
       <h2>Bet Slip + Payout</h2>
       <div class="form-grid">
@@ -2864,7 +2865,7 @@ async function loadTeamPage(){
 
     document.getElementById("teamRoster").innerHTML=
       (rosterData.roster||[]).map(p=>
-        `<div><strong>${p.person.fullName}</strong> — ${p.position.name}</div>`
+        `<div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,.08);cursor:pointer" onclick="loadPlayerPage(${p.person.id})"><strong>${p.person.fullName}</strong> — ${p.position.name}</div>`
       ).join("");
 
     overview.style.display="block";
@@ -2872,6 +2873,21 @@ async function loadTeamPage(){
   }catch(e){
     console.error(e);
     status.textContent="Could not load team data.";
+  }
+}
+
+async function loadPlayerPage(id){
+  const box=document.getElementById("playerProfile");
+  if(!box) return;
+  box.style.display="block";
+  box.innerHTML="Loading player...";
+  try{
+    const r=await fetch(`https://statsapi.mlb.com/api/v1/people/${id}`);
+    const d=await r.json();
+    const x=d.people?.[0]||{};
+    box.innerHTML=`<img src="https://img.mlbstatic.com/mlb-photos/image/upload/w_180,q_auto:best/v1/people/${id}/headshot/67/current" style="width:130px;border-radius:16px"><h2>${x.fullName||"MLB Player"}</h2><div>${x.primaryPosition?.name||""}</div>`;
+  }catch(e){
+    box.innerHTML="Could not load player.";
   }
 }
 
@@ -5173,6 +5189,7 @@ function init(){
 }
 
 window.loadTeamPage = loadTeamPage;
+window.loadPlayerPage = loadPlayerPage;
 window.loadTeamList = loadTeamList;
 window.showTab = showTab;
 window.toggleInputs = toggleInputs;
