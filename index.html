@@ -2881,7 +2881,7 @@ async function loadPlayerPage(id,row){
   const box=document.createElement("div");
   box.className="inline-player-profile card";
   box.style.margin="10px 0";
-  row.insertAdjacentElement("afterend",box);
+  row.appendChild(box);
   box.innerHTML="Loading player...";
   try{
     const season=new Date().getFullYear();
@@ -2902,7 +2902,7 @@ async function loadPlayerPage(id,row){
     const stats=pitcher
       ? `ERA: ${pitch.era||"—"} &nbsp; WHIP: ${pitch.whip||"—"} &nbsp; K: ${pitch.strikeOuts||"—"} &nbsp; IP: ${pitch.inningsPitched||"—"}`
       : `AVG: ${hit.avg||"—"} &nbsp; OPS: ${hit.ops||"—"} &nbsp; HR: ${hit.homeRuns||"—"} &nbsp; RBI: ${hit.rbi||"—"}`;
-    box.innerHTML=`<img src="https://img.mlbstatic.com/mlb-photos/image/upload/w_180,q_auto:best/v1/people/${id}/headshot/67/current" style="width:130px;border-radius:16px"><h2>${x.fullName||"MLB Player"}</h2><div>${x.primaryPosition?.name||""}</div><div class="data-box" style="margin-top:10px">${stats}</div>`;
+    box.innerHTML=`<img src="https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_180,q_auto:best/v1/people/${id}/headshot/67/current" style="width:130px;border-radius:16px"><h2>${x.fullName||"MLB Player"}</h2><div>${x.primaryPosition?.name||""}</div><div class="data-box" style="margin-top:10px">${stats}</div>`;
   }catch(e){
     box.innerHTML="Could not load player.";
   }
