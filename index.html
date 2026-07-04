@@ -2899,9 +2899,15 @@ async function loadPlayerPage(id,row){
     const hit=groups.find(g=>g.group?.displayName==="hitting")?.splits?.[0]?.stat||{};
     const pitch=groups.find(g=>g.group?.displayName==="pitching")?.splits?.[0]?.stat||{};
     const pitcher=x.primaryPosition?.type==="Pitcher";
+    const pa=Number(hit.plateAppearances||0);
+    const ip=Number(pitch.inningsPitched||0);
+    const hitterKRate=pa ? (Number(hit.strikeOuts||0)/pa*100).toFixed(1) : "—";
+    const k9=ip ? (Number(pitch.strikeOuts||0)/ip*9).toFixed(1) : "—";
+    const bb9=ip ? (Number(pitch.baseOnBalls||0)/ip*9).toFixed(1) : "—";
+    const kbb=Number(pitch.baseOnBalls||0) ? (Number(pitch.strikeOuts||0)/Number(pitch.baseOnBalls)).toFixed(2) : "—";
     const stats=pitcher
-      ? `ERA: ${pitch.era||"—"} &nbsp; WHIP: ${pitch.whip||"—"} &nbsp; K: ${pitch.strikeOuts||"—"} &nbsp; IP: ${pitch.inningsPitched||"—"}`
-      : `AVG: ${hit.avg||"—"} &nbsp; OPS: ${hit.ops||"—"} &nbsp; HR: ${hit.homeRuns||"—"} &nbsp; RBI: ${hit.rbi||"—"}`;
+      ? `ERA: ${pitch.era||"—"} &nbsp; WHIP: ${pitch.whip||"—"} &nbsp; K/9: ${k9} &nbsp; BB/9: ${bb9} &nbsp; K/BB: ${kbb} &nbsp; IP: ${pitch.inningsPitched||"—"}`
+      : `AVG: ${hit.avg||"—"} &nbsp; OBP: ${hit.obp||"—"} &nbsp; SLG: ${hit.slg||"—"} &nbsp; OPS: ${hit.ops||"—"} &nbsp; K%: ${hitterKRate}% &nbsp; HR: ${hit.homeRuns||"—"}`;
     box.innerHTML=`<img src="https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_180,q_auto:best/v1/people/${id}/headshot/67/current" style="width:130px;border-radius:16px"><h2>${x.fullName||"MLB Player"}</h2><div>${x.primaryPosition?.name||""}</div><div class="data-box" style="margin-top:10px">${stats}</div>`;
   }catch(e){
     box.innerHTML="Could not load player.";
