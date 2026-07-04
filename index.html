@@ -2241,6 +2241,8 @@ let predictionLog = JSON.parse(localStorage.getItem("wv_prediction_log") || "[]"
 let lastBoardPicks = [];
 
 let currentGame = null;
+let latestHomeAmerican = null;
+let latestAwayAmerican = null;
 
 function lineAlertsEnabled(){
   return el("lineAlertToggle")?.checked === true;
@@ -3850,8 +3852,12 @@ async function loadOdds(){
     console.log("Matched Sharp game:", game);
 
     const info = bestHomeLineFromOddsGame(game);
+    const awayInfo = bestAwayLineFromOddsGame(game);
 
-    console.log("Odds info:", info);
+    latestHomeAmerican = info?.best ?? null;
+    latestAwayAmerican = awayInfo?.best ?? null;
+
+    console.log("Odds info:", info, awayInfo);
 
     if(!info){
       calculateOdds();
@@ -3914,8 +3920,8 @@ setText("loadStatus", "Sportsbook odds loaded.");
   const opponent = pickSide === "home" ? away : home;
   const modelProb = pickSide === "home" ? homeProb : awayProb;
 
-  const homeLine = text("bestHomeLine");
-  const awayLine = text("bestAwayLine");
+  const homeLine = latestHomeAmerican;
+  const awayLine = latestAwayAmerican;
   const pickLine = pickSide === "home" ? homeLine : awayLine;
 
   const exists = predictionLog.some(entry =>
@@ -3923,7 +3929,7 @@ setText("loadStatus", "Sportsbook odds loaded.");
     entry.pickTeam === pickTeam
   );
 
-  const numericLine = parseInt(String(pickLine).replace(/[^\d+-]/g, ""), 10);
+  const numericLine = Number.isFinite(Number(pickLine)) ? Number(pickLine) : null;
 
   const entry = {
     gameId,
