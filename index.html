@@ -2995,6 +2995,24 @@ async function loadIntelGame(){
   renderIntel();
 }
 
+function cleanIntelReason(x){
+  return String(x)
+    .replace(/[+-]\d+(\.\d+)?/g,"")
+    .replace(/\s+/g," ")
+    .replace(/\s+\./g,".")
+    .trim();
+}
+
+function explainIntelReason(x){
+  x=cleanIntelReason(x);
+  const y=x.toLowerCase();
+  if(y.includes("bullpen")) return ["Bullpen Edge",x+" This becomes especially important late in close games."];
+  if(y.includes("command")) return ["Pitching Command",x+" Better control means fewer free baserunners and cleaner innings."];
+  if(y.includes("recent form")) return ["Recent Form",x+" The model is rewarding what the teams are doing now, not just their full-season record."];
+  if(y.includes("park")) return ["Ballpark Impact",x+" The venue changes how friendly the matchup is for hitters and pitchers."];
+  return ["Matchup Factor",x+" This contributed to the final WagerVision projection."];
+}
+
 function renderIntel(){
   const home=text("homeTeam");
   const away=text("awayTeam");
@@ -3015,11 +3033,7 @@ function renderIntel(){
   const reasons=(latestIntelReasons.length
     ? latestIntelReasons
     : ["Load the selected game to generate matchup-specific reasons."]
-  ).map((reason,index)=>[
-    `Factor ${index+1}`,
-    reason,
-    index===0 ? "Primary" : "Active"
-  ]);
+  ).map(explainIntelReason);
 
   const box=document.getElementById("intelReasons");
   if(box){
