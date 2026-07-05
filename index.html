@@ -2291,6 +2291,7 @@ let lastBoardPicks = [];
 let currentGame = null;
 let latestHomeAmerican = null;
 let latestAwayAmerican = null;
+let latestIntelReasons = [];
 
 function lineAlertsEnabled(){
   return el("lineAlertToggle")?.checked === true;
@@ -3011,12 +3012,14 @@ function renderIntel(){
   setText("intelLine",line);
   setText("intelSubhead",`Why WagerVision likes ${pick}`);
 
-  const reasons=[
-    ["Matchup Edge","Model probability is stronger than the market price.",edge],
-    ["Recent Form","Current team form is reflected in the WagerVision model.","Live"],
-    ["Pitching Edge","Starter and bullpen strength are included in the projection.","Active"],
-    ["Market Mispricing","The sportsbook line may be underestimating this side.",line]
-  ];
+  const reasons=(latestIntelReasons.length
+    ? latestIntelReasons
+    : ["Load the selected game to generate matchup-specific reasons."]
+  ).map((reason,index)=>[
+    `Factor ${index+1}`,
+    reason,
+    index===0 ? "Primary" : "Active"
+  ]);
 
   const box=document.getElementById("intelReasons");
   if(box){
@@ -4463,6 +4466,10 @@ if(currentGame && currentGame.teams){
   setText("homeProb", result.homeScore !== null ? result.homeScore.toFixed(1) + "%" : "--");
   setText("marketProb", market !== null ? market.toFixed(1) + "%" : "🔒");
   setText("edgeValue", edge !== null ? (edge >= 0 ? "+" : "") + edge.toFixed(1) + "%" : "🔒");
+
+  latestIntelReasons = Array.isArray(result.reasons)
+    ? [...result.reasons]
+    : [];
 
   const bar = el("bar");
   if(bar) bar.style.width = result.homeScore + "%";
