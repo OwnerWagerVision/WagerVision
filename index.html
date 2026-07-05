@@ -1840,6 +1840,7 @@ body:not(.chat-active) #chat {
     <button class="tab active" onclick="showTab('game',this)" type="button">Game</button>
     <button class="tab" onclick="showTab('board',this)" type="button">Edges</button>
     <button class="tab" onclick="showTab('teams',this)" type="button">Teams</button>
+    <button class="tab" onclick="showTab('intel',this)" type="button">Intel</button>
     <button class="tab" onclick="showTab('slip',this)" type="button">Bet Slip</button>
     <button class="tab" onclick="showTab('results',this)" type="button">Results</button>
     <button class="tab" onclick="showTab('chat',this)" type="button">Chat Room</button>
@@ -2031,7 +2032,47 @@ body:not(.chat-active) #chat {
 </section>
 
   <section id="teams" class="section"><div class="card"><h2>MLB Teams</h2><div class="small">Rosters, stats, recent form, and WagerVision analysis.</div><select id="teamSelect" onchange="loadTeamPage()"><option value="">Loading MLB teams...</option></select><div class="status" id="teamStatus">Choose a team.</div></div><div id="teamOverview" style="display:none;"><div class="card"><h2 id="teamPageName">MLB Team</h2><div id="teamRoster" class="data-box">Roster data will appear here.</div>
-</div></div></section><section id="slip" class="section">
+</div></div></section><section id="intel" class="section">
+  <div class="card">
+    <div class="small" style="color:#62ff7a;font-weight:700;">EDGE BREAKDOWN</div>
+    <h2 id="intelMatchup">Select a game to load matchup intel</h2>
+    <div class="small" id="intelSubhead">Why WagerVision likes this side</div>
+  </div>
+
+  <div class="quick-grid">
+    <div class="data-box"><strong>WagerVision Pick</strong><br><span id="intelPick">—</span></div>
+    <div class="data-box"><strong>Model Win %</strong><br><span id="intelModel">—</span></div>
+    <div class="data-box"><strong>Market Win %</strong><br><span id="intelMarket">—</span></div>
+    <div class="data-box"><strong>Edge</strong><br><span id="intelEdge">—</span></div>
+    <div class="data-box"><strong>Best Line</strong><br><span id="intelLine">—</span></div>
+  </div>
+
+  <div class="card">
+    <h2>Why WagerVision Likes This Side</h2>
+    <div id="intelReasons" class="data-box">
+      Load a game to generate the breakdown.
+    </div>
+  </div>
+
+  <div class="quick-grid">
+    <div class="card">
+      <h2>Probable Starters</h2>
+      <div id="intelStarters" class="data-box">—</div>
+    </div>
+
+    <div class="card">
+      <h2>Recent Form</h2>
+      <div id="intelForm" class="data-box">—</div>
+    </div>
+
+    <div class="card">
+      <h2>Team Comparison</h2>
+      <div id="intelTeamStats" class="data-box">—</div>
+    </div>
+  </div>
+</section>
+
+<section id="slip" class="section">
     <div class="card">
       <h2>Bet Slip + Payout</h2>
       <div class="form-grid">
@@ -2916,6 +2957,56 @@ async function loadPlayerPage(id,row){
   }
 }
 
+function renderIntel(){
+  const home=text("homeTeam");
+  const away=text("awayTeam");
+  const pick=document.getElementById("winner")?.textContent||"—";
+  const model=document.getElementById("probability")?.textContent||"—";
+  const market=document.getElementById("marketProb")?.textContent||"—";
+  const edge=document.getElementById("edgeValue")?.textContent||"—";
+  const line=document.getElementById("bestHomeLine")?.textContent||"—";
+
+  setText("intelMatchup",`${away} at ${home}`);
+  setText("intelPick",pick);
+  setText("intelModel",model);
+  setText("intelMarket",market);
+  setText("intelEdge",edge);
+  setText("intelLine",line);
+  setText("intelSubhead",`Why WagerVision likes ${pick}`);
+
+  const reasons=[
+    ["Matchup Edge","Model probability is stronger than the market price.",edge],
+    ["Recent Form","Current team form is reflected in the WagerVision model.","Live"],
+    ["Pitching Edge","Starter and bullpen strength are included in the projection.","Active"],
+    ["Market Mispricing","The sportsbook line may be underestimating this side.",line]
+  ];
+
+  const box=document.getElementById("intelReasons");
+  if(box){
+    box.innerHTML=reasons.map(r=>`
+      <div style="display:flex;justify-content:space-between;gap:14px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.08)">
+        <div>
+          <strong>${r[0]}</strong>
+          <div class="small">${r[1]}</div>
+        </div>
+        <strong style="color:#62ff7a">${r[2]}</strong>
+      </div>
+    `).join("");
+  }
+
+  const awayStarter=selectedGameData?.teams?.away?.probablePitcher?.fullName||"TBD";
+  const homeStarter=selectedGameData?.teams?.home?.probablePitcher?.fullName||"TBD";
+
+  document.getElementById("intelStarters").innerHTML=
+    `<strong>${away}</strong><br>${awayStarter}<br><br><strong>${home}</strong><br>${homeStarter}`;
+
+  document.getElementById("intelForm").innerHTML=
+    `<strong>${away}</strong>: ${text("awayWins")||"—"}-${text("awayLosses")||"—"}<br><br><strong>${home}</strong>: ${text("homeWins")||"—"}-${text("homeLosses")||"—"}`;
+
+  document.getElementById("intelTeamStats").innerHTML=
+    `<strong>${away}</strong><br>AVG ${text("awayAvg")||"—"} · OPS ${text("awayOps")||"—"} · ERA ${text("awayEra")||"—"}<br><br><strong>${home}</strong><br>AVG ${text("homeAvg")||"—"} · OPS ${text("homeOps")||"—"} · ERA ${text("homeEra")||"—"}`;
+}
+
 function showTab(id, tab){
   document.querySelectorAll(".section, .tab-content").forEach(s => s.classList.remove("active"));
   document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
@@ -2931,6 +3022,10 @@ function showTab(id, tab){
 
   if(id === "teams"){
     loadTeamList();
+  }
+
+  if(id === "intel"){
+    renderIntel();
   }
 }
 
@@ -4886,7 +4981,7 @@ function addPickToSlip(p){
   saveSlip();
   renderSlip();
   setText("slipCount", slip.length);
-  showTab("slip", document.querySelectorAll(".tab")[3]);
+  showTab("slip", document.querySelectorAll(".tab")[4]);
 }
 
 function clearSlip(){
