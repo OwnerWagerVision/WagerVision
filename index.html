@@ -2037,6 +2037,13 @@ body:not(.chat-active) #chat {
     <div class="small" style="color:#62ff7a;font-weight:700;">EDGE BREAKDOWN</div>
     <h2 id="intelMatchup">Select a game to load matchup intel</h2>
     <div class="small" id="intelSubhead">Why WagerVision likes this side</div>
+
+    <div style="margin-top:16px;">
+      <label>Choose Matchup</label>
+      <select id="intelGameSelect" onchange="loadIntelGame()">
+        <option value="">Select a game</option>
+      </select>
+    </div>
   </div>
 
   <div class="quick-grid">
@@ -2957,6 +2964,36 @@ async function loadPlayerPage(id,row){
   }
 }
 
+function populateIntelGames(){
+  const select=document.getElementById("intelGameSelect");
+  if(!select || !loadedGames.length) return;
+
+  select.innerHTML=loadedGames.map((g,i)=>{
+    const away=g.teams?.away?.team?.name||"Away";
+    const home=g.teams?.home?.team?.name||"Home";
+    return `<option value="${i}">${away} at ${home}</option>`;
+  }).join("");
+
+  const currentIndex=loadedGames.findIndex(g=>g.gamePk===selectedGamePk);
+  select.value=String(currentIndex>=0?currentIndex:0);
+}
+
+async function loadIntelGame(){
+  const select=document.getElementById("intelGameSelect");
+  if(!select) return;
+
+  const gameIndex=Number(select.value);
+  if(!loadedGames[gameIndex]) return;
+
+  document.getElementById("gameSelect").value=String(gameIndex);
+  await loadSelectedGame();
+
+  const user=await getCurrentUser();
+  if(user) await loadOdds();
+
+  renderIntel();
+}
+
 function renderIntel(){
   const home=text("homeTeam");
   const away=text("awayTeam");
@@ -3025,6 +3062,7 @@ function showTab(id, tab){
   }
 
   if(id === "intel"){
+    populateIntelGames();
     renderIntel();
   }
 }
