@@ -3041,9 +3041,34 @@ function buildIntelParagraph(raw){
   }
 
   if(lower.includes("starter era")){
-    const side=lower.includes("home") ? home : away;
-    const pitcher=lower.includes("home") ? hp : ap;
-    const era=lower.includes("home") ? hEra : aEra;
+    const hEraNum = Number(hEra);
+    const aEraNum = Number(aEra);
+    const homeHasEra = Number.isFinite(hEraNum);
+    const awayHasEra = Number.isFinite(aEraNum);
+
+    let side;
+    let pitcher;
+    let era;
+
+    if(homeHasEra && awayHasEra){
+      const homeBetter = hEraNum <= aEraNum;
+      side = homeBetter ? home : away;
+      pitcher = homeBetter ? hp : ap;
+      era = homeBetter ? hEra : aEra;
+    } else if(homeHasEra){
+      side = home;
+      pitcher = hp;
+      era = hEra;
+    } else if(awayHasEra){
+      side = away;
+      pitcher = ap;
+      era = aEra;
+    } else {
+      side = lower.includes("home") ? home : away;
+      pitcher = lower.includes("home") ? hp : ap;
+      era = lower.includes("home") ? hEra : aEra;
+    }
+
     return ["Starter Run Prevention",`${pitcher} gives ${side} the stronger run-prevention profile with a ${era} ERA. That matters early, before bullpens take over.`];
   }
 
