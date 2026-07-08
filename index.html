@@ -3064,7 +3064,7 @@ function buildIntelParagraph(raw){
   return ["Matchup Factor",`${reason} This helped shape the WagerVision projection.`];
 }
 
-function renderIntel(){
+async function renderIntel(){
   const home=text("homeTeam");
   const away=text("awayTeam");
   const pick=document.getElementById("winner")?.textContent||"—";
@@ -3102,8 +3102,27 @@ function renderIntel(){
   document.getElementById("intelStarters").innerHTML=
     `<strong>${away}</strong><br>${awayStarter}<br><br><strong>${home}</strong><br>${homeStarter}`;
 
-  document.getElementById("intelForm").innerHTML=
-    `<strong>${away}</strong>: ${text("awayWins")||"—"}-${text("awayLosses")||"—"}<br><br><strong>${home}</strong>: ${text("homeWins")||"—"}-${text("homeLosses")||"—"}`;
+  const awayId=selectedGameData?.teams?.away?.team?.id;
+  const homeId=selectedGameData?.teams?.home?.team?.id;
+
+  if(awayId && homeId){
+    const [awayForm,homeForm]=await Promise.all([
+      getRecentTeamForm(awayId,10),
+      getRecentTeamForm(homeId,10)
+    ]);
+
+    const awayWins=Math.round((awayForm.winPct||0)*10);
+    const homeWins=Math.round((homeForm.winPct||0)*10);
+
+    document.getElementById("intelForm").innerHTML=
+      `<strong>${away}</strong>: ${awayWins}-${10-awayWins} last 10<br>
+       Run Diff/Game: ${(awayForm.runDiffPerGame||0).toFixed(1)}
+       <br><br>
+       <strong>${home}</strong>: ${homeWins}-${10-homeWins} last 10<br>
+       Run Diff/Game: ${(homeForm.runDiffPerGame||0).toFixed(1)}`;
+  }else{
+    document.getElementById("intelForm").innerHTML="Recent form unavailable.";
+  }
 
   document.getElementById("intelTeamStats").innerHTML=
     `<strong>${away}</strong><br>AVG ${text("awayAvg")||"—"} · OPS ${text("awayOps")||"—"} · ERA ${text("awayEra")||"—"}<br><br><strong>${home}</strong><br>AVG ${text("homeAvg")||"—"} · OPS ${text("homeOps")||"—"} · ERA ${text("homeEra")||"—"}`;
