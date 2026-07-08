@@ -3024,6 +3024,46 @@ function explainIntelReason(x){
   return ["Matchup Factor",x+" This contributed to the final WagerVision projection."];
 }
 
+function buildIntelParagraph(raw){
+  const reason=cleanIntelReason(raw);
+  const lower=reason.toLowerCase();
+  const home=text("homeTeam")||"home team";
+  const away=text("awayTeam")||"away team";
+  const hp=selectedGameData?.teams?.home?.probablePitcher?.fullName||"the home starter";
+  const ap=selectedGameData?.teams?.away?.probablePitcher?.fullName||"the away starter";
+  const hEra=text("homeStarterEra")||"—";
+  const aEra=text("awayStarterEra")||"—";
+  const hWhip=text("homeStarterWhip")||"—";
+  const aWhip=text("awayStarterWhip")||"—";
+  const hOps=text("homeOps")||"—";
+  const aOps=text("awayOps")||"—";
+  const hAvg=text("homeAvg")||"—";
+  const aAvg=text("awayAvg")||"—";
+
+  if(lower.includes("command")){
+    const side=lower.includes("home") ? home : away;
+    const pitcher=lower.includes("home") ? hp : ap;
+    const whip=lower.includes("home") ? hWhip : aWhip;
+    return ["Pitching Command",`${pitcher} gives ${side} the command edge with a ${whip} WHIP. That points to better traffic control, fewer free baserunners, and cleaner innings.`];
+  }
+
+  if(lower.includes("starter era")){
+    const side=lower.includes("home") ? home : away;
+    const pitcher=lower.includes("home") ? hp : ap;
+    const era=lower.includes("home") ? hEra : aEra;
+    return ["Starter Run Prevention",`${pitcher} gives ${side} the stronger run-prevention profile with a ${era} ERA. That matters early, before bullpens take over.`];
+  }
+
+  if(lower.includes("ops") || lower.includes("offensive") || lower.includes("offense")){
+    const side=Number(hOps) >= Number(aOps) ? home : away;
+    const ops=side===home ? hOps : aOps;
+    const avg=side===home ? hAvg : aAvg;
+    return ["Offensive Efficiency",`${side} has the stronger offensive profile with a ${avg} batting average and ${ops} OPS. That gives them more on-base pressure and extra-base damage potential.`];
+  }
+
+  return ["Matchup Factor",`${reason} This helped shape the WagerVision projection.`];
+}
+
 function renderIntel(){
   const home=text("homeTeam");
   const away=text("awayTeam");
@@ -3044,7 +3084,7 @@ function renderIntel(){
   const reasons=(latestIntelReasons.length
     ? latestIntelReasons
     : ["Load the selected game to generate matchup-specific reasons."]
-  ).map(explainIntelReason);
+  ).map(buildIntelParagraph);
 
   const box=document.getElementById("intelReasons");
   if(box){
