@@ -4276,7 +4276,6 @@ function modelCalc(input){
   let reasons = [];
 
   s += 2.5;
-  reasons.push("Home field advantage added +2.5");
 
   const avgImpact = clamp((input.homeAvg - input.awayAvg) * 20, -2, 2);
   s += avgImpact;
