@@ -3107,8 +3107,8 @@ async function renderIntel(){
 
   if(awayId && homeId){
     const [awayForm,homeForm]=await Promise.all([
-      getRecentTeamForm(awayId,10),
-      getRecentTeamForm(homeId,10)
+      getRecentTeamForm(awayId,new Date().getFullYear(),10),
+      getRecentTeamForm(homeId,new Date().getFullYear(),10)
     ]);
 
     const awayWins=Math.round((awayForm.winPct||0)*10);
