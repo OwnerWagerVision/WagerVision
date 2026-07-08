@@ -2280,7 +2280,7 @@ let loadedGames = [];
 let selectedGamePk = null;
 let selectedGameData = null;
 let cachedOddsFeed = null;
-let previousOddsMap = {};
+let previousOddsMap = JSON.parse(localStorage.getItem("wv_previous_odds_map") || "{}");
 let slip = JSON.parse(localStorage.getItem("wagervision_bet_slip") || "[]");
 let currentSlipPick = null;
 let lastLineSnapshot = JSON.parse(localStorage.getItem("wv_line_snapshot") || "{}");
@@ -2338,23 +2338,34 @@ function checkAllGamesForLineMoves(feed){
 
     (game.bookmakers || []).forEach(book => {
       const market = book.markets?.find(m => m.key === "h2h");
-      if(!market) return;
+      if(!market || !market.outcomes) return;
 
-      const homeOutcome = market.outcomes.find(o => normalizeTeamName(o.name) === normalizeTeamName(game.home_team));
-      if(!homeOutcome) return;
+      [
+        game.home_team,
+        game.away_team
+      ].forEach(teamName => {
+        const outcome = market.outcomes.find(o =>
+          normalizeTeamName(o.name) === normalizeTeamName(teamName)
+        );
 
-      const key = `${gameId}_${book.title}_${game.home_team}`;
-      const newLine = Number(homeOutcome.price);
-      const oldLine = previousOddsMap[key];
+        if(!outcome) return;
 
-      if(oldLine !== undefined){
-        checkLineMoveAlert(gameId, `${game.home_team} at ${book.title}`, oldLine, newLine);
-      }
+        const key = `${gameId}_${book.title}_${teamName}`;
+        const newLine = Number(outcome.price);
+        const oldLine = previousOddsMap[key];
 
-      previousOddsMap[key] = newLine;
+        if(oldLine !== undefined){
+          checkLineMoveAlert(gameId, `${teamName} at ${book.title}`, oldLine, newLine);
+        }
+
+        previousOddsMap[key] = newLine;
+      });
     });
   });
+
+  localStorage.setItem("wv_previous_odds_map", JSON.stringify(previousOddsMap));
 }
+
 
 function handleLineMove(gameId, teamName, newLine){
   if (newLine == null || Number.isNaN(Number(newLine))) return;
@@ -3038,12 +3049,9 @@ function renderIntel(){
   const box=document.getElementById("intelReasons");
   if(box){
     box.innerHTML=reasons.map(r=>`
-      <div style="display:flex;justify-content:space-between;gap:14px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.08)">
-        <div>
-          <strong>${r[0]}</strong>
-          <div class="small">${r[1]}</div>
-        </div>
-        <strong style="color:#62ff7a">${r[2]}</strong>
+      <div style="padding:16px 0;border-bottom:1px solid rgba(255,255,255,.08)">
+        <strong style="display:block;margin-bottom:6px;color:#62ff7a">${r[0]}</strong>
+        <div class="small" style="line-height:1.6">${r[1]}</div>
       </div>
     `).join("");
   }
@@ -5226,7 +5234,7 @@ async function signOut(){
     lineAlertBox.innerHTML = "";
   }
 
-previousOddsMap = {};
+previousOddsMap = JSON.parse(localStorage.getItem("wv_previous_odds_map") || "{}");
 
   closeAuth();
   updateAuthButton(null);
