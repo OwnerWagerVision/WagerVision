@@ -3081,6 +3081,19 @@ function buildIntelParagraph(raw){
     return ["Starter Run Prevention",`${pitcher} gives ${side} the stronger run-prevention profile with a ${era} ERA. That matters early, before bullpens take over.`];
   }
 
+  if(lower.includes("score per inning")){
+    const lead = text("scoreLead") || "0";
+    const inn = text("inning") || "1";
+    const leader = Number(lead) > 0 ? home : Number(lead) < 0 ? away : "Neither side";
+    const margin = Math.abs(Number(lead) || 0);
+
+    if(margin > 0){
+      return ["Scoring Pace",`${leader} is ahead by ${margin} run${margin === 1 ? "" : "s"} through inning ${inn}. That live scoring gap is part of the current WagerVision read.`];
+    }
+
+    return ["Scoring Pace",`This game is even through inning ${inn}, so the live scoring pace is not creating a clear scoreboard edge yet.`];
+  }
+
   if(lower.includes("ops") || lower.includes("offensive") || lower.includes("offense")){
     const side=Number(hOps) >= Number(aOps) ? home : away;
     const ops=side===home ? hOps : aOps;
@@ -3088,7 +3101,45 @@ function buildIntelParagraph(raw){
     return ["Offensive Efficiency",`${side} has the stronger offensive profile with a ${avg} batting average and ${ops} OPS. That gives them more on-base pressure and extra-base damage potential.`];
   }
 
-  return ["Matchup Factor",`${reason} This helped shape the WagerVision projection.`];
+  if(lower.includes("home starter dominates") || lower.includes("away starter dominates") || lower.includes("era + whip edge")){
+    const hEraNum = Number(hEra);
+    const aEraNum = Number(aEra);
+    const hWhipNum = Number(hWhip);
+    const aWhipNum = Number(aWhip);
+
+    if(Number.isFinite(hEraNum) && Number.isFinite(aEraNum) && Number.isFinite(hWhipNum) && Number.isFinite(aWhipNum)){
+      const homeBetter = hEraNum <= aEraNum && hWhipNum <= aWhipNum;
+      const awayBetter = aEraNum <= hEraNum && aWhipNum <= hWhipNum;
+
+      if(homeBetter){
+        return ["WHIP + ERA Edge",`${hp} gives ${home} the cleaner starter profile with a ${hEra} ERA and ${hWhip} WHIP, compared to ${ap} at ${aEra} ERA and ${aWhip} WHIP.`];
+      }
+
+      if(awayBetter){
+        return ["WHIP + ERA Edge",`${ap} gives ${away} the cleaner starter profile with a ${aEra} ERA and ${aWhip} WHIP, compared to ${hp} at ${hEra} ERA and ${hWhip} WHIP.`];
+      }
+    }
+
+    return ["WHIP + ERA Edge",`The starter matchup is being weighed through both ERA and WHIP, but neither side owns a clean sweep across both numbers.`];
+  }
+
+  if(lower.includes("season record")){
+    return ["Season Record Reality Check",`${reason}. The model is keeping the full-season team profile in view instead of relying only on today’s matchup.`];
+  }
+
+  if(lower.includes("park factor")){
+    if(lower.includes("pitcher-friendly")){
+      return ["Ballpark Impact",`This matchup is being played in a pitcher-friendly environment, which can make run prevention more valuable and slightly reduce offensive expectations.`];
+    }
+
+    if(lower.includes("hitter-friendly")){
+      return ["Ballpark Impact",`This matchup is being played in a hitter-friendly environment, which can raise offensive expectations and make OPS/on-base pressure more important.`];
+    }
+
+    return ["Ballpark Impact",`This matchup is being treated as a neutral park, so the venue is not creating a major lean toward either offense or pitching.`];
+  }
+
+  return ["Matchup Factor",reason];
 }
 
 async function renderIntel(){
@@ -4288,8 +4339,6 @@ function modelCalc(input){
 
   const avgImpact = clamp((input.homeAvg - input.awayAvg) * 20, -2, 2);
   s += avgImpact;
-  reasons.push(`Batting average support: ${avgImpact >= 0 ? "+" : ""}${avgImpact.toFixed(1)}.`);
-
   const opsImpact = clamp((input.homeOps - input.awayOps) * 24, -8, 8);
   s += opsImpact;
   reasons.push(`OPS (offense) impact: ${opsImpact >= 0 ? "+" : ""}${opsImpact.toFixed(1)}.`);
@@ -4297,31 +4346,29 @@ function modelCalc(input){
   const pitcherDiff = input.homePitcher - input.awayPitcher;
   const pitcherImpact = clamp(pitcherDiff * 1.2, -5, 5);
   s += pitcherImpact;
-  reasons.push(`Starting pitcher weight: ${pitcherImpact >= 0 ? "+" : ""}${pitcherImpact.toFixed(1)}.`);
-
   const starterEraImpact = clamp((input.awayStarterEra - input.homeStarterEra) * 1.1, -3, 3);
-s += starterEraImpact;
-reasons.push(`Starter ERA impact: ${starterEraImpact >= 0 ? "+" : ""}${starterEraImpact.toFixed(1)}.`);
+  s += starterEraImpact;
+  reasons.push(`Starter ERA impact: ${starterEraImpact >= 0 ? "+" : ""}${starterEraImpact.toFixed(1)}.`);
 
-const starterWhipImpact = clamp((input.awayStarterWhip - input.homeStarterWhip) * 10, -3, 3);
-s += starterWhipImpact;
-reasons.push(`Starter WHIP impact: ${starterWhipImpact >= 0 ? "+" : ""}${starterWhipImpact.toFixed(1)}.`);
+  const starterWhipImpact = clamp((input.awayStarterWhip - input.homeStarterWhip) * 10, -3, 3);
+  s += starterWhipImpact;
+  reasons.push(`Starter WHIP impact: ${starterWhipImpact >= 0 ? "+" : ""}${starterWhipImpact.toFixed(1)}.`);
 
-if (
-  input.homeStarterEra < input.awayStarterEra &&
-  input.homeStarterWhip < input.awayStarterWhip
-) {
-  s += 1.5;
-  reasons.push("Home starter dominates (ERA + WHIP edge) +1.5");
-}
+  if (
+    input.homeStarterEra < input.awayStarterEra &&
+    input.homeStarterWhip < input.awayStarterWhip
+  ) {
+    s += 1.5;
+    reasons.push("Home starter dominates (ERA + WHIP edge) +1.5");
+  }
 
-if (
-  input.awayStarterEra < input.homeStarterEra &&
-  input.awayStarterWhip < input.homeStarterWhip
-) {
-  s -= 1.5;
-  reasons.push("Away starter dominates (ERA + WHIP edge) -1.5");
-}
+  if (
+    input.awayStarterEra < input.homeStarterEra &&
+    input.awayStarterWhip < input.homeStarterWhip
+  ) {
+    s -= 1.5;
+    reasons.push("Away starter dominates (ERA + WHIP edge) -1.5");
+  }
  
   const homeTriple =
   (input.homeOps - input.awayOps > 0.020) &&
