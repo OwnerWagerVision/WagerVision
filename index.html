@@ -3033,11 +3033,20 @@ function buildIntelParagraph(raw){
   const hAvg=text("homeAvg")||"—";
   const aAvg=text("awayAvg")||"—";
 
-  if(lower.includes("command")){
-    const side=lower.includes("home") ? home : away;
-    const pitcher=lower.includes("home") ? hp : ap;
-    const whip=lower.includes("home") ? hWhip : aWhip;
-    return ["Pitching Command",`${pitcher} gives ${side} the command edge with a ${whip} WHIP. That points to better traffic control, fewer free baserunners, and cleaner innings.`];
+  if(lower.includes("command") || lower.includes("starter whip")){
+    const hWhipNum = Number(hWhip);
+    const aWhipNum = Number(aWhip);
+    const homeBetter = Number.isFinite(hWhipNum) && Number.isFinite(aWhipNum)
+      ? hWhipNum <= aWhipNum
+      : lower.includes("home");
+
+    const side = homeBetter ? home : away;
+    const pitcher = homeBetter ? hp : ap;
+    const whip = homeBetter ? hWhip : aWhip;
+    const otherPitcher = homeBetter ? ap : hp;
+    const otherWhip = homeBetter ? aWhip : hWhip;
+
+    return ["Pitching Command",`${pitcher} gives ${side} the command edge with a ${whip} WHIP, compared to ${otherPitcher} at ${otherWhip}. That points to better traffic control, fewer free baserunners, and cleaner innings.`];
   }
 
   if(lower.includes("starter era")){
