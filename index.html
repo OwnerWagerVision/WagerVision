@@ -2159,7 +2159,11 @@ button{
   </div>
 </section>
 
-  <section id="teams" class="section"><div class="card"><h2>MLB Teams</h2><div class="small">Rosters, stats, recent form, and WagerVision analysis.</div><select id="teamSelect" onchange="loadTeamPage()"><option value="">Loading MLB teams...</option></select><div class="status" id="teamStatus">Choose a team.</div></div><div id="teamOverview" style="display:none;"><div class="card"><h2 id="teamPageName">MLB Team</h2><div id="teamRoster" class="data-box">Roster data will appear here.</div>
+  <section id="teams" class="section"><div class="card"><h2>MLB Teams</h2><div class="small">Rosters, stats, recent form, and WagerVision analysis.</div><select id="teamSelect" onchange="loadTeamPage()"><option value="">Loading MLB teams...</option></select><div class="status" id="teamStatus">Choose a team.</div></div><div id="teamOverview" style="display:none;"><div class="card"><h2 id="teamPageName">MLB Team</h2><div id="teamStats" class="quick-grid" style="margin:14px 0;">
+  <div class="data-box">Team stats will appear here.</div>
+</div>
+<h3 style="margin-top:18px;">Active Roster</h3>
+<div id="teamRoster" class="data-box">Roster data will appear here.</div>
 </div></div></section><section id="intel" class="section">
   <div class="card">
     <div class="small" style="color:#62ff7a;font-weight:700;">EDGE BREAKDOWN</div>
@@ -3038,14 +3042,51 @@ async function loadTeamPage(){
   status.textContent="Loading team roster...";
 
   try{
-    const [teamRes,rosterRes]=await Promise.all([
+    const season=new Date().getFullYear();
+    const [teamRes,rosterRes,standingsRes]=await Promise.all([
       fetch(`https://statsapi.mlb.com/api/v1/teams/${id}`),
-      fetch(`https://statsapi.mlb.com/api/v1/teams/${id}/roster?rosterType=active`)
+      fetch(`https://statsapi.mlb.com/api/v1/teams/${id}/roster?rosterType=active`),
+      fetch(`https://statsapi.mlb.com/api/v1/standings?leagueId=103,104&season=${season}&standingsTypes=regularSeason`)
     ]);
 
     const teamData=await teamRes.json();
     const rosterData=await rosterRes.json();
+    const standingsData=await standingsRes.json();
     const team=teamData.teams?.[0];
+
+    const teamRecord=(standingsData.records||[])
+      .flatMap(r=>r.teamRecords||[])
+      .find(r=>String(r.team?.id)===String(id));
+
+    const wins=teamRecord?.leagueRecord?.wins??"—";
+    const losses=teamRecord?.leagueRecord?.losses??"—";
+    const winPct=teamRecord?.winningPercentage||"—";
+    const rank=teamRecord?.divisionRank||"—";
+    const gamesBack=teamRecord?.gamesBack??"—";
+    const wildCardBack=teamRecord?.wildCardGamesBack??"—";
+    const streak=teamRecord?.streak?.streakCode||"—";
+    const runDiff=Number(teamRecord?.runDifferential||0);
+    const runsScored=teamRecord?.runsScored??"—";
+    const runsAllowed=teamRecord?.runsAllowed??"—";
+    const splits=teamRecord?.records?.splitRecords||[];
+    const home=splits.find(x=>x.type==="home");
+    const away=splits.find(x=>x.type==="away");
+    const last10=splits.find(x=>x.type==="lastTen");
+
+    document.getElementById("teamStats").innerHTML=`
+      <div class="data-box"><strong>Record</strong><br>${wins}-${losses}</div>
+      <div class="data-box"><strong>Win %</strong><br>${winPct}</div>
+      <div class="data-box"><strong>Division Rank</strong><br>#${rank}</div>
+      <div class="data-box"><strong>Games Back</strong><br>${gamesBack}</div>
+      <div class="data-box"><strong>Wildcard Back</strong><br>${wildCardBack}</div>
+      <div class="data-box"><strong>Current Streak</strong><br>${streak}</div>
+      <div class="data-box"><strong>Runs Scored</strong><br>${runsScored}</div>
+      <div class="data-box"><strong>Runs Allowed</strong><br>${runsAllowed}</div>
+      <div class="data-box"><strong>Run Differential</strong><br>${runDiff>0?"+":""}${runDiff}</div>
+      <div class="data-box"><strong>Home Record</strong><br>${home?`${home.wins}-${home.losses}`:"—"}</div>
+      <div class="data-box"><strong>Road Record</strong><br>${away?`${away.wins}-${away.losses}`:"—"}</div>
+      <div class="data-box"><strong>Last 10</strong><br>${last10?`${last10.wins}-${last10.losses}`:"—"}</div>
+    `;
 
     document.getElementById("teamPageName").innerHTML=
       `<img src="https://www.mlbstatic.com/team-logos/${id}.svg" style="width:55px;vertical-align:middle;margin-right:12px">${team?.name||"MLB Team"}`;
