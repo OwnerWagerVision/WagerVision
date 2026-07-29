@@ -1799,6 +1799,18 @@ button{
 }
 </style>
 
+
+<style>
+#dailyPickCard{
+  margin:16px 0;
+  border:1px solid rgba(73,142,255,.35);
+}
+#dailyPickCard .small{
+  font-weight:800;
+  letter-spacing:.08em;
+}
+</style>
+
 </head>
 
 <body class="landing-mode">
@@ -1910,6 +1922,23 @@ button{
 
   <p>Real MLB data, live game state, sportsbook odds, edge ranking, and estimated bet slip payouts.</p>
 </section>
+
+<div class="card" id="dailyPickCard">
+  <div class="small">TODAY'S WAGERVISION PICK</div>
+  <h2 id="dailyPickTeam">Pick loading...</h2>
+  <div class="small" id="dailyPickMatchup">Matchup loading...</div>
+
+  <div class="quick-grid">
+    <div class="data-box"><strong>Best Line</strong><br><span id="dailyPickLine">—</span></div>
+    <div class="data-box"><strong>Model Win %</strong><br><span id="dailyPickModel">—</span></div>
+    <div class="data-box"><strong>Market Win %</strong><br><span id="dailyPickMarket">—</span></div>
+    <div class="data-box"><strong>Edge</strong><br><span id="dailyPickEdge">—</span></div>
+  </div>
+
+  <div id="dailyPickDetails" class="data-box" style="margin-top:12px;">
+    Model analysis will appear here.
+  </div>
+</div>
 
 <details class="game-recap-card" id="gameRecapCard" ontoggle="if(this.open) loadGameRecaps()">
 
@@ -5267,6 +5296,27 @@ try{
 }
 
   picks.sort((a,b) => b.edge - a.edge);
+
+  const daily=picks[0];
+  if(daily){
+    setText("dailyPickTeam", daily.pick);
+    setText("dailyPickMatchup", `${daily.away} @ ${daily.home}`);
+    setText("dailyPickLine", displayAmerican(daily.american));
+    setText("dailyPickModel", `${daily.model.toFixed(1)}%`);
+    setText("dailyPickMarket", `${daily.market.toFixed(1)}%`);
+    setText("dailyPickEdge", `${daily.edge >= 0 ? "+" : ""}${daily.edge.toFixed(1)}%`);
+
+    const details=el("dailyPickDetails");
+    if(details){
+      details.innerHTML=(daily.reasons||[]).slice(0,3).join(" · ") || "Top model edge on today’s board.";
+    }
+
+    localStorage.setItem("wv_daily_pick", JSON.stringify({
+      ...daily,
+      savedDate:new Date().toISOString().slice(0,10)
+    }));
+  }
+
   lastBoardPicks = picks;
   logBoardPicks(picks);
   window.wagerVisionPicks = picks;
@@ -5733,6 +5783,31 @@ document.addEventListener("DOMContentLoaded", function () {
         setText("loadStatus", "Model odds loaded. Sign in to unlock real time sportsbook odds.");
       }
     });
+  }
+
+  try{
+    const daily=JSON.parse(localStorage.getItem("wv_daily_pick")||"null");
+
+    if(daily && daily.savedDate===new Date().toISOString().slice(0,10)){
+      setText("dailyPickTeam",daily.pick||"—");
+      setText("dailyPickMatchup",`${daily.away||"Away"} @ ${daily.home||"Home"}`);
+      setText("dailyPickLine",displayAmerican(daily.american));
+      setText("dailyPickModel",`${Number(daily.model).toFixed(1)}%`);
+      setText("dailyPickMarket",`${Number(daily.market).toFixed(1)}%`);
+      setText("dailyPickEdge",`${daily.edge>=0?"+":""}${Number(daily.edge).toFixed(1)}%`);
+
+      const details=el("dailyPickDetails");
+      if(details){
+        details.innerHTML=(daily.reasons||[]).slice(0,3).join(" · ");
+      }
+    }
+  }catch(e){
+    console.error("Daily Pick restore failed:",e);
+  }
+
+  if(!localStorage.getItem("wv_daily_pick")){
+    setText("dailyPickTeam","Today’s pick coming soon");
+    setText("dailyPickDetails","Scan the Edge Board to generate today’s strongest model play.");
   }
 
   init();
